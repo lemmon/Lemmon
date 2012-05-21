@@ -1,0 +1,64 @@
+<html>
+<head>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+	<title>{% block header %}{{ "Fatal Error"|t }}{% endblock %} | {% block title %}{{ exception.message }}{% endblock %}</title>
+
+	<meta name="generator" content="TextMate http://macromates.com/">
+	<meta name="author" content="Jakub Pelák">
+	<meta name="robots" content="noindex, nofollow">
+
+	<style type="text/css" media="screen">
+	* { margin:0; padding:0; }
+	body, h1, h2, h3, h4 { font:13px/22px arial,sans-serif; }
+	body { margin:15px 30px; padding:0 0; }
+	body > * { margin:15px 0; }
+	h1 { font-size:25px; line-height:35px; }
+	pre { background:#33362c; color:#fff; margin-left:-15px; margin-right:15px; padding:15px; font:11px/18px 'Monaco'; -moz-border-radius:5px; overflow:hidden; }
+	#header { background:#f00; color:#fff; margin-left:-15px; margin-right:15px; padding:15px; -moz-border-radius:5px; }
+	.error { background:#d22; display:block; }
+	pre .error { margin:0 -3px; padding:0 3px; }
+	</style>
+
+</head>
+
+<body>
+
+	<div id="header">
+		
+		<h1>{{ block("header") }}</h1>
+		<h2>{{ block("title") }}</h2>
+		
+	</div>
+	
+	<p><strong>{{ exception.file }}</strong> (line {{ exception.line }})</p>
+	<pre>{% for i, line in exception_block %}{% if (i+1==exception.line) %}<span class="error">{{ i+1 }}. {{ line|e }}</span>{% else %}{{ i+1 }}. {{ line|e }}{% endif %}{% endfor %}</pre>
+	{% if (exception.context) %}
+	{{ exception.context|dump }}
+	{% endif %}
+
+	{% if (trace) %}
+
+		{% if (trace[0].file) %}
+		<p><strong>{{ trace[0].file }}</strong> (line {{ trace[0].line }})<br></p>
+		<pre>{% for i, line in trace[0].block %}{% if (i+1==trace[0].line) %}<span class="error">{{ i+1 }}. {{ line|e }}</span>{% else %}{{ i+1 }}. {{ line|e }}{% endif %}{% endfor %}</pre>
+		{% endif %}
+		<p>on <em>{{ trace[0].class ~ trace[0].type ~ trace[0].function }}:</em></p>
+		{{ trace[0].args|dump|raw }}
+	
+		<ul>
+			{% for step in trace %}
+			{% if loop.index0 %}
+			<li>
+				<strong>{{ step.file }}</strong> (line {{ step.line }})<br>
+				on <em>{{ step.class ~ step.type ~ step.function }}</em>
+			</li>
+			{% endif %}
+			{% endfor %}
+		</ul>
+	
+	{% endif %}
+	
+</body>
+</html>

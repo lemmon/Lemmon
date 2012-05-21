@@ -1,0 +1,30 @@
+{% if (paginate) %}
+<p>
+	{% if (paginate.page>0) %}
+	<a href="{{ link.toParams(":section", {"page": (paginate.page-1)?paginate.page-1:""}) }}">&larr; {{ "prev"|t }}</a>
+	{% endif %}
+	{% if (paginate.page_min>0) %}
+	<a href="{{ link.toParams(":section", {"page": ""}) }}">1</a>
+	<a href="{{ link.toParams(":section", {"page": "1"}) }}">2</a>
+	&hellip;
+	{% endif %}
+	{% for i in range(paginate.page_min, paginate.page_max) %}
+	{% if (i==paginate.page) %}
+	<strong>{{ i+1 }}</strong>
+	{% else %}
+	<a href="{{ link.toParams(":section", {"page": i?i:""}) }}">{{ i+1 }}</a>
+	{% endif %}
+	{% endfor %}
+	{% if (paginate.page_max<paginate.pages-1) %}
+	&hellip;
+	<a href="{{ link.toParams(":section", {"page": paginate.pages-2}) }}">{{ paginate.pages-1 }}</a>
+	<a href="{{ link.toParams(":section", {"page": paginate.pages-1}) }}">{{ paginate.pages }}</a>
+	{% endif %}
+	{% if (paginate.page<paginate.pages-1) %}
+	<a href="{{ link.toParams(":section", {"page": paginate.page+1}) }}">{{ "next"|t }} &rarr;</a>
+	{% endif %}
+</p>
+<p>
+	({{ "%d entry"|tn("%d entries", paginate.total) }})
+</p>
+{% endif %}

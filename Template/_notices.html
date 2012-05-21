@@ -1,0 +1,19 @@
+{% if flash.notice %}
+<div class="flash_notice">
+	{% for line in flash.notice %}
+	{% if (line) %}
+	{{ line }}<br>
+	{% endif %}
+	{% endfor %}
+</div>
+{% endif %}
+
+{% if flash.error %}
+<div class="flash_error">
+	{% for line in flash.error %}
+	{% if (line and line!="@") %}
+	{{ line }}<br>
+	{% endif %}
+	{% endfor %}
+</div>
+{% endif %}

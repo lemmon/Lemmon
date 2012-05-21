@@ -1,0 +1,85 @@
+{% macro input(name, value, size, maxlength) %}
+<input class="input" type="text" id="f_{{ name|asciize("_") }}" name="{{ name }}" value="{{ value|e }}" size="{{ size|default(55) }}" maxlength="{{ maxlength|default(size)|default(255) }}">
+{% endmacro %}
+
+{% macro hidden(name, value) %}
+<input type="hidden" id="f_{{ name }}" name="{{ name }}" value="{{ value|e }}">
+{% endmacro %}
+
+{% macro text(name, value, cols, rows) %}
+<textarea id="f_{{ name|asciize("_") }}" name="{{ name }}" cols="{{ cols|default(64) }}" rows="{{ rows|default(12) }}">{{ value|e }}</textarea>
+{% endmacro %}
+
+{% macro password(name, size, maxlength) %}
+<input class="input" type="password" id="f_{{ name }}" name="{{ name }}" size="{{ size|default(55) }}" maxlength="{{ maxlength|default(size)|default(255) }}"><br>
+<input class="input" type="password" name="{{ name }}_2" size="{{ size|default(55) }}" maxlength="{{ maxlength|default(size)|default(255) }}">
+{% endmacro %}
+
+{% macro checkbox(name, checked, value) %}
+<input type="checkbox" id="f_{{ name }}" name="{{ name }}" value="{{ value|default(1) }}" {% if (checked) %}checked{% endif %}>
+{% endmacro %}
+
+{% macro checkbox_collection(name, value, collection, break) %}
+{% for key, label in collection %}
+<label><input type="checkbox" id="f_{{ name }}_{{ key }}" name="{{ name }}[]" value="{{ key }}" {% if (value[key]) %}checked{% endif %}> {{ label|t }}{{ break|raw }}</label>
+{% endfor %}
+{% endmacro %}
+
+{% macro radio(name, value, checked) %}
+<input type="radio" id="f_{{ name }}_{{ value }}" name="{{ name }}" value="{{ value }}" {% if (checked) %}checked{% endif %}>
+{% endmacro %}
+
+{% macro radio_collection(name, value, collection, break, undefined) %}
+{% if (undefined) %}
+<label><input type="radio" name="{{ name }}" value="" {% if (not value) %}checked{% endif %}> {{ undefined }}</label>{{ break|raw }}
+{% endif %}
+{% for key, label in collection %}
+<label><input type="radio" name="{{ name }}" value="{{ key }}" {% if (value==key) %}checked{% endif %}> {{ label|t }}</label>{{ break|raw }}
+{% endfor %}
+{% endmacro %}
+
+{% macro select(name, value, collection, has_empty, attr) %}
+<select id="f_{{ name|asciize("_") }}" name="{{ name }}"{% for _key, _val in attr %} {{ _key }}="{{ _val }}"{% endfor %}>
+	{% if (has_empty or has_empty is none) %}
+	<option class="null" value="">{{ has_empty }}</option>
+	{% endif %}
+	{% for key, caption in collection %}
+	{% if (caption) %}
+	<option value="{{ key }}" {% if (key==value) %}selected{% endif %}>{{ caption|t }}</option>
+	{% endif %}
+	{% endfor %}
+</select>
+{% endmacro %}
+
+{% macro selectRaw(name, value, collection, has_empty, attr) %}
+<select id="f_{{ name }}" name="{{ name }}"{% for _key, _val in attr %} {{ _key }}="{{ _val }}"{% endfor %}>
+	{% if (has_empty or has_empty is none) %}
+	<option class="null" value="">{{ has_empty }}</option>
+	{% endif %}
+	{% for caption in collection %}
+	{% if (caption|length) %}
+	<option {% if (value|length and caption==value) %}selected{% endif %}>{{ caption }}</option>
+	{% endif %}
+	{% endfor %}
+</select>
+{% endmacro %}
+
+{% macro selectGroups(name, value, collection, has_empty) %}
+<select id="f_{{ name }}" name="{{ name }}">
+	{% if (has_empty|default(true)) %}
+	<option class="null" value="">{{ has_empty }}</option>
+	{% endif %}
+	{% for parent_id, label in collection[0] %}
+	<optgroup label="{{ label }}">
+		{% for key, caption in collection[parent_id] %}
+		<option value="{{ key }}" {% if (key==value) %}selected{% endif %}>{{ caption }}</option>
+		{% endfor %}
+	</optgroup>
+	{% endfor %}
+</select>
+{% endmacro %}
+
+{% macro file(name) %}
+<input type="file" name="{{ name }}">
+{% endmacro %}
+
