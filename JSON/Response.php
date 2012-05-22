@@ -35,7 +35,7 @@ class Lemmon_JSON_Response
 		$data = $this->_data;
 		if ($data_to_collect=$this->_dataToCollect)
 		{
-			$controller = Lemmon_Framework::getInstance();
+			$controller = Lemmon\Framework::getInstance();
 			foreach ($data_to_collect as $key)
 			{
 				$data[$key] = $controller->data[$key];

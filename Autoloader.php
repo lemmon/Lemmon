@@ -1,81 +1,93 @@
 <?php
+
+/*
+ * This file is part of the Lemmon package.
+ *
+ * (c) Jakub Pelák <jpelak@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Lemmon;
+
 /**
-* 
-*/
-class Lemmon_Autoloader
+ * Class autoloader.
+ * 
+ * @author Jakub Pelák <jpelak@gmail.com>
+ */
+class Autoloader
 {
-	private static $_rootDir;
-	private static $_libDir;
+	const LA_PREPEND = 1;
+	const LA_INCLUDE_PSR0 = 2;
+
 
 	private $_masks = array();
-	private $_dirs = array();
-	
-	function __construct($prepend=false)
-	{
-		// controllers
-		$this->register('*_Controller', function($class){
-			return '$root/app/controllers/' . Lemmon_Autoloader::classToFileName(substr($class, 0, -11)) . '_controller.php';
-		});
-		// mailers
-		$this->register('*Mailer', '$root/app/mailers/$file.php');
-		// application
-		$this->register('Application', '$root/app/controllers/application.php');
-		// models
-		$this->registerDir('$root/app/models/$file.php');
-		// general
-		$this->registerDir('$lib/$class.php');
-		//
-		// register
-		spl_autoload_register(array($this, 'loadClass'), true, $prepend);
-	}
-	
-	static function setRootDir($dir)
-	{
-		self::$_rootDir = rtrim($dir, DIRECTORY_SEPARATOR);
-	}
-	
-	static function getRootDir()
-	{
-		return self::$_rootDir;
-	}
-	
-	static function setLibDir($dir)
-	{
-		self::$_libDir = rtrim($dir, DIRECTORY_SEPARATOR);
-	}
-	
-	static function getLibDir()
-	{
-		return self::$_libDir;
-	}
-	
-	static function classToFileName($str)
-	{
-		$str = strtolower(str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1_$2', $str)));
-		return $str;
-	}
-	
-	function register($mask, $file)
+	private $_files = array();
+
+
+	/**
+	 * Register masked class name.
+	 * @param  string     $mask
+	 * @param  string     $file
+	 * @return Autoloader
+	 */
+	function addMask($mask, $file)
 	{
 		$this->_masks['/^' . str_replace('*', '.+', $mask) . '$/'] = $file;
 	}
-	
-	function registerDir($file)
+
+
+	/**
+	 * Register file.
+	 * @param  string     $file
+	 * @return Autoloader
+	 */
+	function add($file)
 	{
-		$this->_dirs[] = $file;
+		$this->_files[] = $file;
 	}
-	
+
+
+	/**
+	 * Register.
+	 * @param  int        $switch
+	 * @return Autoloader
+	 */
+	function register($switch=null)
+	{
+		// prepend it
+		if ($switch & self::LA_PREPEND) $prepend = true; else $prepend = false;
+		// register PSR-0
+		if ($switch & self::LA_INCLUDE_PSR0) $this->add('$lib/$class.php');
+		// register
+		spl_autoload_register(array($this, 'loadClass'), true, $prepend);
+		//
+		return $this;
+	}
+
+
 	function loadClass($class)
 	{
 		if ($file=$this->findFile($class)) require $file;
 	}
-	
-	private function _parse($file, $class)
+
+
+	private function _parse($path, $class)
 	{
-		return str_replace(array('$root', '$lib', '$class', '$file'), array(self::$_rootDir, self::$_libDir, str_replace('_', DIRECTORY_SEPARATOR, $class), self::classToFileName($class)), $file);
+		return str_replace(
+			array('$root', '$lib', '$class', '$file'),
+			array(
+				ROOT_DIR,
+				LIBS_DIR,
+				str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $class),
+				strtolower(preg_replace('/(.)([A-Z])/u', '$1_$2', $class)),
+				),
+			$path);
 	}
-	
-	function findFile($class, &$dirs=array())
+
+
+	function findFile($class)
 	{
 		// masks
 		foreach ($this->_masks as $mask => $file) if (preg_match($mask, $class))
@@ -84,10 +96,10 @@ class Lemmon_Autoloader
 			$file = $this->_parse($file, $class);
 			if (is_file($file)) return $file;
 		}
-		// dirs
-		foreach ($this->_dirs as $file)
+		// files
+		foreach ($this->_files as $path)
 		{
-			$file = $this->_parse($file, $class);
+			$file = $this->_parse($path, $class);
 			if (is_file($file)) return $file;
 		}
 	}

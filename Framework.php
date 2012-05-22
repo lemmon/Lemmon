@@ -1,126 +1,124 @@
 <?php
-/**
-* This file is part of the Lemmon Framework.
-*
-* Copyright 2007-2011, Jakub Pelák (http://www.lemmonjuice.com)
-*/
+
+/*
+ * This file is part of the Lemmon package.
+ *
+ * (c) Jakub Pelák <jpelak@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Lemmon;
 
 /**
  * Lemmon PHP Framework core library.
- *
- * @copyright  Copyright (c) 2007-2011 Jakub Pelák
- * @author     Jakub Pelák <jpelak@gmail.com>
- * @link       http://www.lemmonjuice.com
- * @package    lemmon
  */
-class Lemmon_Framework
+class Framework
 {
 	private static $_instance;
-	private static $_root;
 
-	protected $_name = 'Lemmon Framework Application';
-	protected $_version = null;
-	protected $_frameworkVersion = '?';
-
+	protected $log;
+	protected $env;
+	protected $db;
 	protected $route;
-	protected $viewRoot;
+	protected $tpl;
+
+	protected $flash;
 	
-	private $_viewRootDisabled;
-
-	protected $private = array();
-
-	public $data = array();
+	protected $data = array();
 
 
-	public function __construct()
+	/**
+	 * Runs application.
+	 * @param  Autoloader $loader
+	 * @return Autoloader
+	 */
+	static function autoloader($loader)
 	{
-		// instance
-		self::$_instance = $this;
-
-		// load route
-		$this->route = Lemmon_Route::getInstance();
+		// register controllers
+		$loader->addMask('*_Controller', function($class){
+			return '$root/app/controllers/' . strtolower(str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1_$2', substr($class, 0, -11)))) . '_controller.php';
+		});
 		
-		// magic quotes fix
-		$_GET = $this->_checkQuotes($_GET);
-		$_POST = $this->_checkQuotes($_POST);
-
-		// start sessions
-		session_start();
-		// template
-		$this->_view($this->route->getAction());
-		// flash messages
-		$currentHash = self::_getCurrentHash();
-		if ($currentHash!=$_SESSION['_flash']['link']) $_SESSION['_flash'] = array( 'link' => $currentHash );
-	}
-	
-	
-	static public function getInstance()
-	{
-		return self::$_instance;
-	}
-	
-	
-	private function _checkQuotes($data)
-	{
-		if (get_magic_quotes_gpc())
-		{
-			if (is_array($data))
-				foreach ($data as $key => $value) $data[$key] = $this->_checkQuotes($value);
-			else
-				$data = stripslashes(trim($data));
-		}
-		return $data;
-	}
-	
-	
-	public static function getName()
-	{
-		return self::getInstance()->_name;
-	}
-	
-	static public function go()
-	{
-		$route = Lemmon_Route::getInstance();
+		// register mailers
+		$loader->addMask('*Mailer', '$root/app/mailers/$file.php');
 		
+		// register application class
+		$loader->addMask('Application', '$root/app/controllers/application.php');
+		
+		// register models
+		$loader->add('$root/app/models/$file.php');
+		
+		//
+		return $loader;
+	}
+
+
+	/**
+	 * Run the application.
+	 * @param array $params
+	 */
+	static function run(array $params=null)
+	{
 		try
 		{
-			// load controller
-			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $route->getController()))) . '_Controller';
-			$controller = new $controller_class_name();
+			// start sessions
+			session_start();
+	
+			// controller
+			$controller_name = $params['route']->getController();
+			$action_name     = $params['route']->getAction();
 			
-			$action = $route->getAction();
+			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
+
+			// create controller
+			$controller = new $controller_class_name($params);
+
+			// init controller
+			if (method_exists($controller, '__init'))
+			{
+				$controller->__init();
+			}
 			
 			// execute action
-			if (method_exists($controller, $action))
+			if (method_exists($controller, $action_name))
 			{
-				$res = $controller->{$action}();
+				$res = $controller->{$action_name}();
 			}
 			else
 			{
-				throw new Lemmon_Exception(sprintf('Unknown method `%s` on `%s`', $action, get_class($controller)));
+				throw new \Lemmon_Exception(sprintf('Unknown method `%s` on `%s`', $action, get_class($controller)));
 			}
 		}
-		catch (Exception $exception)
+		catch (\Exception $exception)
 		{
+			// handle the exception
 			$trace = $exception->getTrace();
 			if ($trace[0]['file'])
 			{
 				$trace[0]['block'] = array_slice(file($trace[0]['file']), $trace[0]['line']-8, 15, true);
 			}
-			Lemmon_Template::display('exception', array(
+			Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
 				'exception' => $exception,
 				'exception_block' => array_slice(file($exception->getFile()), $exception->getLine()-8, 15, true),
 				'trace' => $trace,
 			));
 			exit;
 		}
-
-		if ($res===null)
+		
+		// process result
+		if ($res === null)
 		{
 			// load template
-			Lemmon_Template::display();
+			$data = $controller->data;
+			$data['link']  = $controller->route;
+			$data['flash'] = $_SESSION['_flash']['message'];
+			$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
+			Template::appendFilesystem('app/views/' . $controller_name);
+			Template::display($action_name, $data);
 		}
-		elseif ($res instanceof Lemmon_Route_Redir)
+		elseif ($res instanceof Request\Redir)
 		{
 			// redirect
 			$res->exec();
@@ -128,113 +126,64 @@ class Lemmon_Framework
 		}
 		elseif ($res instanceof Lemmon_Mailer)
 		{
-			Lemmon_Template::display('email', array(
+			Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
 				'message' => $res,
+				'link'    => $controller->route,
 			));
 		}
 		else
 		{
-			// display plain result
+			// display plain text result
 			echo $res;
 		}
 	}
-	
-
-	static public function error($errno, $errstr, $error_file, $error_line, $context)
-	{
-		if (!(error_reporting() & $errno)) return;
-		throw new ErrorException($errstr, 0, $errno, $error_file, $error_line);
-	}
 
 
-	protected function _view($view=null, $view_root=null)
+	/**
+	 * Runs application.
+	 * @return string
+	 */
+	final function __construct(array $params=null)
 	{
-		$route = Lemmon_Route::getInstance();
-		if ($view_root) $this->viewRoot = $view_root;
-		if ($this->viewRoot===null) $this->viewRoot = $route->getController();
-		if ($view) $this->view = strtr($view, '-', '_');
-		return ($this->_viewRootDisabled ? '' : $this->viewRoot . '/') . $this->view . '.html';
-	}
-	
-	
-	public function setView($a, $b=null)
-	{
-		$this->_view($a, $b);
-	}
-	
-	
-	public function getView()
-	{
-		return $this->_view();
-	}
+		// assign necessary classes
+		$this->log   = $params['log'];
+		$this->db    = $params['db'];
+		$this->env   = $params['env'];
+		$this->route = $params['route'];
 		
+		// create rest of the classes
+		$this->flash   = new Flash($this->route);
+		$this->request = new Request($this);
 
-	protected function _viewRoot($view_root=null)
-	{
-		if ($view_root) $this->viewRoot = $view_root;
-		return $this->viewRoot;
-	}
-	
-
-	public function getViewRoot($view_root=null)
-	{
-		return ($this->_viewRootDisabled ? '' : ($view_root ? $view_root : $this->viewRoot) . '/');
-	}
-	
-
-	public function disableViewRoot()
-	{
-		$this->_viewRootDisabled = true;
-	}
-	
-
-	public function allOk()
-	{
-		return 1;
-	}
-	
-
-	private function _getCurrentHash()
-	{
-		return md5( ($_POST ? microtime(1) : '') . $this->route->getSelfWithParams() );
-	}
-	
-
-	public function flash($type, $line, $key=null)
-	{
-		if ($line)
-		{
-			if ($key)
-				$_SESSION['_flash']['message'][$type][$key] = $line;
-			else
-				$_SESSION['_flash']['message'][$type][] = $line;
-		}
-	}
-
-	
-	public function flashNotice()
-	{
-		$_SESSION['_flash']['message']['notice'][] = call_user_func_array('Lemmon_I18n::t', func_get_args());
-		return $this;
-	}
-
-	
-	public function flashError()
-	{
-		$_SESSION['_flash']['message']['error'][] = call_user_func_array('Lemmon_I18n::t', func_get_args());
-		return $this;
-	}
-
-	
-	public function flashErrorField()
-	{
-		foreach (func_get_args() as $field) $_SESSION['_flash']['error_field'][$field] = $field;
-		return $this;
+		// instance
+		self::$_instance = $this;
 	}
 
 
-	static public function getIp()
+	/**
+	 * Returns current application instance.
+	 * @return Framework
+	 */
+	static function getInstance()
 	{
-		return $_SERVER['REMOTE_ADDR'];
+		return self::$_instance;
+	}
+
+
+	/**
+	 * @return Route
+	 */
+	function getRoute()
+	{
+		return $this->route;
+	}
+
+
+	/**
+	 * @return Flash
+	 */
+	function getFlash()
+	{
+		return $this->flash;
 	}
 }

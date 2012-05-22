@@ -37,7 +37,7 @@ class Lemmon_Route
 	 * Defines all the necessary parameters required to run this class
 	 * properly.
 	 */
-	final public function __construct()
+	final function __construct()
 	{
 		self::$_instance = $this;
 		
@@ -58,13 +58,13 @@ class Lemmon_Route
 			$this->_params = explode('/', $route);
 		}
 		
-		$this->_uploadDir = Lemmon_Autoloader::getRootDir() . '/' . 'uploads/';
+		$this->_uploadDir = ROOT_DIR . '/' . 'uploads/';
 		$this->_uploadURL = $this->_root . 'uploads/';
 		
 		$this->define();
 	}
-	
-	
+
+
 	/**
 	 * Helper function used to define application specific parameters.
 	 */
@@ -75,39 +75,34 @@ class Lemmon_Route
 	 * Get current defined instance.
 	 * @return Lemmon_Route
 	 */
-	final public static function getInstance()
+	final static function getInstance()
 	{
-		if (!self::$_instance)
-		{
-			self::$_instance = new Lemmon_Route();
-		}
-		
 		return self::$_instance;
 	}
-	
-	
+
+
 	/**
 	 * Returns matched parameter of current route.
 	 * @param  string
 	 * @return mixed  either string on defined match or null on undefined one
 	 */
-	final public function __get($key)
+	final function __get($key)
 	{
 		return array_key_exists($key, $this->_matches) ? $this->_matches[$key] : null;
 	}
 
 
-	final public function __set($key, $val)
+	final function __set($key, $val)
 	{
 		$this->_matches[$key] = $val;
 	}
-	
-	
+
+
 	/**
 	 * Get current host.
 	 * @return string
 	 */
-	final public static function getHost()
+	final static function getHost()
 	{
 		return $_SERVER['HTTP_HOST'];
 	}
@@ -117,7 +112,7 @@ class Lemmon_Route
 	 * Get current domain.
 	 * @return string
 	 */
-	final public static function getDomain()
+	final static function getDomain()
 	{
 		$domain = self::getHost();
 		if (substr_count($domain, '.')>1)
@@ -126,13 +121,13 @@ class Lemmon_Route
 		}
 		return $domain;
 	}
-	
+
 
 	/**
 	 * Get current subdomain.
 	 * @return string
 	 */
-	final public static function getSubdomain()
+	final static function getSubdomain()
 	{
 		$subdomain = self::getHost();
 		if (substr_count($subdomain, '.')>1)
@@ -141,44 +136,44 @@ class Lemmon_Route
 		}
 		return $subdomain;
 	}
-	
+
 
 	/**
 	 * Get absolute link for root.
 	 * @return string
 	 */
-	final public function getRoot()
+	final function getRoot()
 	{
 		return $this->_root;
 	}
-	
+
 
 	/**
 	 * Get route.
 	 * @return string
 	 */
-	final public function getRoute()
+	final function getRoute()
 	{
 		return $this->_route;
 	}
-	
+
 
 	/**
 	 * Get absolute link for current route.
 	 * @return string
 	 */
-	final public function getSelf()
+	final function getSelf()
 	{
 		return $this->_root . $this->_route;
 	}
-	
+
 
 	/**
 	 * Get absolute link for current route.
 	 * @param  boolean
 	 * @return string
 	 */
-	final public function getSelfWithParams()
+	final function getSelfWithParams()
 	{
 		$res = self::getSelf();
 		if ($_GET) $res .= '?' . http_build_query( $_GET, '', '&' );
@@ -190,7 +185,7 @@ class Lemmon_Route
 	 * Get all route parameters.
 	 * @return array
 	 */
-	final public function getParams()
+	final function getParams()
 	{
 		return $this->_params;
 	}
@@ -201,7 +196,7 @@ class Lemmon_Route
 	 * @param  mixed
 	 * @return string
 	 */
-	final public function getParam($i, $default=null)
+	final function getParam($i, $default=null)
 	{
 		if (strpos($i, '/'))
 		{
@@ -219,9 +214,9 @@ class Lemmon_Route
 			return $this->{$i};
 		}
 	}
-	
-	
-	final public function setParam($i, $val)
+
+
+	final function setParam($i, $val)
 	{
 		$this->_params[$i-1] = $val;
 	}
@@ -231,17 +226,17 @@ class Lemmon_Route
 	 * Get Controller name.
 	 * @return string
 	 */
-	final public function getController()
+	final function getController()
 	{
 		return $this->_controller;
 	}
-	
-	
+
+
 	/**
 	 * Get Action name.
 	 * @return string
 	 */
-	final public function getAction()
+	final function getAction()
 	{
 		return $this->_action;
 	}
@@ -251,34 +246,34 @@ class Lemmon_Route
 	 * Checks if the request is XMLHttpRequest (XHR).
 	 * @return boolean
 	 */
-	final static public function isXHR()
+	final static function isXHR()
 	{
 		return strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])=='xmlhttprequest' ? true : false;
 	}
-	
-	
+
+
 	/**
-	 * Get absolute link to a public directory.
+	 * Get absolute link to a directory.
 	 * @param  string
 	 * @return string
 	 */
-	public function getPublic($link)
+	function getPublic($link)
 	{
 		return $this->_root . 'public/' . $link;
 	}
-	
-	
+
+
 	/**
 	 * Get absolute link to a upload directory.
 	 * @return string
 	 */
-	final public function getUploadDir()
+	final function getUploadDir()
 	{
 		return $this->_uploadDir;
 	}
-	
-	
-	final public function setUploadDir($dir)
+
+
+	final function setUploadDir($dir)
 	{
 		try
 		{
@@ -290,55 +285,44 @@ class Lemmon_Route
 			throw new Lemmon_Exception('Upload directory not writable');
 		}
 	}
-	
-	final public function setUploadURL($url)
+
+
+	final function setUploadURL($url)
 	{
 		$this->_uploadURL = $url;
 	}
-	
-	final public function getUploadURL()
+
+
+	final function getUploadURL()
 	{
 		return $this->_uploadURL;
 	}
-	
-	
-	/**
-	 * Get path to partial template file.
-	 * @param  string
-	 * @param  string
-	 * @return string
-	 */
-	final public function getPartial($partial, $view_root='')
-	{
-		$controller = Lemmon_Framework::getInstance();
-		return $controller->getViewRoot($view_root) . '_' . $partial . '.html';
-	}
-	
+
 
 	/**
 	 * Set Controller name.
 	 * @param  string
 	 * @return string
 	 */
-	final public function setController($controller)
+	final function setController($controller)
 	{
 		$this->_controller = $controller;
 		return $this->_controller;
 	}
-	
-	
+
+
 	/**
 	 * Set Action name.
 	 * @param  string
 	 * @return string
 	 */
-	final public function setAction($action)
+	final function setAction($action)
 	{
 		$this->_action = str_replace(array('-', '.'), '_', $action);
 		return $this;
 	}
-	
-	
+
+
 	/**
 	 * Match current host with specific regular expression.
 	 * @param  string case insensitive regex pattern
@@ -349,8 +333,8 @@ class Lemmon_Route
 		$pattern = str_replace('.', '\.', $pattern);
 		return (bool)preg_match('/' . $pattern . '/i', self::getHost());
 	}
-	
-	
+
+
 	/**
 	 * Match current route with specific regular expression.
 	 *
@@ -365,7 +349,7 @@ class Lemmon_Route
 	 * @param  array   array of case insensitive regex pattern bits
 	 * @return boolean
 	 */
-	final public function match($pattern, $conditions=array())
+	final function match($pattern, $conditions=array())
 	{
 		$pattern = str_replace('/', '\/', $pattern);
 		$pattern = str_replace('.', '\.', $pattern);
@@ -388,27 +372,27 @@ class Lemmon_Route
 			return false;
 		}
 	}
-	
-	
+
+
 	/**
 	 * Register shortcut for a custom route.
 	 * @param  string
 	 * @param  string
 	 * @return void
 	 */
-	final public function register($key, $link)
+	final function register($key, $link)
 	{
 		$this->_definedRoutes[':' . $key] = $link;
 	}
-	
-	
+
+
 	/**
 	 * Parse link.
 	 * @param  string
 	 * @param  array
 	 * @return string
 	 */
-	final public function parse($link, $params)
+	final function parse($link, $params)
 	{
 		preg_match_all('/@?(\$([\w]+))/i', $link, $m,  PREG_SET_ORDER);
 	
@@ -430,7 +414,7 @@ class Lemmon_Route
 		while (($i=strpos($link, '{'))!==false)
 		{
 			$j = strpos($link, '}', $i);
-			$link = substr_replace($link, Lemmon_String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
+			$link = substr_replace($link, Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
 		}
 		
 		return $link;
@@ -443,7 +427,7 @@ class Lemmon_Route
 	 * @param  array
 	 * @return string
 	 */
-	final public function to($link=null, $params=null)
+	final function to($link=null, $params=null)
 	{
 		if ($link{0}==':') 
 		{
@@ -487,7 +471,7 @@ class Lemmon_Route
 		while (($i=strpos($link, '{'))!==false)
 		{
 			$j = strpos($link, '}', $i);
-			$link = substr_replace($link, Lemmon_String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
+			$link = substr_replace($link, Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
 		}
 		
 		$link = explode('/', $link);
@@ -506,48 +490,48 @@ class Lemmon_Route
 	 * @param  array
 	 * @return string
 	 */
-	final public function toParams($link='', $params=array())
+	final function toParams($link='', $params=array())
 	{
 		$res = self::to($link, $params);
 		if ($_GET) $res .= '?' . http_build_query($_GET, '', '&amp;');
 		return $res;
 	}
-	
+
 
 	/**
 	 * @param  string
 	 * @param  array
 	 * @return string
 	 */
-	final public function toReturn($link='', $params=array())
+	final function toReturn($link='', $params=array())
 	{
 		$res = self::to($link, $params);
 		$q['redir'] = html_entity_decode(self::getSelfWithParams());
 		$res .= '?' . http_build_query($q, '', '&amp;');
 		return $res;
 	}
-	
-	
+
+
 	/**
 	 * @param  string
 	 * @param  array
 	 * @return string
 	 */
-	final public function toReturnSoft($link='', $params=array())
+	final function toReturnSoft($link='', $params=array())
 	{
 		$res = self::to($link, $params);
 		$q['return'] = html_entity_decode(self::getSelfWithParams());
 		$res .= '?' . http_build_query($q, '', '&amp;');
 		return $res;
 	}
-	
-	
+
+
 	/**
 	 * @param  string
 	 * @param  array
 	 * @return string
 	 */
-	final public function toBack($link='', $params=array())
+	final function toBack($link='', $params=array())
 	{
 		if ($_GET['return'])
 		{
@@ -562,8 +546,8 @@ class Lemmon_Route
 			return self::to($link, $params);
 		}
 	}
-	
-	
+
+
 	/**
 	 * @param  array
 	 * @param  boolean
@@ -571,13 +555,13 @@ class Lemmon_Route
 	 * @param  boolean
 	 * @return string
 	 */
-	final public function addParams($params, $with_return=false, $soft_return=false, $raw=false)
+	final function addParams($params, $with_return=false, $soft_return=false, $raw=false)
 	{
 		$params = array_merge($_GET, $params);
 		if ($with_return) $params[ $soft_return ? 'return' : 'redir' ] = self::getSelfWithParams(true);
 		return ($query=http_build_query( $params, '', $raw ? '&' : '&amp;' )) ? '?' . $query : '';
 	}
-	
+
 
 	/**
 	 * @param  array
@@ -586,66 +570,9 @@ class Lemmon_Route
 	 * @param  boolean
 	 * @return string
 	 */
-	final public function withParams($params, $with_return=false, $soft_return=false)
+	final function withParams($params, $with_return=false, $soft_return=false)
 	{
 		if ($with_return) $params[ $soft_return ? 'return' : 'redir' ] = self::getSelfWithParams(true);
 		return ($query=http_build_query( $params, '', '&' )) ? '?' . $query : '';
 	}
-
-
-	/**
-	 * Redirect
-	 * @param  string
-	 * @param  array
-	 * @return Lemmon_Route_Redir
-	 */
-	final public function redir($link='', $params=array())
-	{
-		if ($_GET['redir'])
-		{
-			return new Lemmon_Route_Redir($_GET['redir']);
-		}
-		elseif ($link==':root')
-		{
-			return new Lemmon_Route_Redir(self::getRoot());
-		}
-		elseif ($link==':self')
-		{
-			return new Lemmon_Route_Redir(self::getSelf());
-		}
-		elseif ($link==':self+params')
-		{
-			return new Lemmon_Route_Redir(self::getSelfWithParams());
-		}
-		elseif ($link{0}=='/')
-		{
-			return new Lemmon_Route_Redir($link);
-		}
-		elseif ($link)
-		{
-			return new Lemmon_Route_Redir(self::to($link, $params));
-		}
-		else
-		{
-			return new Lemmon_Route_Redir();
-		}
-		/*
-		$_SESSION['_flash']['link'] = md5($to);
-		header('Location: ' . $to);
-		exit;
-		*/
-	}
-	
-
-	/*
-	final public function redirReturn($link=null, $params=null, $force=false)
-	{
-		$to = ($_GET['redir'] and !$force) ? $_GET['redir'] : self::to($link, $params);
-		$q['redir'] = self::getSelfWithParams();
-		$to .= '?'.http_build_query($q, '', '&amp;');
-		$_SESSION['_flash']['link'] = md5($to);
-		header('Location: '.$to);
-		exit;
-	}
-	*/
 }

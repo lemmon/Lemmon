@@ -1,16 +1,22 @@
 <?php
+
+namespace Lemmon;
+
 /**
- * General strings helpers.
+ * General strings helper functions.
  *
- * @copyright  Copyright (c) 2007-2010 Jakub Pelák
+ * @copyright  Copyright (c) 2007-2012 Jakub Pelák
  * @author     Jakub Pelák <jpelak@gmail.com>
  * @link       http://www.lemmonjuice.com
  * @package    lemmon
  */
-class Lemmon_String
+class String
 {
-	
 
+
+	/**
+	 * Converts variable name to human representation.
+	 */
 	static public function human($str)
 	{
 		$str = str_replace('_id', '', $str);
@@ -19,33 +25,25 @@ class Lemmon_String
 		return $str;
 	}
 
-	
-	static public function parseCode($code)
-	{
-		return '[foo]';
-	}
 
-	
-	static public function urlLink($url)
-	{
-		if (substr($url, 0, 7)!='http://' and substr($url, 0, 8)!='https://') $url = 'http://' . $url;
-		return $url;
-	}
-	
-
-	static public function urlCaption($url)
-	{
-		if (substr($url, 0, 7)=='http://') $url = substr($url, 7);
-		return $url;
-	}
-	
-	
+	/**
+	 * Returns html.
+	 * @param  string  $html
+	 * @return string
+	 * @todo   it just returns $html variable
+	 */
 	public static function html($html)
 	{
 		return $html;
 	}
-	
 
+
+	/**
+	 * Converts plain text to html.
+	 * @param  string  $text
+	 * @return string
+	 * @todo   probably merge text() & html() to textToHtml()
+	 */
 	public static function text($text)
 	{
 		if ($text)
@@ -61,30 +59,15 @@ class Lemmon_String
 		}
 		return $text;
 	}
-	
-	
-	static public function nl2br($str)
-	{
-		$str = trim($str);
-		$str = nl2br($str);
-		return $str;
-	}
 
 
-	public static function indent($str)
-	{
-		$res = preg_replace('/([\.]+\s+)/', '', trim($str), -1, $n);
-		return $n;
-	}
-	
-	
-	public static function removeIndent($str)
-	{
-		$res = preg_replace('/([\.]+\s+)/', '', trim($str), -1, $n);
-		return $res;
-	}
-	
-	
+	/**
+	 * Converts plain text or html to single line string.
+	 * @param  string  $text
+	 * @param  int     $len
+	 * @return string
+	 * @todo   perhaps better is to convert "..." to &hellip; or test it with Twig what's best
+	 */
 	static public function line($str, $len=150)
 	{
 		$str = strip_tags($str);
@@ -94,6 +77,11 @@ class Lemmon_String
 	}
 
 
+	/**
+	 * Converts plural string to singular.
+	 * @param  string  $pl
+	 * @return string
+	 */
 	static public function sg($pl)
 	{
 		if (substr($pl, -4)=='vies')
@@ -115,7 +103,12 @@ class Lemmon_String
 		return $sg;
 	}
 
-	
+
+	/**
+	 * Converts singular string to plural.
+	 * @param  string  $sg
+	 * @return string
+	 */
 	static public function pl($sg)
 	{
 		if (substr($sg, -1)=='y')
@@ -137,21 +130,36 @@ class Lemmon_String
 		return $pl;
 	}
 
-	
+
+	/**
+	 * Converts class name to filename.
+	 * @param  string  $str
+	 * @return string
+	 */
 	static public function classToFileName($str)
 	{
-		$str = strtolower(preg_replace('/(.)([A-Z])/u', '$1_$2', $str));
-		return $str;
+		return (str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1_$2', $str)));
 	}
 
 
+	/**
+	 * Converts class name to table name.
+	 * @param  string  $str
+	 * @return string
+	 */
 	static public function classToTableName($str)
 	{
 		return self::classToFileName($str);
 	}
 
-	
-	static public function tableToClassName($str, $table=null)
+
+	/**
+	 * Converts table name to class name.
+	 * @param  string  $str
+	 * @param  string  $table
+	 * @return string
+	 */
+	static public function tableToClassName($str, $table='')
 	{
 		$str = str_replace('@', $table . ' ', $str);
 		$str = str_replace(' ', '', ucwords(str_replace('_', ' ', $str)));
@@ -159,14 +167,16 @@ class Lemmon_String
 	}
 
 
-	public static function entities($str)
-	{
-		$str = str_replace('ľ', '&#x013e;', $str);
-		return $str;
-	}
-	
+	/**
+	 * Asciizes string.
+	 * @param  string  $str
+	 * @param  string  $sep
+	 * @param  string  $lower
+	 * @return string
+	 */
 	static public function asciize($str, $sep='-', $lower=true)
 	{
+		// asciize
 		$str = preg_replace('/[àáâäæãåā]/u', 'a', $str);
 		$str = preg_replace('/[ÀÁÂÄÆÃÅĀ]/u', 'A', $str);
 		$str = preg_replace('/[çćč]/u',      'c', $str);
@@ -196,11 +206,11 @@ class Lemmon_String
 		$str = preg_replace('/[žźż]/u',      'z', $str);
 		$str = preg_replace('/[ŽŹŻ]/u',      'Z', $str);
 		$str = preg_replace('/[\W_]+/', $sep, $str);
-		if ($lower)
-		{
-			$str = strtolower($str);
-		}
+		// lowecase everything?
+		if ($lower) $str = strtolower($str);
+		// trim
 		$str = trim($str, $sep);
+		//
 		return $str;
 	}	
 }

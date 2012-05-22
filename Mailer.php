@@ -4,7 +4,7 @@
 */
 
 
-require_once Lemmon_Autoloader::getLibDir() . '/Swift/_/swift_init.php';
+require_once LIBS_DIR . '/Swift/_/swift_init.php';
 
 
 class Lemmon_Mailer
@@ -38,7 +38,7 @@ class Lemmon_Mailer
 		{
 			$mailer = new $called_class_name();
 			call_user_func_array(array($mailer, $m[2]), $arguments);
-			if (!$mailer->template) $mailer->template = Lemmon_String::classToFileName($m[2]);
+			if (!$mailer->template) $mailer->template = Lemmon\String::classToFileName($m[2]);
 			return $mailer->{$m[1]}();
 		}
 		else

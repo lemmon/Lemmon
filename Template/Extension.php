@@ -37,17 +37,17 @@ class Lemmon_Template_Extension extends Twig_Extension
 			'fileName' => new Twig_Filter_Function('basename'),
 			
 			// Strings
-			'asciize' => new Twig_Filter_Function('Lemmon_String::asciize'),
-			'human' => new Twig_Filter_Function('Lemmon_String::human'),
-			'nl2br' => new Twig_Filter_Function('Lemmon_String::nl2br'),
-			'text' => new Twig_Filter_Function('Lemmon_String::text'),
-			'line' => new Twig_Filter_Function('Lemmon_String::line'),
-			'url_link' => new Twig_Filter_Function('Lemmon_String::urlLink'),
-			'url_caption' => new Twig_Filter_Function('Lemmon_String::urlCaption'),
-			'email_hide' => new Twig_Filter_Function('Lemmon_String::emailHide'),
-			'entities' => new Twig_Filter_Function('Lemmon_String::entities'),
-			'indent' => new Twig_Filter_Function('Lemmon_String::indent'),
-			'removeIndent' => new Twig_Filter_Function('Lemmon_String::removeIndent'),
+			'asciize' => new Twig_Filter_Function('Lemmon\String::asciize'),
+			'human' => new Twig_Filter_Function('Lemmon\String::human'),
+			'nl2br' => new Twig_Filter_Function('Lemmon\String::nl2br'),
+			'text' => new Twig_Filter_Function('Lemmon\String::text'),
+			'line' => new Twig_Filter_Function('Lemmon\String::line'),
+			'url_link' => new Twig_Filter_Function('Lemmon\String::urlLink'),
+			'url_caption' => new Twig_Filter_Function('Lemmon\String::urlCaption'),
+			'email_hide' => new Twig_Filter_Function('Lemmon\String::emailHide'),
+			'entities' => new Twig_Filter_Function('Lemmon\String::entities'),
+			'indent' => new Twig_Filter_Function('Lemmon\String::indent'),
+			'removeIndent' => new Twig_Filter_Function('Lemmon\String::removeIndent'),
 			
 			// Numbers
 			'round' => new Twig_Filter_Function('round'),

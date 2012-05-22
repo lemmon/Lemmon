@@ -13,15 +13,15 @@ class Lemmon_Cache
 	
 	public static function getBase()
 	{
-		return Lemmon_Autoloader::getRootDir() . '/' . self::$_base;
+		return ROOT_DIR . '/' . self::$_base;
 	}
 	
 	public static function setBase($base)
 	{
 		$base = rtrim($base, '/') . '/';
-		if (!is_dir(Lemmon_Autoloader::getRootDir() . '/' . $base))
+		if (!is_dir(ROOT_DIR . '/' . $base))
 		{
-			if (!mkdir(Lemmon_Autoloader::getRootDir() . '/' . $base, 0777, true)) throw new Lemmon_Exception();
+			if (!mkdir(ROOT_DIR . '/' . $base, 0777, true)) throw new Lemmon_Exception();
 		}
 		self::$_base = $base;
 		return self::getBase();

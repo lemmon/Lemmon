@@ -17,16 +17,16 @@ class Lemmon_Scaffold extends Application
 	protected $_redir = ':section';
 	protected $_default = array();
 	
-	public function __construct()
+	public function __init()
 	{
-		parent::__construct();
+		parent::__init();
 		
 		if (!$this->_model)
 		{
 			$model_name = $this->route->controller;
 			$model_name = explode('/', $model_name);
 			$model_name = end($model_name);
-			$model_name = Lemmon_String::tableToClassName($model_name);
+			$model_name = Lemmon\String::tableToClassName($model_name);
 			$this->_model = $model_name;
 		}
 	}
@@ -61,12 +61,12 @@ class Lemmon_Scaffold extends Application
 		{
 			if ($this->_sanitize($f)!==false and $model->create($f))
 			{
-				$this->flashNotice('Entry has been successfully created');
-				return $this->route->redir($this->_redir, $model);
+				$this->flash->notice('Entry has been successfully created');
+				return $this->request->redir($this->_redir, $model);
 			}
 			else
 			{
-				$this->flashError('Entry has not been created');
+				$this->flash->error('Entry has not been created');
 			}
 		}
 		else
@@ -76,7 +76,7 @@ class Lemmon_Scaffold extends Application
 		$this->data['item'] = $model;
 	}
 	
-	public function update($p=array())
+	public function update()
 	{
 		if ($id=$this->route->id)
 		{
@@ -87,12 +87,12 @@ class Lemmon_Scaffold extends Application
 				{
 					if ($this->_sanitize($f)!==false and $model->replace($f))
 					{
-						$this->flashNotice('Entry has been successfully updated');
-						return $this->route->redir($this->_redir, $model);
+						$this->flash->notice('Entry has been successfully updated');
+						return $this->request->redir($this->_redir, $model);
 					}
 					else
 					{
-						$this->flashError('Entry has not been updated');
+						$this->flash->error('Entry has not been updated');
 					}
 				}
 				else
@@ -117,13 +117,13 @@ class Lemmon_Scaffold extends Application
 			{
 				if ($model->delete())
 				{
-					$this->flashNotice('Entry has been removed successfully');
+					$this->flash->notice('Entry has been removed successfully');
 				}
 				else
 				{
-					$this->flashError('Entry has not been deleted');
+					$this->flash->error('Entry has not been deleted');
 				}
-				return $this->route->redir($this->_redir);
+				return $this->request->redir($this->_redir);
 			}
 			else
 			{

@@ -18,9 +18,9 @@ class Statement extends \PDOStatement
 	private $_connection;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
-	function __construct(Connection $connection)
+	protected function __construct(Connection $connection)
 	{
 		$this->_connection = $connection;
 		$this->setFetchMode(PDO::FETCH_CLASS, 'Lemmon\Db\Row', array($this));

@@ -17,19 +17,26 @@ class Connection extends PDO
 	/** @var string */
 	private $_dsn;
 
+
 	/** @var string */
 	private $_tablePrefix = '';
 
+
 	/**
 	 * Constructor.
+	 * @param string $dsn
+	 * @param string $username
+	 * @param string $password
 	 */
-	function __construct($dsn, $username=NULL, $password=NULL)
+	public function __construct($dsn, $username=null, $password=null)
 	{
 		parent::__construct($this->_dsn=$dsn, $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
 		$this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Lemmon\Db\Statement', array($this)));
+		$this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 	}
-	
+
+
 	/**
 	 * Returns DSN.
 	 */
@@ -38,8 +45,10 @@ class Connection extends PDO
 		return $this->_dsn;
 	}
 
+
 	/**
 	 * Sets table prefix.
+	 * @param string $prefix
 	 */
 	function setTablePrefix($prefix)
 	{
@@ -47,20 +56,24 @@ class Connection extends PDO
 		return $this;
 	}
 
+
 	/**
 	 * Returns table prefix.
+	 * @return string
 	 */
-	function getTablePrefix($prefix)
+	function getTablePrefix()
 	{
 		return $this->_tablePrefix;
 	}
 
+
 	/**
 	 * Prepares MySQL query.
+	 * @param string $query
 	 */
 	function query($query)
 	{
 		$args = func_get_args();
-		return $this->exec(new Query($connection, array_shift($args), $args));
+		return parent::query(new Query($this, array_shift($args), $args));
 	}
 }

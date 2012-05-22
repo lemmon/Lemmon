@@ -28,7 +28,7 @@ class Lemmon_I18N
 	
 	public static function setBase($base)
 	{
-		return self::$_base=rtrim( ($base{0}=='/') ? $base : Lemmon_Autoloader::getRootDir() . '/' . $base , '/' );
+		return self::$_base=rtrim( ($base{0}=='/') ? $base : ROOT_DIR . '/' . $base , '/' );
 	}
 	
 	public static function getBase()

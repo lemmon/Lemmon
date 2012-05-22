@@ -18,7 +18,7 @@ abstract class Lemmon_Model_Item
 		
 		if (!$this->table)
 		{
-			$this->table = Lemmon_String::pl(Lemmon_String::classToTableName(get_class($this)));
+			$this->table = Lemmon\String::pl(Lemmon\String::classToTableName(get_class($this)));
 		}
 		
 		$this->define();

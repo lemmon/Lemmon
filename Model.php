@@ -46,7 +46,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 
 		if (!$this->_table)
 		{
-			$this->_table = Lemmon_String::classToTableName(get_class($this));
+			$this->_table = Lemmon\String::classToTableName(get_class($this));
 		}
 		
 		$this->define();
@@ -100,7 +100,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		$this->reload();
 		return array_key_exists($key, $this->_row)
 			or array_key_exists($key, $this->_childrenFields)
-			or array_key_exists(Lemmon_String::pl($key), $this->_childrenFields);
+			or array_key_exists(Lemmon\String::pl($key), $this->_childrenFields);
 	}
 	
 	final public function __get($key)
@@ -131,7 +131,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 				return $collection[null];
 				*/
 			}
-			elseif (array_key_exists($key_pl=Lemmon_String::pl($key), $this->_childrenFields)
+			elseif (array_key_exists($key_pl=Lemmon\String::pl($key), $this->_childrenFields)
 				and ($this->_childrenFields[$key_pl]=='_hasMany' or $this->_childrenFields[$key_pl]=='_hasAndBelongsToMany'))
 			{
 				$res = $this->_children[$key_pl]->first();
@@ -410,13 +410,13 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		if ($child_sg{0}=='@')
 		{
 			$child_sg = substr($child_sg, 1);
-			$child_pl = Lemmon_String::pl($child_sg);
-			$model = Lemmon_String::tableToClassName($this->getTable() . '_' . $child_pl);
+			$child_pl = Lemmon\String::pl($child_sg);
+			$model = Lemmon\String::tableToClassName($this->getTable() . '_' . $child_pl);
 		}
 		else
 		{
-			$child_pl = Lemmon_String::pl($child_sg);
-			$model = Lemmon_String::tableToClassName($child_pl);
+			$child_pl = Lemmon\String::pl($child_sg);
+			$model = Lemmon\String::tableToClassName($child_pl);
 		}
 		$params = array(
 			'model' => $model,
@@ -432,14 +432,14 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		if ($child_sg{0}=='@')
 		{
 			$child_sg = substr($child_sg, 1);
-			$child_pl = $this->getTable() . '_' . Lemmon_String::pl($child_sg);
+			$child_pl = $this->getTable() . '_' . Lemmon\String::pl($child_sg);
 		}
 		else
 		{
-			$child_pl = Lemmon_String::pl($child_sg);
+			$child_pl = Lemmon\String::pl($child_sg);
 		}
 		$params = array(
-			'model' => Lemmon_String::tableToClassName($child_pl),
+			'model' => Lemmon\String::tableToClassName($child_pl),
 			'field' => $child_sg . '_id',
 		);
 		$this->_hasOne[$child_sg] = array_merge($params, $args);
@@ -450,9 +450,9 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 	final public function hasMany($child_pl, $args=array())
 	{
 		$params = array(
-			'model' => Lemmon_String::tableToClassName($child_pl, $this->getTable()),
-			#'field' => Lemmon_String::sg($this->getTable()) . '_id',
-			'field' => Lemmon_String::sg(Lemmon_String::classToTableName(get_class($this))) . '_id',
+			'model' => Lemmon\String::tableToClassName($child_pl, $this->getTable()),
+			#'field' => Lemmon\String::sg($this->getTable()) . '_id',
+			'field' => Lemmon\String::sg(Lemmon\String::classToTableName(get_class($this))) . '_id',
 		);
 		if ($child_pl{0}=='@') $child_pl = substr($child_pl, 1);
 		$this->_hasMany[$child_pl] = array_merge($params, $args);
@@ -471,11 +471,11 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		{
 			$intersect = $this->getTable() . '_to_' . $child_pl;
 		}
-		$child_sg = Lemmon_String::sg($child_pl);
+		$child_sg = Lemmon\String::sg($child_pl);
 		$params = array(
-			'model' => Lemmon_String::tableToClassName($child_pl),
+			'model' => Lemmon\String::tableToClassName($child_pl),
 			'intersect' => $intersect,
-			'field_my' => Lemmon_String::sg($this->getTable()) . '_id',
+			'field_my' => Lemmon\String::sg($this->getTable()) . '_id',
 			'field_foreign' => $child_sg . '_id',
 		);
 		$this->_hasAndBelongsToMany[$child_pl] = array_merge($params, $args);
@@ -629,7 +629,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 	
 	final public function has($child, $id=null)
 	{
-		if ($field=$this->_childrenFields[$child] or ($child=Lemmon_String::pl($child) and $field=$this->_childrenFields[$child]))
+		if ($field=$this->_childrenFields[$child] or ($child=Lemmon\String::pl($child) and $field=$this->_childrenFields[$child]))
 		{
 			$params = $this->{$field}[$child];
 			if (func_num_args()==1)
@@ -637,13 +637,13 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 				switch ($field)
 				{
 					case '_belongsTo':
-						$this->join(Lemmon_String::classToTableName($params['model']), array(
-							array('%t.%n=$_table.%n', Lemmon_String::classToTableName($params['model']), 'id', $params['field'])
+						$this->join(Lemmon\String::classToTableName($params['model']), array(
+							array('%t.%n=$_table.%n', Lemmon\String::classToTableName($params['model']), 'id', $params['field'])
 						));
 						break;
 					case '_hasMany':
-						$this->join(Lemmon_String::classToTableName($params['model']), array(
-							array('%t.%n=$_table.%n', Lemmon_String::classToTableName($params['model']), $params['field'], 'id')
+						$this->join(Lemmon\String::classToTableName($params['model']), array(
+							array('%t.%n=$_table.%n', Lemmon\String::classToTableName($params['model']), $params['field'], 'id')
 						));
 						break;
 					case '_hasAndBelongsToMany':
@@ -689,8 +689,8 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 				switch ($field)
 				{
 					case '_hasMany':
-						$this->join(Lemmon_String::classToTableName($params['model']), array(
-							array('%t.%n=$_table.%n', Lemmon_String::classToTableName($params['model']), $params['field'], 'id'),
+						$this->join(Lemmon\String::classToTableName($params['model']), array(
+							array('%t.%n=$_table.%n', Lemmon\String::classToTableName($params['model']), $params['field'], 'id'),
 							$args[1] => $args[2],
 						));
 						break;
@@ -698,8 +698,8 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 						$this->join($params['intersect'], array(
 							$params['field_my'] => '$id',
 						));
-						$this->join(Lemmon_String::classToTableName($params['model']), array(
-							array('%t.`id`=%t.%n', Lemmon_String::classToTableName($params['model']), $params['intersect'], $params['field_foreign']),
+						$this->join(Lemmon\String::classToTableName($params['model']), array(
+							array('%t.`id`=%t.%n', Lemmon\String::classToTableName($params['model']), $params['intersect'], $params['field_foreign']),
 							$args[1] => $args[2],
 						));
 						break;
@@ -733,7 +733,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 	{
 		$row = (array)$row;
 		$ok = true;
-		$controller = Lemmon_Framework::getInstance();
+		$controller = Lemmon\Framework::getInstance();
 		// required
 		foreach ($this->_required as $field)
 		{
@@ -743,7 +743,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 				 	or !$this->_row[$this->{$this->_childrenFields[$field]}[$field]['field']]))
 			{
 				if ($controller)
-					Lemmon_Framework::getInstance()->flashError('Missing field %s', Lemmon_I18n::t(Lemmon_String::human($field)))->flashErrorField($field);
+					Lemmon\Framework::getInstance()->flash->error('Missing field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->flash->errorField($field);
 				else
 					throw new Lemmon_Exception('Missing field ' . $field);
 				$ok = false;
@@ -754,7 +754,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		{
 			if ($row and isset($row[$field]) and self::make()->findLike($field, $row[$field])->exclude($this->getPrimaryVal())->count())
 			{
-				Lemmon_Framework::getInstance()->flashError('Duplicate entry for field %s', Lemmon_I18n::t(Lemmon_String::human($field)))->flashErrorField($field);
+				Lemmon\Framework::getInstance()->flash->error('Duplicate entry for field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->flash->errorField($field);
 				$ok = false;
 			}
 		}
@@ -860,7 +860,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 					@unlink($upload_base . $_file_full);
 				}
 				// upload file
-				$file_name = Lemmon_String::asciize(substr($file['name'], 0, strrpos($file['name'], '.')), '_');
+				$file_name = Lemmon\String::asciize(substr($file['name'], 0, strrpos($file['name'], '.')), '_');
 				$file_ext = substr($file['name'], strrpos($file['name'], '.'));
 				$file_full = $upload_dir . $file_name . '.' . $time . $file_ext;
 				if (move_uploaded_file($file['tmp_name'], $upload_base . $file_full))
@@ -879,7 +879,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 			}
 			else
 			{
-				Lemmon_Framework::getInstance()->flashError('Error uploading %s (errno. %i)', Lemmon_String::human($field), $file['error'])->flashErrorField($field);
+				Lemmon\Framework::getInstance()->flash->error('Error uploading %s (errno. %i)', Lemmon\String::human($field), $file['error'])->flash->errorField($field);
 				$ok = false;
 			}
 		}
