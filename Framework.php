@@ -76,19 +76,19 @@ class Framework
 			$controller = new $controller_class_name($params);
 
 			// init controller
-			if (method_exists($controller, '__init'))
+			if (method_exists($controller, '__init') and ($res=$controller->__init())===null)
 			{
-				$controller->__init();
-			}
-			
-			// execute action
-			if (method_exists($controller, $action_name))
-			{
-				$res = $controller->{$action_name}();
-			}
-			else
-			{
-				throw new \Lemmon_Exception(sprintf('Unknown method `%s` on `%s`', $action, get_class($controller)));
+				// find action
+				if (method_exists($controller, $action_name))
+				{
+					// execute action
+					$res = $controller->{$action_name}();
+				}
+				else
+				{
+					// error on missing action
+					throw new \Lemmon_Exception(sprintf('Unknown method `%s` on `%s`', $action, get_class($controller)));
+				}
 			}
 		}
 		catch (\Exception $exception)
@@ -107,13 +107,13 @@ class Framework
 			exit;
 		}
 		
-		// process result
+		// process the result
 		if ($res === null)
 		{
 			// load template
 			$data = $controller->data;
 			$data['link']  = $controller->route;
-			$data['flash'] = $_SESSION['_flash']['message'];
+			$data['flash'] = $_SESSION['__FLASH__'];
 			$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
 			Template::appendFilesystem('app/views/' . $controller_name);
 			Template::display($action_name, $data);

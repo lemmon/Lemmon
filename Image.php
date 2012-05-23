@@ -40,7 +40,7 @@ class Lemmon_Image extends Application
 	
 	protected function processImage()
 	{
-		$source = $this->route->getUploadDir() . $this->imageSource;
+		$source = $this->route->getUploadDir() . '/' . $this->imageSource;
 		
 		if ($this->imageSource)
 		{

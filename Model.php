@@ -743,7 +743,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 				 	or !$this->_row[$this->{$this->_childrenFields[$field]}[$field]['field']]))
 			{
 				if ($controller)
-					Lemmon\Framework::getInstance()->flash->error('Missing field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->flash->errorField($field);
+					Lemmon\Framework::getInstance()->getFlash()->error('Missing field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->errorField($field);
 				else
 					throw new Lemmon_Exception('Missing field ' . $field);
 				$ok = false;
@@ -754,7 +754,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		{
 			if ($row and isset($row[$field]) and self::make()->findLike($field, $row[$field])->exclude($this->getPrimaryVal())->count())
 			{
-				Lemmon\Framework::getInstance()->flash->error('Duplicate entry for field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->flash->errorField($field);
+				Lemmon\Framework::getInstance()->getFlash()->error('Duplicate entry for field %s', Lemmon_I18n::t(Lemmon\String::human($field)))->errorField($field);
 				$ok = false;
 			}
 		}
@@ -837,10 +837,10 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		{
 			if ($file['error']==UPLOAD_ERR_OK)
 			{
-				$upload_base = Lemmon_Route::getInstance()->getUploadDir();
+				$upload_base = Lemmon\Route::getInstance()->getUploadDir() . '/';
 				$upload_dir = strftime(rtrim($args['path'], '/')) . '/';
 				// create directory
-				if (!file_exists($upload_base.$upload_dir))
+				if (!file_exists($upload_base . $upload_dir))
 				{
 					if (is_writable($upload_base))
 					{
@@ -879,7 +879,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 			}
 			else
 			{
-				Lemmon\Framework::getInstance()->flash->error('Error uploading %s (errno. %i)', Lemmon\String::human($field), $file['error'])->flash->errorField($field);
+				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (errno. %i)', Lemmon\String::human($field), $file['error'])->errorField($field);
 				$ok = false;
 			}
 		}
@@ -1210,9 +1210,9 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 			{
 				foreach (array_keys($this->_files) as $field) if ($file=$this->{$field})
 				{
-					if (file_exists(Lemmon_Route::getInstance()->getUploadDir() . $file))
+					if (file_exists(Lemmon\Route::getInstance()->getUploadDir() . '/' . $file))
 					{
-						@unlink(Lemmon_Route::getInstance()->getUploadDir() . $file);
+						@unlink(Lemmon\Route::getInstance()->getUploadDir() . '/' . $file);
 					}
 				}
 			}

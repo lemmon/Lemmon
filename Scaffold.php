@@ -61,12 +61,12 @@ class Lemmon_Scaffold extends Application
 		{
 			if ($this->_sanitize($f)!==false and $model->create($f))
 			{
-				$this->flash->notice('Entry has been successfully created');
+				$this->getFlash()->notice('Entry has been successfully created');
 				return $this->request->redir($this->_redir, $model);
 			}
 			else
 			{
-				$this->flash->error('Entry has not been created');
+				$this->getFlash()->error('Entry has not been created');
 			}
 		}
 		else
@@ -87,12 +87,12 @@ class Lemmon_Scaffold extends Application
 				{
 					if ($this->_sanitize($f)!==false and $model->replace($f))
 					{
-						$this->flash->notice('Entry has been successfully updated');
+						$this->getFlash()->notice('Entry has been successfully updated');
 						return $this->request->redir($this->_redir, $model);
 					}
 					else
 					{
-						$this->flash->error('Entry has not been updated');
+						$this->getFlash()->error('Entry has not been updated');
 					}
 				}
 				else
@@ -117,11 +117,11 @@ class Lemmon_Scaffold extends Application
 			{
 				if ($model->delete())
 				{
-					$this->flash->notice('Entry has been removed successfully');
+					$this->getFlash()->notice('Entry has been removed successfully');
 				}
 				else
 				{
-					$this->flash->error('Entry has not been deleted');
+					$this->getFlash()->error('Entry has not been deleted');
 				}
 				return $this->request->redir($this->_redir);
 			}

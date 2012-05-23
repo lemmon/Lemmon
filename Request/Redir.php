@@ -71,36 +71,16 @@ class Redir
 		}
 		exit;
 	}
-	
-	
+
+
+	/**
+	 * Sets redirect code.
+	 * @param  int  $code
+	 * @return Redir
+	 */
 	public function setCode($code)
 	{
 		$this->_code = $code;
-		return $this;
-	}
-	
-	
-	public function onDomain($domain)
-	{
-		$this->_domain = $domain;
-		$this->onSubdomain('www');
-		return $this;
-	}
-	
-	
-	private function _getDomain()
-	{
-		return $this->_domain ? $this->_domain : Lemmon_Route::getInstance()->getDomain();
-	}
-	
-	
-	public function onSubdomain($subdomain)
-	{
-		$this->_host = $subdomain . '.' . $this->_getDomain();
-		if (!$this->_service)
-		{
-			$this->_service = 'http://';
-		}
 		return $this;
 	}
 }

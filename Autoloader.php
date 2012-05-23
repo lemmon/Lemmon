@@ -18,8 +18,8 @@ namespace Lemmon;
  */
 class Autoloader
 {
-	const LA_PREPEND = 1;
-	const LA_INCLUDE_PSR0 = 2;
+	const PREPEND = 1;
+	const INCLUDE_PSR0 = 2;
 
 
 	private $_masks = array();
@@ -57,9 +57,9 @@ class Autoloader
 	function register($switch=null)
 	{
 		// prepend it
-		if ($switch & self::LA_PREPEND) $prepend = true; else $prepend = false;
+		if ($switch & self::PREPEND) $prepend = true; else $prepend = false;
 		// register PSR-0
-		if ($switch & self::LA_INCLUDE_PSR0) $this->add('$lib/$class.php');
+		if ($switch & self::INCLUDE_PSR0) $this->add('$lib/$class.php');
 		// register
 		spl_autoload_register(array($this, 'loadClass'), true, $prepend);
 		//

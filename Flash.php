@@ -74,7 +74,7 @@ class Flash
 	 */
 	function notice($message)
 	{
-		$_SESSION['__FLASH__']['messages']['notice'][] = $message;
+		$_SESSION['__FLASH__']['messages']['notice'][] = call_user_func_array(array($this, '_message'), func_get_args());
 		return $this;
 	}
 
@@ -86,7 +86,7 @@ class Flash
 	 */
 	function error($message)
 	{
-		$_SESSION['__FLASH__']['messages']['error'][] = $message;
+		$_SESSION['__FLASH__']['messages']['error'][] = call_user_func_array(array($this, '_message'), func_get_args());
 		return $this;
 	}
 
@@ -101,5 +101,14 @@ class Flash
 	{
 		$_SESSION['__FLASH__']['error_fields'][$field][] = $message;
 		return $this;
+	}
+
+
+	/**
+	 * Process the message.
+	 */
+	private function _message($message)
+	{
+		return call_user_func_array('Lemmon_I18n::t', func_get_args());
 	}
 }

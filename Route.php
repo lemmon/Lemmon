@@ -1,32 +1,32 @@
 <?php
-/**
-* This file is part of the Lemmon Framework.
-*
-* Copyright 2007-2010, Jakub Pelák (http://www.lemmonjuice.com)
-*/
+
+/*
+ * This file is part of the Lemmon package.
+ *
+ * (c) Jakub Pelák <jpelak@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Lemmon;
 
 /**
  * Handles routing and other miscellaneous functions with links.
- *
- * @copyright  Copyright (c) 2007-2010 Jakub Pelák
- * @author     Jakub Pelák <jpelak@gmail.com>
- * @link       http://www.lemmonjuice.com
- * @package    lemmon
  */
-class Lemmon_Route
+class Route
 {
 	private static $_instance;
-	
-	private $_host;
+
 	private $_root;
 	private $_route;
 	private $_params = array();
 	private $_matches = array();
 	private $_definedRoutes = array();
-	
+
 	private $_controller = 'index';
 	private $_action = 'index';
-	
+
 	private $_uploadDir;
 	private $_uploadURL;
 
@@ -39,36 +39,31 @@ class Lemmon_Route
 	 */
 	final function __construct()
 	{
+		// current instance
 		self::$_instance = $this;
 		
-		$this->_host = $_SERVER['HTTP_HOST'];
+		// set root
 		$this->_root = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
-
-		if (isset($_GET['request_uri']))
-		{
-			$route = $_GET['request_uri'];
-		}
-		else
-		{
-			$route = substr( ($i=strpos($_SERVER['REQUEST_URI'], '?')) ? substr($_SERVER['REQUEST_URI'], 0, $i) : $_SERVER['REQUEST_URI'] , strlen($this->_root));
-		}
-
+		
+		// get route
+		$route = substr( ($i=strpos($_SERVER['REQUEST_URI'], '?')) ? substr($_SERVER['REQUEST_URI'], 0, $i) : $_SERVER['REQUEST_URI'] , strlen($this->_root));
+		
+		// process route
 		if ($this->_route=$route)
 		{
 			$this->_params = explode('/', $route);
 		}
 		
+		// default upload dirs
 		$this->_uploadDir = ROOT_DIR . '/' . 'uploads/';
 		$this->_uploadURL = $this->_root . 'uploads/';
 		
-		$this->define();
+		// init class
+		if (method_exists($this, '__init'))
+		{
+			$this->__init();
+		}
 	}
-
-
-	/**
-	 * Helper function used to define application specific parameters.
-	 */
-	protected function define() {}
 
 
 	/**
@@ -89,12 +84,6 @@ class Lemmon_Route
 	final function __get($key)
 	{
 		return array_key_exists($key, $this->_matches) ? $this->_matches[$key] : null;
-	}
-
-
-	final function __set($key, $val)
-	{
-		$this->_matches[$key] = $val;
 	}
 
 
