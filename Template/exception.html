@@ -34,10 +34,12 @@
 	
 	<p><strong>{{ exception.file }}</strong> (line {{ exception.line }})</p>
 	<pre>{% for i, line in exception_block %}{% if (i+1==exception.line) %}<span class="error">{{ i+1 }}. {{ line|e }}</span>{% else %}{{ i+1 }}. {{ line|e }}{% endif %}{% endfor %}</pre>
+	{#
 	{% if (exception.context) %}
 	{{ exception.context|dump }}
 	{% endif %}
-
+	#}
+	
 	{% if (trace) %}
 
 		{% if (trace[0].file) %}

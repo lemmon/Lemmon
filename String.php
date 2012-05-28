@@ -149,7 +149,7 @@ class String
 	 */
 	static public function classToTableName($str)
 	{
-		return self::classToFileName($str);
+		return strtolower(self::classToFileName($str));
 	}
 
 

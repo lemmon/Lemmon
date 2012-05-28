@@ -36,7 +36,7 @@ class Template
 	}
 
 
-	public static function setFilesystem($filesystem, $include_lemmon=false)
+	static function setFilesystem($filesystem, $include_lemmon=false)
 	{
 		$filesystem = array(ROOT_DIR . '/' . $filesystem);
 		if ($include_lemmon) $filesystem[] = LIBS_DIR . '/Lemmon/Template';
@@ -44,13 +44,13 @@ class Template
 	}
 
 
-	public static function appendFilesystem($filesystem_to_append)
+	static function appendFilesystem($filesystem_to_append)
 	{
 		array_unshift(self::$_filesystemAppended, ROOT_DIR . '/' . $filesystem_to_append);
 	}
 
 
-	public static function getEnvironment()
+	static function getEnvironment()
 	{
 		$environment = self::$_environment;
 		$environment['cache'] = \Lemmon_Cache::getBase() . self::$_cache;
@@ -58,7 +58,7 @@ class Template
 	}
 
 
-	public static function setEnvironment($environment)
+	static function setEnvironment($environment)
 	{
 		self::$_environment = $environment;
 	}
@@ -69,7 +69,7 @@ class Template
 	 * @param string $file
 	 * @param array  $data
 	 */
-	public static function display($file, array $data=null)
+	static function display($file, array $data=null)
 	{
 		// setup template filesystem
 		if ($file{0}=='/')
@@ -91,35 +91,17 @@ class Template
 		$template = $template_environment->loadTemplate($file_name);
 
 		// display
-		return $template->display($data);
-	}
-
-
-	public static function render($tpl, $data=array())
-	{
-		$controller = Lemmon\Framework::getInstance();
-		$route = clone Lemmon_Route::getInstance();
-		
-		$template_file = $controller->getViewRoot() . $tpl;
-		$template_loader = new Twig_Loader_Filesystem(self::getFilesystem());
-		$template_environment = new Twig_Environment($template_loader, self::getEnvironment());
-		$template_environment->addExtension(new Lemmon_Template_Extension());
-		$template = $template_environment->loadTemplate($template_file);
-		$data['link'] = $route;
-		$data['flash'] = $_SESSION['_flash']['message'];
-		$data['f'] = array_merge($_POST, (array)$controller->data['f']);
-
 		return $template->render($data);
 	}
 
 
-	public static function debug($dump)
+	static function debug($dump)
 	{
 		return '<pre class="debug">' . print_r($dump, 1) . '</pre>';
 	}
 
 
-	public static function varDump($dump)
+	static function varDump($dump)
 	{
 		return '<pre class="debug">' . var_export($dump, 1) . '</pre>';
 	}

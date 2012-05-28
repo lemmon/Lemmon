@@ -53,8 +53,8 @@ class Lemmon_Template_Extension extends Twig_Extension
 			'round' => new Twig_Filter_Function('round'),
 
 			// Debug
-			'dump' => new Twig_Filter_Function('Lemmon_Template::debug'),
-			'vardump' => new Twig_Filter_Function('Lemmon_Template::varDump'),
+			'dump' => new Twig_Filter_Function('Lemmon\Template::debug'),
+			'vardump' => new Twig_Filter_Function('Lemmon\Template::varDump'),
 			
 		);
 	}

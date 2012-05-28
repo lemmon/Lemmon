@@ -17,15 +17,13 @@ namespace Lemmon;
 class Route
 {
 	private static $_instance;
-
+	
+	private $_urlParsed;
 	private $_root;
 	private $_route;
 	private $_params = array();
 	private $_matches = array();
 	private $_definedRoutes = array();
-
-	private $_controller = 'index';
-	private $_action = 'index';
 
 	private $_uploadDir;
 	private $_uploadURL;
@@ -42,14 +40,17 @@ class Route
 		// current instance
 		self::$_instance = $this;
 		
-		// set root
-		$this->_root = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') . '/';
+		// get root
+		$this->_root = $root = substr($_SERVER['SCRIPT_NAME'], 0, -strlen(basename($_SERVER['SCRIPT_NAME'])));
+		
+		// parse url
+		$this->_urlParsed = $url_parsed = parse_url('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
 		
 		// get route
-		$route = substr( ($i=strpos($_SERVER['REQUEST_URI'], '?')) ? substr($_SERVER['REQUEST_URI'], 0, $i) : $_SERVER['REQUEST_URI'] , strlen($this->_root));
+		$this->_route = $route = substr($url_parsed['path'], strlen($root));
 		
 		// process route
-		if ($this->_route=$route)
+		if ($route)
 		{
 			$this->_params = explode('/', $route);
 		}
@@ -88,42 +89,35 @@ class Route
 
 
 	/**
+	* Get parameter of current route.
+	* @param  int|string $param
+	* @return string
+	*/
+	final function getParam($param)
+	{
+		if (strpos($param, '/'))
+		{
+			$param = explode('/', $param);
+			foreach ($param as $key => $val) $param[$key] = self::getParam($key+1);
+			return join('/', $param);
+		}
+		elseif (is_numeric($param))
+		{
+			return $this->_params[$param-1];
+		}
+		else
+		{
+			return $this->{$param};
+		}
+	}
+
+	/**
 	 * Get current host.
 	 * @return string
 	 */
 	final static function getHost()
 	{
 		return $_SERVER['HTTP_HOST'];
-	}
-
-
-	/**
-	 * Get current domain.
-	 * @return string
-	 */
-	final static function getDomain()
-	{
-		$domain = self::getHost();
-		if (substr_count($domain, '.')>1)
-		{
-			$domain = substr($domain, strpos($domain, '.') + 1);
-		}
-		return $domain;
-	}
-
-
-	/**
-	 * Get current subdomain.
-	 * @return string
-	 */
-	final static function getSubdomain()
-	{
-		$subdomain = self::getHost();
-		if (substr_count($subdomain, '.')>1)
-		{
-			$subdomain = substr($subdomain, 0, strpos($subdomain, '.'));
-		}
-		return $subdomain;
 	}
 
 
@@ -148,86 +142,22 @@ class Route
 
 
 	/**
-	 * Get absolute link for current route.
-	 * @return string
+	 * Get link handler for current route.
+	 * @return Route\Link
 	 */
 	final function getSelf()
 	{
-		return $this->_root . $this->_route;
+		return new Route\Link($this, $this->_route);
 	}
 
 
 	/**
-	 * Get absolute link for current route.
-	 * @param  boolean
-	 * @return string
-	 */
-	final function getSelfWithParams()
-	{
-		$res = self::getSelf();
-		if ($_GET) $res .= '?' . http_build_query( $_GET, '', '&' );
-		return $res;
-	}
-
-
-	/**
-	 * Get all route parameters.
+	 * Returns defined routes.
 	 * @return array
 	 */
-	final function getParams()
+	final function getDefinedRoutes()
 	{
-		return $this->_params;
-	}
-
-
-	/**
-	 * Get parameter of current route.
-	 * @param  mixed
-	 * @return string
-	 */
-	final function getParam($i, $default=null)
-	{
-		if (strpos($i, '/'))
-		{
-			$i = explode('/', $i);
-			$default = explode('/', $default);
-			foreach ($i as $key => $val) $i[$key] = self::getParam($key+1, $default[$key], true);
-			return join('/', $i);
-		}
-		elseif (is_numeric($i))
-		{
-			return ($res=$this->_params[$i-1]) ? $res : $default;
-		}
-		else
-		{
-			return $this->{$i};
-		}
-	}
-
-
-	final function setParam($i, $val)
-	{
-		$this->_params[$i-1] = $val;
-	}
-
-
-	/**
-	 * Get Controller name.
-	 * @return string
-	 */
-	final function getController()
-	{
-		return $this->_controller;
-	}
-
-
-	/**
-	 * Get Action name.
-	 * @return string
-	 */
-	final function getAction()
-	{
-		return $this->_action;
+		return $this->_definedRoutes;
 	}
 
 
@@ -238,17 +168,6 @@ class Route
 	final static function isXHR()
 	{
 		return strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])=='xmlhttprequest' ? true : false;
-	}
-
-
-	/**
-	 * Get absolute link to a directory.
-	 * @param  string
-	 * @return string
-	 */
-	function getPublic($link)
-	{
-		return $this->_root . 'public/' . $link;
 	}
 
 
@@ -289,30 +208,6 @@ class Route
 
 
 	/**
-	 * Set Controller name.
-	 * @param  string
-	 * @return string
-	 */
-	final function setController($controller)
-	{
-		$this->_controller = $controller;
-		return $this->_controller;
-	}
-
-
-	/**
-	 * Set Action name.
-	 * @param  string
-	 * @return string
-	 */
-	final function setAction($action)
-	{
-		$this->_action = str_replace(array('-', '.'), '_', $action);
-		return $this;
-	}
-
-
-	/**
 	 * Match current host with specific regular expression.
 	 * @param  string case insensitive regex pattern
 	 * @return boolean
@@ -334,8 +229,8 @@ class Route
 	 *
 	 * `$this->match('$controller(/$action)', array('controller'=>'[\w\-]+', 'action'=>'[\w\-]+'));`
 	 *
-	 * @param  string  case insensitive regex pattern
-	 * @param  array   array of case insensitive regex pattern bits
+	 * @param  string  $pattern    case insensitive regex pattern
+	 * @param  array   $conditions array of case insensitive regex pattern bits
 	 * @return boolean
 	 */
 	final function match($pattern, $conditions=array())
@@ -349,11 +244,11 @@ class Route
 			$pattern = str_replace('$' . $key, '(?P<' . $key . '>' . $val . ')', $pattern);
 		}
 		
-		if (preg_match('/'.$pattern.'/i', $this->_route, $matches))
+		if (preg_match("/{$pattern}/i", $this->_route, $matches))
 		{
 			$this->_matches = $matches;
-			if ($matches['controller']) $this->_controller = $matches['controller'];
-			if ($matches['action']) $this->setAction($matches['action']);
+			if ($matches['controller']) Framework::setController($matches['controller']);
+			if ($matches['action']) Framework::setAction($matches['action']);
 			return true;
 		}
 		else
@@ -376,192 +271,26 @@ class Route
 
 
 	/**
-	 * Parse link.
-	 * @param  string
-	 * @param  array
-	 * @return string
-	 */
-	final function parse($link, $params)
-	{
-		preg_match_all('/@?(\$([\w]+))/i', $link, $m,  PREG_SET_ORDER);
-	
-		foreach ($m as $replace)
-		{
-			if (isset($params[$replace[2]]))
-			{
-				$val = $params[$replace[2]];
-				$val = strtolower($val);
-				$val = trim($val, '-');
-				$link = str_replace($replace[0], $val, $link);
-			}
-			else
-			{
-				$link = str_replace($replace[1], '', $link);
-			}
-		}
-		
-		while (($i=strpos($link, '{'))!==false)
-		{
-			$j = strpos($link, '}', $i);
-			$link = substr_replace($link, Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
-		}
-		
-		return $link;
-	}
-
-
-	/**
 	 * Get an absolute route valid for current application.
-	 * @param  string
-	 * @param  array
-	 * @return string
+	 * @param  string     $link
+	 * @param  mixed      $params
+	 * @return Route\Link
 	 */
-	final function to($link=null, $params=null)
+	final function to($link, $params=null)
 	{
-		if ($link{0}==':') 
-		{
-			if (!($link=$this->_definedRoutes[$link])) return false;
-		}
-		
-		if (substr($link, 0, 9)=='~uploads/')
-		{
-			$link = str_replace('~uploads/', $this->getUploadURL(), $link);
-		}
-		
-		preg_match_all('/@?(\$([\w\.]+))/i', $link, $m,  PREG_SET_ORDER);
-		foreach ($m as $replace)
-		{
-			if (is_array($params) and array_key_exists($replace[2], $params))
-			{
-				$link = str_replace($replace[0], $params[$replace[2]], $link);
-			}
-			elseif (is_object($params) and method_exists($params, $method='get'.$replace[2]))
-			{
-				$link = str_replace($replace[0], $params->{$method}(), $link);
-			}
-			elseif (strpos($replace[2], '.'))
-			{
-				$_replace = explode('.', $replace[2]);
-				if (count($_replace)==2)
-					$link = str_replace($replace[0], $params->{$_replace[0]}->{$_replace[1]}, $link);
-				elseif (count($_replace)==3)
-					$link = str_replace($replace[0], $params->{$_replace[0]}->{$_replace[1]}->{$_replace[2]}, $link);
-			}
-			elseif (is_object($params) and isset($params->{$replace[2]}))
-			{
-				$link = str_replace($replace[0], $params->{$replace[2]}, $link);
-			}
-			else
-			{
-				$link = str_replace($replace[1], '', $link);
-			}
-		}
-		
-		while (($i=strpos($link, '{'))!==false)
-		{
-			$j = strpos($link, '}', $i);
-			$link = substr_replace($link, Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
-		}
-		
-		$link = explode('/', $link);
-		foreach ($link as $key => $val) if ($val=='@') $link[$key] = $this->_params[$key];
-		$link = join('/', $link);
-		$link = rtrim($link, '/');
-		
-		$res = ($link{0}=='/' ? '' : $this->_root) . $link;
-		
-		return $res;
+		return new Route\Link($this, $link, $params);
 	}
 
 
 	/**
-	 * @param  string
-	 * @param  array
-	 * @return string
+	 * Get return link.
+	 * @return mixed
 	 */
-	final function toParams($link='', $params=array())
+	final function getReturn()
 	{
-		$res = self::to($link, $params);
-		if ($_GET) $res .= '?' . http_build_query($_GET, '', '&amp;');
-		return $res;
-	}
-
-
-	/**
-	 * @param  string
-	 * @param  array
-	 * @return string
-	 */
-	final function toReturn($link='', $params=array())
-	{
-		$res = self::to($link, $params);
-		$q['redir'] = html_entity_decode(self::getSelfWithParams());
-		$res .= '?' . http_build_query($q, '', '&amp;');
-		return $res;
-	}
-
-
-	/**
-	 * @param  string
-	 * @param  array
-	 * @return string
-	 */
-	final function toReturnSoft($link='', $params=array())
-	{
-		$res = self::to($link, $params);
-		$q['return'] = html_entity_decode(self::getSelfWithParams());
-		$res .= '?' . http_build_query($q, '', '&amp;');
-		return $res;
-	}
-
-
-	/**
-	 * @param  string
-	 * @param  array
-	 * @return string
-	 */
-	final function toBack($link='', $params=array())
-	{
-		if ($_GET['return'])
+		if ($redir=$_GET['redir'])
 		{
-			return $_GET['return'];
+			return $this->to($redir);
 		}
-		elseif ($_GET['redir'])
-		{
-			return $_GET['redir'];
-		}
-		else
-		{
-			return self::to($link, $params);
-		}
-	}
-
-
-	/**
-	 * @param  array
-	 * @param  boolean
-	 * @param  boolean
-	 * @param  boolean
-	 * @return string
-	 */
-	final function addParams($params, $with_return=false, $soft_return=false, $raw=false)
-	{
-		$params = array_merge($_GET, $params);
-		if ($with_return) $params[ $soft_return ? 'return' : 'redir' ] = self::getSelfWithParams(true);
-		return ($query=http_build_query( $params, '', $raw ? '&' : '&amp;' )) ? '?' . $query : '';
-	}
-
-
-	/**
-	 * @param  array
-	 * @param  boolean
-	 * @param  boolean
-	 * @param  boolean
-	 * @return string
-	 */
-	final function withParams($params, $with_return=false, $soft_return=false)
-	{
-		if ($with_return) $params[ $soft_return ? 'return' : 'redir' ] = self::getSelfWithParams(true);
-		return ($query=http_build_query( $params, '', '&' )) ? '?' . $query : '';
 	}
 }

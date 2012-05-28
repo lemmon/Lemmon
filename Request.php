@@ -37,6 +37,13 @@ class Request
 	 */
 	function redir($link, $params=null)
 	{
-		return new Request\Redir($this->_controller->getRoute()->to($link, $params), $this->_controller);
+		if ($redir=$_GET['redir'])
+		{
+			return new Request\Redir($redir, $this->_controller);
+		}
+		else
+		{
+			return new Request\Redir($this->_controller->getRoute()->to($link, $params), $this->_controller);
+		}
 	}
 }

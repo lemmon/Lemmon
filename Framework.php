@@ -17,6 +17,9 @@ namespace Lemmon;
 class Framework
 {
 	private static $_instance;
+	
+	private static $_controller = 'index';
+	private static $_action = 'index';
 
 	protected $log;
 	protected $env;
@@ -56,6 +59,46 @@ class Framework
 
 
 	/**
+	 * Sets application controller.
+	 * @param string $controller
+	 */
+	static function setController($controller)
+	{
+		self::$_controller = $controller;
+	}
+
+
+	/**
+	 * Returns application controller.
+	 * @return string
+	 */
+	static function getController()
+	{
+		return self::$_controller;
+	}
+
+
+	/**
+	 * Sets application action.
+	 * @param string $action
+	 */
+	static function setAction($action)
+	{
+		self::$_action = $action;
+	}
+
+
+	/**
+	 * Returns application action.
+	 * @return string
+	 */
+	static function getAction()
+	{
+		return self::$_action;
+	}
+
+
+	/**
 	 * Run the application.
 	 * @param array $params
 	 */
@@ -67,16 +110,19 @@ class Framework
 			session_start();
 	
 			// controller
-			$controller_name = $params['route']->getController();
-			$action_name     = $params['route']->getAction();
+			$controller_name = self::$_controller;
+			$action_name     = self::$_action;
 			
 			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
 
 			// create controller
 			$controller = new $controller_class_name($params);
+			
+			// template
+			Template::appendFilesystem('app/views/' . $controller_name);
 
 			// init controller
-			if (method_exists($controller, '__init') and ($res=$controller->__init())===null)
+			if (!method_exists($controller, '__init') or ($res=$controller->__init())===null)
 			{
 				// find action
 				if (method_exists($controller, $action_name))
@@ -99,24 +145,23 @@ class Framework
 			{
 				$trace[0]['block'] = array_slice(file($trace[0]['file']), $trace[0]['line']-8, 15, true);
 			}
-			Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
+			echo Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
 				'exception' => $exception,
 				'exception_block' => array_slice(file($exception->getFile()), $exception->getLine()-8, 15, true),
 				'trace' => $trace,
 			));
 			exit;
 		}
-		
+
 		// process the result
 		if ($res === null)
 		{
 			// load template
-			$data = $controller->data;
-			$data['link']  = $controller->route;
-			$data['flash'] = $_SESSION['__FLASH__'];
-			$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
-			Template::appendFilesystem('app/views/' . $controller_name);
-			Template::display($action_name, $data);
+			$data = $controller->getData(true);
+			// render
+ 			$html = Template::display($action_name, $data);
+			// print
+			echo $html;
 		}
 		elseif ($res instanceof Request\Redir)
 		{
@@ -126,7 +171,7 @@ class Framework
 		}
 		elseif ($res instanceof Lemmon_Mailer)
 		{
-			Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
+			Template::display(LIBS_DIR . '/Lemmon/Template/email.html', array(
 				'message' => $res,
 				'link'    => $controller->route,
 			));
@@ -136,6 +181,25 @@ class Framework
 			// display plain text result
 			echo $res;
 		}
+	}
+
+
+	/**
+	 * Runs application.
+	 * @return string
+	 */
+	final function getData($include_data=false)
+	{
+		$data = $this->data;
+		// include framework's data
+		if ($include_data)
+		{
+			$data['link']  = $this->route;
+			$data['flash'] = $_SESSION['__FLASH__'];
+			$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
+		}
+		//
+		return $data;
 	}
 
 

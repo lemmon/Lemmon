@@ -31,7 +31,7 @@ class Redir
 	 */
 	function __construct($link, \Lemmon\Framework $controller=null)
 	{
-		$this->_link = $link;
+		$this->_link = (string)$link;
 		$this->_controller = $controller;
 	}
 

@@ -90,7 +90,7 @@ class Lemmon_Mailer
 		elseif ($this->template)
 		{
 			$message->setBody(
-				$this->body = Lemmon_Template::render('mailer_' . $this->template . '.html', $this->data),
+				$this->body = Lemmon\Template::display('mailer_' . $this->template, $this->data),
 				$this->contentType ? $this->contentType : 'text/html');
 		}
 		else
