@@ -69,7 +69,7 @@ class Template
 	 * @param string $file
 	 * @param array  $data
 	 */
-	static function display($file, array $data=null)
+	static function display($file, array $data=array())
 	{
 		// setup template filesystem
 		if ($file{0}=='/')
@@ -79,6 +79,16 @@ class Template
 		}
 		else
 		{
+			// append more filesystems if file is nested
+			if (($n=count($file_path=explode('/', $file))-1) and $tpl_base=substr(self::getFilesystem()[0], strlen(ROOT_DIR . '/')))
+			{
+				array_pop($file_path);
+				for ($i=1; $i <= $n; $i++)
+				{
+					self::appendFilesystem($tpl_base . '/' . join('/', array_slice($file_path, 0, $i)));
+				}
+			}
+			//
 			$template_loader = new \Twig_Loader_Filesystem(self::getFilesystem());
 			$file_name = $file . '.html';
 		}
