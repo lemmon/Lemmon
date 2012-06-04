@@ -290,13 +290,18 @@ class Route
 
 	/**
 	 * Get return link.
+	 * @param  string $link
 	 * @return mixed
 	 */
-	final function getReturn()
+	final function getReturn($link)
 	{
 		if ($redir=$_GET['redir'])
 		{
 			return $this->to($redir);
+		}
+		else
+		{
+			return $this->to($link);
 		}
 	}
 }
