@@ -75,7 +75,7 @@ class Link
 		while (($i=strpos($link, '{'))!==false)
 		{
 			$j = strpos($link, '}', $i);
-			$link = substr_replace($link, Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
+			$link = substr_replace($link, \Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
 		}
 		
 		// keep current values

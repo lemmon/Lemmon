@@ -88,6 +88,12 @@ class Route
 	}
 
 
+	final function __isset($key)
+	{
+		return array_key_exists($key, $this->_matches);
+	}
+
+
 	/**
 	* Get parameter of current route.
 	* @param  int|string $param
