@@ -114,6 +114,7 @@ class Framework
 			$action_name     = self::$_action;
 			
 			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
+			$action_method_name = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $action_name))));
 
 			// create controller
 			$controller = new $controller_class_name($params);
@@ -125,10 +126,10 @@ class Framework
 			if (!method_exists($controller, '__init') or ($res=$controller->__init())===null)
 			{
 				// find action
-				if (method_exists($controller, $action_name))
+				if (method_exists($controller, $action_method_name))
 				{
 					// execute action
-					$res = $controller->{$action_name}();
+					$res = $controller->{$action_method_name}();
 				}
 				else
 				{
