@@ -33,7 +33,7 @@ class Link
 	{
 		// route
 		$this->_route = $route;
-		$this->_linkRaw = $link;
+		$this->_linkRaw = $link = (string)$link;
 		
 		// check for registered link
 		if ($link{0}==':') 

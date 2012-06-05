@@ -133,7 +133,7 @@ class Framework
 				else
 				{
 					// error on missing action
-					throw new \Lemmon_Exception(sprintf('Unknown method `%s` on `%s`', $action, get_class($controller)));
+					throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_name, get_class($controller)));
 				}
 			}
 		}
