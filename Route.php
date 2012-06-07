@@ -291,9 +291,10 @@ class Route
 	/**
 	 * Get return link.
 	 * @param  string $link
+	 * @param  mixed  $params
 	 * @return mixed
 	 */
-	final function getReturn($link)
+	final function getReturn($link, $params=null)
 	{
 		if ($redir=$_GET['redir'])
 		{
@@ -301,7 +302,7 @@ class Route
 		}
 		else
 		{
-			return $this->to($link);
+			return $this->to($link, $params);
 		}
 	}
 }

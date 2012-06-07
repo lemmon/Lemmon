@@ -28,7 +28,7 @@ class Flash
 		$this->route = $route;
 		
 		// generate new hash on new page
-		if (self::getHash() != ($hash=self::generateHash($route->getSelf(), (bool)$_POST)))
+		if (self::getHash() != ($hash=self::generateHash((string)$route->getSelf()->includeQuery(), $_SERVER['REQUEST_METHOD']=='POST')))
 		{
 			$_SESSION['__FLASH__'] = ['hash' => $hash];
 		}
@@ -55,8 +55,9 @@ class Flash
 	 */
 	function generateHash($link, $post=null)
 	{
-		return md5(($post ? microtime(1).'@' : '') . $link);
+		return (($post ? microtime(1).'@' : '') . (string)$link);
 	}
+
 
 	/**
 	 * @return string
