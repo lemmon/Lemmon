@@ -17,6 +17,8 @@ namespace Lemmon\Route;
 class Link
 {
 	private $_route;
+	private $_scheme = 'http';
+	private $_host;
 	private $_link;
 	private $_linkRaw;
 	private $_query = array();
@@ -33,8 +35,10 @@ class Link
 	{
 		// route
 		$this->_route = $route;
-		$this->_linkRaw = $link = (string)$link;
 		
+		// url
+		$link = $this->_parseUrl($this->_linkRaw=(string)$link);
+
 		// check for registered link
 		if ($link{0}==':') 
 		{
@@ -89,14 +93,27 @@ class Link
 	}
 
 
+	private function _parseUrl($url)
+	{
+		$url_parsed = parse_url($url);
+		if ($url_parsed) $this->_scheme = $url_parsed['scheme'];
+		$this->_host = $url_parsed['host'];
+		$this->_link = $link = $url_parsed['path'];
+		return $link;
+	}
+
+
 	/**
 	 * Return link.
 	 * @return string
 	 */
 	function __toString()
 	{
-		return ($this->_link{0}=='/' ? '' : $this->_route->getRoot())
+		return ($this->_host ? $this->_scheme . '://' . $this->_host : '')
+		       // link
+		     . ($this->_link{0}=='/' ? '' : $this->_route->getRoot())
 		     . ($this->_link)
+		       // http query
 		     . ($this->_query ? '?' . http_build_query($this->_query) : '')
 		     ;
 	}
