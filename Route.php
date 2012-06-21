@@ -277,24 +277,12 @@ class Route
 
 
 	/**
-	 * Get an absolute route valid for current application.
-	 * @param  string     $link
-	 * @param  mixed      $params
-	 * @return Route\Link
-	 */
-	final function to($link, $params=null)
-	{
-		return new Route\Link($this, $link, $params);
-	}
-
-
-	/**
 	 * Get return link.
 	 * @param  string $link
 	 * @param  mixed  $params
 	 * @return mixed
 	 */
-	final function getReturn($link, $params=null)
+	final function returnTo($link, $params=null)
 	{
 		if ($redir=$_GET['redir'])
 		{
@@ -304,5 +292,17 @@ class Route
 		{
 			return $this->to($link, $params);
 		}
+	}
+
+
+	/**
+	 * Get an absolute route valid for current application.
+	 * @param  string     $link
+	 * @param  mixed      $params
+	 * @return Route\Link
+	 */
+	final function to($link, $params=null)
+	{
+		return new Route\Link($this, $link, $params);
 	}
 }
