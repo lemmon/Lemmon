@@ -25,19 +25,22 @@ class Lemmon_I18N
 	static private $_daysShort = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
 	static private $_moths = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
 	static private $_mothsShort = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec');
-	
+
+
 	public static function setBase($base)
 	{
 		return self::$_base=rtrim( ($base{0}=='/') ? $base : ROOT_DIR . '/' . $base , '/' );
 	}
-	
+
+
 	public static function getBase()
 	{
 		return ($base=self::$_base)
 		     ? $base
 		     : self::setBase('i18n');
 	}
-	
+
+
 	static private function _setSpecialCases()
 	{
 		if (self::$_strings['_nRule']) self::$_nRule = create_function('$n', self::$_strings['_nRule']);
@@ -50,7 +53,8 @@ class Lemmon_I18N
 		if (self::$_strings['_moths']) self::$_moths = self::$_strings['_moths'];
 		if (self::$_strings['_mothsShort']) self::$_mothsShort = self::$_strings['_mothsShort'];
 	}
-	
+
+
 	static public function setLocale($locale)
 	{
 		self::$_locale = $locale;
@@ -61,12 +65,14 @@ class Lemmon_I18N
 			self::_setSpecialCases();
 		}
 	}
-	
+
+
 	static public function getLocale()
 	{
 		return self::$_locale;
 	}
-	
+
+
 	static public function loadSection($section)
 	{
 		$section_file = self::getBase() . '/' . self::$_locale . '_' . $section . '.php';
@@ -83,7 +89,8 @@ class Lemmon_I18N
 			return false;
 		}
 	}
-	
+
+
 	static public function loadSectionRaw($section)
 	{
 		$section_file = self::getBase() . '/' . $section . '.php';

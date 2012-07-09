@@ -99,6 +99,11 @@ class Link
 		if ($url_parsed) $this->_scheme = $url_parsed['scheme'];
 		$this->_host = $url_parsed['host'];
 		$this->_link = $link = $url_parsed['path'];
+		if ($url_parsed['query'])
+		{
+			parse_str($url_parsed['query'], $query);
+			$this->_query = $query;
+		}
 		return $link;
 	}
 
@@ -125,7 +130,7 @@ class Link
 	 */
 	function addReturnQuery()
 	{
-		$this->_query['redir'] = (string)$this->_route->getSelf();
+		$this->_query['redir'] = (string)$this->_route->getSelf()->includeQuery();
 		return $this;
 	}
 
