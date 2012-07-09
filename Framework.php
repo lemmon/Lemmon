@@ -115,7 +115,7 @@ class Framework
 			
 			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
 			$action_method_name = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $action_name))));
-
+			
 			// create controller
 			$controller = new $controller_class_name($params);
 			
@@ -134,7 +134,7 @@ class Framework
 				else
 				{
 					// error on missing action
-					throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_name, get_class($controller)));
+					throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_method_name, get_class($controller)));
 				}
 			}
 		}
@@ -153,7 +153,7 @@ class Framework
 			));
 			exit;
 		}
-
+		
 		// process the result
 		if ($res === null)
 		{
@@ -170,12 +170,16 @@ class Framework
 			$res->exec();
 			exit;
 		}
-		elseif ($res instanceof Lemmon_Mailer)
+		elseif (is_a($res, 'Lemmon_Mailer'))
 		{
+			echo $res->getBody();
+			/*
+			die;
 			Template::display(LIBS_DIR . '/Lemmon/Template/email.html', array(
 				'message' => $res,
 				'link'    => $controller->route,
 			));
+			*/
 		}
 		else
 		{
