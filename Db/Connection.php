@@ -28,12 +28,27 @@ class Connection extends PDO
 	 * @param string $username
 	 * @param string $password
 	 */
-	public function __construct($dsn, $username=null, $password=null)
+	function __construct($dsn, $username=null, $password=null)
 	{
 		parent::__construct($this->_dsn=$dsn, $username, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\''));
 		$this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('Lemmon\Db\Statement', array($this)));
 		$this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+	}
+
+
+	function __call($foo, $bar)
+	{
+		if (substr($foo, 0, 3)=='get')
+		{
+			// find table
+			$table = \Lemmon\String::classToTableName(substr($foo, 3));
+			return new Query\Builder($this, $table);
+		}
+		else
+		{
+			throw new \Exception('ds98fa7s0d9f');
+		}
 	}
 
 

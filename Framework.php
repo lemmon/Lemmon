@@ -106,9 +106,6 @@ class Framework
 	{
 		try
 		{
-			// start sessions
-			session_start();
-	
 			// controller
 			$controller_name = self::$_controller;
 			$action_name     = self::$_action;

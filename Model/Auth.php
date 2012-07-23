@@ -20,7 +20,7 @@ class Lemmon_Model_Auth extends Lemmon_Model
 	{
 		if ($user=parent::make()->onAuth($f)->first())
 		{
-			return self::$_this = $_SESSION['__LEMMON_AUTH__'] = $user;
+			return self::$_this = $_SESSION['__LEMMON_AUTH__'] = $user->toArray(1);
 		}
 		return false;
 	}
@@ -31,9 +31,9 @@ class Lemmon_Model_Auth extends Lemmon_Model
 		{
 			return $user;
 		}
-		elseif ($user=$_SESSION['__LEMMON_AUTH__'] and get_called_class()==get_class($user))
+		elseif ($user=$_SESSION['__LEMMON_AUTH__']/* and get_called_class()==get_class($user)*/)
 		{
-			return self::$_this = $user;
+			return self::$_this = Lemmon_Model::factory(get_called_class(), $user['id']);
 		}
 		else
 		{
@@ -43,7 +43,7 @@ class Lemmon_Model_Auth extends Lemmon_Model
 	
 	final public static function setCurrent($id)
 	{
-		return self::$_this = $_SESSION['__LEMMON_AUTH__'] = self::make($id)->first();
+		return self::$_this = $_SESSION['__LEMMON_AUTH__'] = self::make($id)->first()->toArray(1);
 	}
 	
 	final public static function clearCurrent()
