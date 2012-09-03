@@ -61,6 +61,20 @@ class String
 	}
 
 
+	static function html2text($html)
+	{
+		$html = preg_replace('/[\s]+/', ' ', $html);
+		$html = preg_replace('/\s+(<(p|h1|h2|h3|h4|h5|h6|table))/', "\n\n$1", $html);
+		$html = preg_replace('/\s+(<(tr))/', "\n$1", $html);
+		$html = preg_replace('/(<br>)/', "$1\n", $html);
+		$text = strip_tags($html);
+		$text = trim($text);
+		$text = preg_replace('/[ ]*\n[ ]*/', "\n", $text);
+		$text = preg_replace('/[\n]{3,}/', "\n\n", $text);
+		return $text;
+	}
+
+
 	/**
 	 * Converts plain text or html to single line string.
 	 * @param  string  $text
