@@ -91,6 +91,16 @@ class String
 	}
 
 
+	static function paragraph($text)
+	{
+		$text = trim($text);
+		$text = str_replace("\r\n", "\n", $text);
+		$text = preg_replace('/[ ]*\n[ ]*/', "\n", $text);
+		$text = explode("\n\n", $text);
+		return $text[0];
+	}
+
+
 	/**
 	 * Converts plural string to singular.
 	 * @param  string  $pl
