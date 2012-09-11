@@ -14,7 +14,7 @@ namespace Lemmon;
 /**
  * Handles mails.
  */
-abstract class Mailer implements \Lemmon\Mailer\IMailer
+abstract class Mailer implements Mailer\MailerInterface
 {
 
 
@@ -28,37 +28,38 @@ abstract class Mailer implements \Lemmon\Mailer\IMailer
 	}
 
 
-	private function _getMail()
+	protected function getMessage()
 	{
-		return $this->__initMail();
+		return $this->__initMessage();
+	}
+
+
+	protected function getTransport()
+	{
+		return $this->__initTransport();
 	}
 
 
 	final static function __callStatic($class_name, $arguments)
 	{
 		$called_class_name = get_called_class();
-		preg_match('/(batchSend|preview|send)(.*)/i', $class_name, $m);
+		preg_match('/([a-z]+)(.*)/', $class_name, $m);
 		if ($m[1] and $m[2])
 		{
 			$mailer = new $called_class_name();
 			$method_name = lcfirst($m[2]);
 			if (method_exists($mailer, $method_name))
 			{
-				array_unshift($arguments, $mail=$mailer->_getMail());
+				array_unshift($arguments, $mail=$mailer->getMessage());
 				$mail = call_user_func_array(array($mailer, $m[2]), $arguments);
-				if (method_exists($mail, $m[1]))
+				if (method_exists($mailer, $m[1]))
 				{
-					return $mail->{$m[1]}();
-					#return $mail;
-				}
-				elseif (method_exists($this, $m[1]))
-				{
-					$this->{$m[1]}();
+					$mailer->{$m[1]}($mail);
 					return $this;
 				}
 				else
 				{
-					throw new \Exception(sprintf('Unablo to perform method %s() on %s class.', $method_name));
+					throw new \Exception(sprintf('Unable to perform method %s() on %s class.', $m[1], $called_class_name));
 				}
 			}
 			else
