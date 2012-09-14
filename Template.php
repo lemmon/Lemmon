@@ -46,7 +46,14 @@ class Template
 
 	static function appendFilesystem($filesystem_to_append)
 	{
-		array_unshift(self::$_filesystemAppended, ROOT_DIR . '/' . $filesystem_to_append);
+		// array
+		if (!is_array($filesystem_to_append)) $filesystem_to_append = [$filesystem_to_append];
+		// append
+		foreach ($filesystem_to_append as $dir)
+		{
+			$dir = ($dir{0}=='/') ? $dir : ROOT_DIR . '/' . $dir;
+			array_unshift(self::$_filesystemAppended, $dir);
+		}
 	}
 
 
