@@ -1,14 +1,17 @@
 <?php
 
+
 function dump($dump)
 {
 	echo '<pre>'.print_r($dump, 1).'</pre>';
 }
 
+
 function _t($line)
 {
 	return call_user_func_array('Lemmon_I18n::t', func_get_args());
 }
+
 
 /*
 function param($object, $param)
