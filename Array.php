@@ -4,8 +4,8 @@
 */
 class Lemmon_Array
 {
-	const emptyProperty = '_____empty_property_____';
-	
+
+
 	public static function first($array)
 	{
 		return is_array($array) ? reset($array) : null;
@@ -34,7 +34,7 @@ class Lemmon_Array
 	
 	public static function hasKey($array, $key)
 	{
-		return array_key_exists($key, $array) ? $array[ $key ] : self::emptyProperty;
+		return array_key_exists($key, $array);
 	}
 	
 	public static function isIn($key, $array)

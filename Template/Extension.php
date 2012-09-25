@@ -37,24 +37,23 @@ class Lemmon_Template_Extension extends Twig_Extension
 			'fileName' => new Twig_Filter_Function('basename'),
 			
 			// Strings
-			'asciize' => new Twig_Filter_Function('Lemmon\String::asciize'),
-			'human' => new Twig_Filter_Function('Lemmon\String::human'),
-			'nl2br' => new Twig_Filter_Function('Lemmon\String::nl2br'),
-			'text' => new Twig_Filter_Function('Lemmon\String::text'),
-			'line' => new Twig_Filter_Function('Lemmon\String::line'),
-			'url_link' => new Twig_Filter_Function('Lemmon\String::urlLink'),
-			'url_caption' => new Twig_Filter_Function('Lemmon\String::urlCaption'),
-			'email_hide' => new Twig_Filter_Function('Lemmon\String::emailHide'),
-			'entities' => new Twig_Filter_Function('Lemmon\String::entities'),
-			'indent' => new Twig_Filter_Function('Lemmon\String::indent'),
+			'asciize'      => new Twig_Filter_Function('Lemmon\String::asciize'),
+			'human'        => new Twig_Filter_Function('Lemmon\String::human'),
+			'nl2br'        => new Twig_Filter_Function('Lemmon\String::nl2br'),
+			'html'         => new Twig_Filter_Function('Lemmon\String::text', ['pre_escape' => 'html', 'is_safe' => ['html']]),
+			'line'         => new Twig_Filter_Function('Lemmon\String::line'),
+			'url_link'     => new Twig_Filter_Function('Lemmon\String::urlLink'),
+			'url_caption'  => new Twig_Filter_Function('Lemmon\String::urlCaption'),
+			'email_hide'   => new Twig_Filter_Function('Lemmon\String::emailHide'),
+			'entities'     => new Twig_Filter_Function('Lemmon\String::entities'),
+			'indent'       => new Twig_Filter_Function('Lemmon\String::indent'),
 			'removeIndent' => new Twig_Filter_Function('Lemmon\String::removeIndent'),
 			
 			// Numbers
-			'round' => new Twig_Filter_Function('round'),
+			'round'        => new Twig_Filter_Function('round'),
 
 			// Debug
-			'dump' => new Twig_Filter_Function('Lemmon\Template::debug'),
-			'vardump' => new Twig_Filter_Function('Lemmon\Template::varDump'),
+			'dump'         => new Twig_Filter_Function('Lemmon\Debugger::dump', ['pre_escape' => 'html', 'is_safe' => ['html']]),
 			
 		);
 	}

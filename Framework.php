@@ -104,8 +104,8 @@ class Framework
 	 */
 	static function run(array $params=null)
 	{
-		try
-		{
+		#try
+		#{
 			// controller
 			$controller_name = self::$_controller;
 			$action_name     = self::$_action;
@@ -134,22 +134,22 @@ class Framework
 					throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_method_name, get_class($controller)));
 				}
 			}
-		}
-		catch (\Exception $exception)
-		{
-			// handle the exception
-			$trace = $exception->getTrace();
-			if ($trace[0]['file'])
-			{
-				$trace[0]['block'] = array_slice(file($trace[0]['file']), $trace[0]['line']-8, 15, true);
-			}
-			echo Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
-				'exception' => $exception,
-				'exception_block' => array_slice(file($exception->getFile()), $exception->getLine()-8, 15, true),
-				'trace' => $trace,
-			));
-			exit;
-		}
+		#}
+		#catch (\Exception $exception)
+		#{
+		#	// handle the exception
+		#	$trace = $exception->getTrace();
+		#	if ($trace[0]['file'])
+		#	{
+		#		$trace[0]['block'] = array_slice(file($trace[0]['file']), $trace[0]['line']-8, 15, true);
+		#	}
+		#	echo Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
+		#		'exception' => $exception,
+		#		'exception_block' => array_slice(file($exception->getFile()), $exception->getLine()-8, 15, true),
+		#		'trace' => $trace,
+		#	));
+		#	exit;
+		#}
 		
 		// process the result
 		if ($res === null)

@@ -110,16 +110,4 @@ class Template
 		// display
 		return $template->render($data);
 	}
-
-
-	static function debug($dump)
-	{
-		return '<pre class="debug">' . print_r($dump, 1) . '</pre>';
-	}
-
-
-	static function varDump($dump)
-	{
-		return '<pre class="debug">' . var_export($dump, 1) . '</pre>';
-	}
 }

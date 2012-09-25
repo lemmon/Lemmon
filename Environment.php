@@ -22,9 +22,27 @@ class Environment
 
 
 	/**
+	 * Constructor.
+	 */
+	function __construct()
+	{
+		// defaults
+		if ($_SERVER['SERVER_ADDR']=='127.0.0.1')
+		{
+			self::setDev(true);
+		}
+		// init class
+		if (method_exists($this, '__init'))
+		{
+			$this->__init();
+		}
+	}
+
+
+	/**
 	 * Set development environment.
 	 */
-	static function setDevelopment($is=true)
+	static function setDev($is=true)
 	{
 		self::$_development = (bool)$is;
 	}
@@ -34,21 +52,8 @@ class Environment
 	 * Get development environment.
 	 * @return bool
 	 */
-	static function getDevelopment()
+	static function isDev()
 	{
 		return self::$_development;
-	}
-
-
-	/**
-	 * Constructor.
-	 */
-	function __construct()
-	{
-		// init class
-		if (method_exists($this, '__init'))
-		{
-			$this->__init();
-		}
 	}
 }
