@@ -7,6 +7,7 @@
 	background:#fdf6e3 !important;
 	color:#002b36;
 	overflow-x:auto;
+	margin-bottom:10px;
 }
 pre.LemmonDebuggerDump {
 	border:1px solid #eee8d5;

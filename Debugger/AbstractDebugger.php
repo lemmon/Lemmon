@@ -16,7 +16,8 @@ namespace Lemmon\Debugger;
  */
 abstract class AbstractDebugger
 {
-	static $jQuery = '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js';
+	static $jQuery  = '//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js';
+	#static $onError = null;
 
 	static private $_headersIncluded = false;
 	static private $_objectsVisited  = [];
@@ -25,6 +26,7 @@ abstract class AbstractDebugger
 	static function loop($data, $level=0, $recursion=[], $more_recursion=[])
 	{
 		#if ($level==5) return PHP_EOL;
+		$res = '';
 		$indent0 = sprintf('%' . (($level+0) * 4) . 's', '');
 		$indent1 = sprintf('%' . (($level+1) * 4) . 's', '');
 		$indent2 = sprintf('%' . (($level+2) * 4) . 's', '');
@@ -54,7 +56,7 @@ abstract class AbstractDebugger
 					{
 						$res .= $indent1
 						        . (is_numeric($key) ? '#' : '$') . $key . ' <span class="note">=></span> '
-						        . self::loop($value, $level+1, $recursion+$more_recursion,  $data)
+						        . self::loop($value, $level+1, $recursion+$more_recursion, $data)
 						        ;
 					}
 					$res .= $indent0;
@@ -66,7 +68,31 @@ abstract class AbstractDebugger
 				}
 				break;
 			case 'object':
-				if (!in_array($data, $recursion))
+				if (is_a($data, 'stdClass'))
+				{
+					if ($data)
+					{
+						$data_array = (array)$data;
+						$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . get_class($data) . '</span><span class="note">(' . count($data_array) . ')</span> ';
+						$res .= '<span class="note">{</span><span class="more' . ($level ? '' : ' hide') . '">&hellip;</span></a>';
+						$res .= '<span class="collapse' . ($level ? '' : ' expand') . '">';
+						$res .= PHP_EOL;
+						foreach ($data_array as $key => $value)
+						{
+							$res .= $indent1
+							        . (is_numeric($key) ? '#' : '$') . $key . ' <span class="note">=></span> '
+							        . self::loop($value, $level+1, $recursion+$more_recursion, $data_array)
+							        ;
+						}
+						$res .= $indent0;
+						$res .= '<span class="note">}</span></span>';
+					}
+					else
+					{
+						$res .= '<span class="mark">array</span><span class="note">(0)</span> <span class="note">{}</span>';
+					}
+				}
+				elseif (!in_array($data, $recursion))
 				{
 					$refClass      = new \ReflectionClass($data);
 					$refClass_name = $refClass->getName();
@@ -74,6 +100,7 @@ abstract class AbstractDebugger
 					$methods       = $refClass->getMethods();
 					$_refClass_parent = $refClass;
 					$_properties = [];
+					/*
 					while ($_refClass_parent=$_refClass_parent->getParentClass())
 					{
 						$_properties = array_merge($_properties, $_refClass_parent->getProperties());
@@ -82,6 +109,7 @@ abstract class AbstractDebugger
 					{
 						$properties = array_merge($properties, ['MORE'], $_properties);
 					}
+					*/
 					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . $refClass_name . '</span><span class="note">(' . count($properties) . ')</span> ';
 					#$res .= '<abbr>&#x25bc;</abbr> ';
 					$res .= '<span class="note">{</span><span class="more' . ($level ? '' : ' hide') . '">&hellip;</span></a>';
@@ -162,6 +190,7 @@ abstract class AbstractDebugger
 		// syntax highlight
 		$source = preg_replace('/(\"[^\"]*\")/', '<span class="string">$1</span>', $source); // "" strings
 		$source = preg_replace('/(\'[^\']*\')/', '<span class="string">$1</span>', $source); // '' strings
+		$source = preg_replace('#/\*(.*?)\*/#sm', '<span class="note">/*$1*/</span>', $source); // /* comments
 		$source = preg_replace('/(\/\/[^\n]*)/', '<span class="note">$1</span>', $source); // // comments
 		$source = preg_replace('/(\#[^\n]*)/', '<span class="note">$1</span>', $source); // # comments
 		#$source = preg_replace('/(define|function)/', '<span class="mark">$1</span>', $source); // special expressions
@@ -171,7 +200,11 @@ abstract class AbstractDebugger
 		$l = strlen(count($source));
 		
 		// slice lines
-		if ($line+15>count($source))
+		if ($line-8<0)
+		{
+			$cut_line = 0;
+		}
+		elseif ($line+8>count($source))
 		{
 			$cut_line = count($source) - 15;
 		}

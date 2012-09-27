@@ -16,6 +16,7 @@ namespace Lemmon;
  */
 class Debugger extends Debugger\AbstractDebugger
 {
+	static $onError;
 
 
 	static function init()
@@ -58,14 +59,18 @@ class Debugger extends Debugger\AbstractDebugger
 		$error = error_get_last();
 		if (isset($types[$error['type']]))
 		{
+			ob_start();
 			include __DIR__ . '/Debugger/_fatal_error.php';
+			self::_ob();
 		}
 	}
 
 
 	static function exceptionHandler($exception)
 	{
+		header('HTTP/1.1 500 Internal Server Error');
 		include __DIR__ . '/Debugger/_exception.php';
+		self::_ob();
 	}
 
 
@@ -101,5 +106,27 @@ class Debugger extends Debugger\AbstractDebugger
 
 		/* Don't execute PHP internal error handler */
 		return true;
+	}
+
+
+	static private function _ob()
+	{
+		if (!Environment::isDev())
+		{
+			// ob
+			$html = ob_get_contents();
+			ob_end_clean();
+			// front message
+			include __DIR__ . '/Debugger/_error.php';
+			// call onError event
+			if (is_callable(self::$onError))
+			{
+				call_user_func(self::$onError, $html);
+			}
+		}
+		else
+		{
+			ob_flush();
+		}
 	}
 }
