@@ -1,7 +1,26 @@
 <?php
+
+/*
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
+ *
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Lemmon\Model;
+
 /**
-* 
-*/
-class Lemmon_Model_Schema
+ * Model Schema.
+ */
+class Schema
 {
+	static private $_schemas = [];
+
+
+	static function get($model_name)
+	{
+		
+	}
 }

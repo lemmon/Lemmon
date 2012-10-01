@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Lemmon package.
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
  *
- * (c) Jakub Pelák <jpelak@gmail.com>
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,17 +16,14 @@ namespace Lemmon\Sql;
  */
 class Table
 {
-	private $_statement;
 	private $_table;
 
 
-	function __construct(QueryStatement $statement, $table)
+	function __construct($table)
 	{
-		$this->_statement = $statement;
-		
 		if (is_string($table))
 		{
-			$this->_table = [$table];
+			$this->_table = func_get_args();
 		}
 		elseif (is_array($table))
 		{
@@ -45,9 +42,9 @@ class Table
 		foreach ($table as $_alias => $_table)
 		{
 			if (is_int($_alias))
-				$table[$_alias] = $this->_statement->quoteField($_table);
+				$table[$_alias] = Quote::field($_table);
 			else
-				$table[$_alias] = $this->_statement->quoteField($_table) . ' AS ' . $this->_statement->quoteField($_alias);
+				$table[$_alias] = Quote::field($_table) . ' AS ' . Quote::field($_alias);
 		}
 		return join(', ', $table);
 	}

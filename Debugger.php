@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Lemmon package.
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
  *
- * (c) Jakub Pelák <jpelak@gmail.com>
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -59,17 +59,27 @@ class Debugger extends Debugger\AbstractDebugger
 		$error = error_get_last();
 		if (isset($types[$error['type']]))
 		{
+			/*
 			ob_start();
 			include __DIR__ . '/Debugger/_fatal_error.php';
 			self::_ob();
+			*/
+			self::_exceptionHandler(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'], null));
 		}
 	}
 
 
 	static function exceptionHandler($exception)
 	{
-		header('HTTP/1.1 500 Internal Server Error');
-		include __DIR__ . '/Debugger/_exception.php';
+		@header('HTTP/1.1 500 Internal Server Error');
+		try
+		{
+			include __DIR__ . '/Debugger/_exception.php';
+		}
+		catch (\Exception $e)
+		{
+			echo $e->getMessage();
+		}
 		self::_ob();
 	}
 
@@ -83,7 +93,8 @@ class Debugger extends Debugger\AbstractDebugger
 		}
 
 		throw new \Exception($errstr);
-
+	
+		/*
 		switch ($errno)
 		{
 			case E_USER_ERROR:
@@ -103,6 +114,7 @@ class Debugger extends Debugger\AbstractDebugger
 				echo "Unknown error type: [$errno] $errstr<br />\n";
 				break;
 		}
+		*/
 
 		/* Don't execute PHP internal error handler */
 		return true;

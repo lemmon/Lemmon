@@ -6,6 +6,8 @@
 	<span class="collapse">
 		<h4>Headers</h4>
 		<?php echo self::dumpArray($_SERVER) ?>
+		<h4>Sessions</h4>
+		<?php echo self::dumpArray($_SESSION) ?>
 		<h4>GET</h4>
 		<?php echo self::dumpArray($_GET) ?>
 		<h4>POST</h4>

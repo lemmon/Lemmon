@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Lemmon\Mailer;
+namespace Lemmon\Auth;
 
 /**
-* 
-*/
-interface MailerInterface
+ * Handles authentication.
+ * @see Service
+ * @see AbstractAuth
+ */
+class Auth
 {
-	function __initMessage();
-	function __initTransport();
 }

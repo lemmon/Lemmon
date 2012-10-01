@@ -30,13 +30,17 @@
 			<?php foreach ($exception->getTrace() as $i => $trace): ?>
 			<li>
 				<a class="LemmonDebugerExpander" href="#">
+					<?php if (isset($trace['file'])): ?>
 					<strong>File:</strong> <?php echo $trace['file'] ?>
 					<strong>Line:</strong> <?php echo $trace['line'] ?>
+					<?php endif ?>
 					<em style="color:#268bd2"><?php echo $trace['class'] . $trace['type'] . ($trace['function'] ? $trace['function'] . '()' : '') ?></em>
 					<span class="more<?php if (!$i): ?> hide<?php endif ?>">&hellip;</span>
 				</a>
 				<span class="collapse<?php if (!$i): ?> expand<?php endif ?>">
+					<?php if (isset($trace['file'])): ?>
 					<pre class="LemmonDebuggerDump source"><?php echo self::printSource($trace['file'], $trace['line']) ?></pre>
+					<?php endif ?>
 					<?php if ($trace['args']): ?>
 					<h4>Arguments</h4>
 					<?php echo self::dumpArray($trace['args']) ?>

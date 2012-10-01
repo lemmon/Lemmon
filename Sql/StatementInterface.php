@@ -9,13 +9,12 @@
  * file that was distributed with this source code.
  */
 
-namespace Lemmon\Mailer;
+namespace Lemmon\Sql;
 
 /**
-* 
-*/
-interface MailerInterface
+ * SQL Query Statement Interface.
+ */
+interface StatementInterface
 {
-	function __initMessage();
-	function __initTransport();
+	function getQueryString();
 }

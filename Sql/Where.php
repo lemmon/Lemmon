@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Lemmon package.
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
  *
- * (c) Jakub Pelák <jpelak@gmail.com>
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,81 +16,85 @@ namespace Lemmon\Sql;
  */
 class Where
 {
-	private $_statement;
-	private $_expression;
+	private $_originalExpression;
+	private $_expressionString;
 
 
-	function __construct(QueryStatement $statement, $expr, $value=false)
+	function __construct($expr, $value=false)
 	{
 		$expression = '';
 		
-		// one expression
-		if (is_a($expr, __NAMESPACE__ . '\Expression'))
-		{
-			$expression = $expr;
-		}
+		//
 		// one argument
-		elseif ($value === false)
+		if ($value==false)
 		{
-			$expression = $statement->expr($expr);
+			if ($expr instanceof Expression)
+			{
+				$expression = $expr;
+			}
+			else
+			{
+				$expression = new Expression($expr);
+			}
 		}
-		// three or more arguments
-		elseif (func_num_args()>3)
+		//
+		// more than two arguments
+		elseif (func_num_args()>2)
 		{
-			$args = func_get_args();
-			array_shift($args);
-			$expression = call_user_func_array([$statement, 'expr'], $args);
+			$expression = new Expression(func_get_args());
 		}
+		//
 		// two arguments
 		else
 		{
-			// expression
-			if (is_a($value, __NAMESPACE__ . '\Expression'))
-			{
-				$expression = $value;
-			}
 			// expr ... ?
-			elseif (strpos($expr, '?'))
+			if (is_string($expr) and strpos($expr, '?'))
 			{
-				if (is_null($value) and strpos($expr, '!='))
-				{
-					// field != ? to field IS NOT NULL
-					$expression = $statement->expr($expr);
-					$expression = call_user_func([$statement, 'expr'], preg_replace('/\s+!=\s+/', ' IS NOT ', $expr), null);
-				}
-				elseif (is_null($value) and strpos($expr, '='))
-				{
-					// field = ? to field IS NULL
-					$expression = $statement->expr($expr);
-					$expression = call_user_func([$statement, 'expr'], preg_replace('/\s+=\s+/', ' IS ', $expr), null);
-				}
-				else
-				{
-					$expression = $statement->expr($expr);
-					$expression = call_user_func([$statement, 'expr'], $expr, $value);
-				}
+				$expression = new Expression($expr, $value);
 			}
 			// field IS NULL
 			elseif (is_null($value))
 			{
-				$expression = sprintf('%s IS NULL', $statement->quoteField($expr));
+				if ($expr{0}=='!')
+				{
+					$expression = sprintf('%s IS NOT NULL', Quote::field(substr($expr, 1)));
+				}
+				else
+				{
+					$expression = sprintf('%s IS NULL', Quote::field($expr));
+				}
 			}
 			// field (NOT) IN (array)
 			elseif (is_array($value))
 			{
-				if (strtoupper(substr($expr, 0, 4))=='NOT ')
+				if ($expr{0}=='!')
 				{
-					$expression = sprintf('%s NOT IN (%s)', $statement->quoteField(trim(substr($expr, 4))), join(', ', $statement->quoteArray($value)));
+					$expression = sprintf('%s NOT IN (%s)', Quote::field(substr($expr, 1)), Quote::value($value));
 				}
 				else
 				{
-					$expression = sprintf('%s IN (%s)', $statement->quoteField($expr), join(', ', $statement->quoteArray($value)));
+					$expression = sprintf('%s IN (%s)', Quote::field($expr), Quote::value($value));
 				}
 			}
 			// field = value
 			elseif (!is_numeric($expr))
 			{
-				$expression = sprintf('%s = %s', $statement->quoteField($expr), $statement->quote($value));
+				// expression
+				if (is_object($value) and $value instanceof Expression)
+				{
+					$expression = new Expression(sprintf('%s = ?', $expr), $value);
+				}
+				else
+				{
+					if ($expr{0}=='!')
+					{
+						$expression = sprintf('%s != %s', Quote::field(substr($expr, 1)), Quote::value($value));
+					}
+					else
+					{
+						$expression = sprintf('%s = %s', Quote::field($expr), Quote::value($value));
+					}
+				}
 			}
 			// error
 			else
@@ -98,20 +102,29 @@ class Where
 				throw new \Exception(sprintf('Unknown field name %s.', $expr));
 			}
 		}
-		
-		$this->_statement = $statement;
-		$this->_expression = $expression;
+
+		//
+		if ($expression instanceof Expression)
+		{
+			$this->_originalExpression = $expression;
+			$this->_expressionString = $expression->toString();
+		}
+		else
+		{
+			$this->_originalExpression = func_get_args();
+			$this->_expressionString = $expression;
+		}
 	}
 
 
 	function __toString()
 	{
-		return (string)$this->getExpression();
+		return $this->_expressionString;
 	}
 
 
 	function getExpression()
 	{
-		return $this->_expression;
+		return $this->_expressionString;
 	}
 }

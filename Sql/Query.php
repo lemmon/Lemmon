@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Lemmon package.
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
  *
- * (c) Jakub Pelák <jpelak@gmail.com>
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,23 +11,55 @@
 
 namespace Lemmon\Sql;
 
+use \Lemmon\Db\Adapter as DbAdapter;
+
 /**
  * SQL Query.
  */
 class Query
 {
 	private $_adapter;
+	#private $_statement;
 
 
-	function __construct($adapter)
+	function __construct($query=null)
 	{
-		$this->_adapter = $adapter;
+		// adapter
+		if (true/*is_null($adapter)*/)
+		{
+			$this->_adapter = DbAdapter::getDefault();
+		}
+		/* !todo
+		elseif ($adapter instanceof DbAdapter)
+		{
+			$this->_adapter = $adapter;
+		}
+		else
+		{
+			throw new \Exception(sprintf('Unknown adapter type (%s).', gettype($adapter)));
+		}
+		*/
+		
+		// query
+		if (isset($query))
+		{
+			if (is_string($query))
+			{
+				$statement = new Statement($this);
+				$statement = call_user_func_array([$statement, 'setQuery'], func_get_args());
+				$this->_statement = $statement;
+			}
+			else
+			{
+				throw new \Exception(sprintf('Unknown Query type (%s).', gettype($query)));
+			}
+		}
 	}
 
 
 	function select($table=null)
 	{
-		return new Select($this, is_array($table) ? $table : func_get_args());
+		return /*$this->_statement = */new Select($this, is_array($table) ? $table : func_get_args());
 	}
 
 
@@ -37,8 +69,8 @@ class Query
 	}
 
 
-	function exec($query)
+	function exec($query=null)
 	{
-		return $this->_adapter->getPdo()->query($query);
+		return $this->_adapter->getPdo()->query(($query) ?: $this->_statement->getQueryString());
 	}
 }

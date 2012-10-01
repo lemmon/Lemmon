@@ -14,31 +14,6 @@ namespace Lemmon\Model;
 /**
  * Model.
  */
-abstract class AbstractRow
+class Cache
 {
-	protected $data = [];
-	
-	private $_model;
-
-
-	final function __construct($data=null)
-	{
-		#if (is_array())
-		if (isset($data))
-		{
-			throw new \Exception('[todo]');
-		}
-	}
-
-
-	function __get($key)
-	{
-		return $this->data[$key];
-	}
-
-
-	function __set($key, $val)
-	{
-		$this->data[$key] = $val;
-	}
 }

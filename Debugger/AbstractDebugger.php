@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of the Lemmon package.
+ * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
  *
- * (c) Jakub Pelák <jpelak@gmail.com>
+ * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -49,14 +49,14 @@ abstract class AbstractDebugger
 				if ($data)
 				{
 					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">array</span><span class="note">(' . count($data) . ')</span> ';
-					$res .= '<span class="note">{</span><span class="more' . ($level ? '' : ' hide') . '">&hellip;</span></a>';
-					$res .= '<span class="collapse' . ($level ? '' : ' expand') . '">';
+					$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';
+					$res .= '<span class="collapse' . (($level>1) ? '' : ' expand') . '">';
 					$res .= PHP_EOL;
 					foreach ($data as $key => $value)
 					{
 						$res .= $indent1
 						        . (is_numeric($key) ? '#' : '$') . $key . ' <span class="note">=></span> '
-						        . self::loop($value, $level+1, $recursion+$more_recursion, $data)
+						        . self::loop($value, $level+1, array_merge($recursion, $more_recursion), $data)
 						        ;
 					}
 					$res .= $indent0;
@@ -74,14 +74,14 @@ abstract class AbstractDebugger
 					{
 						$data_array = (array)$data;
 						$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . get_class($data) . '</span><span class="note">(' . count($data_array) . ')</span> ';
-						$res .= '<span class="note">{</span><span class="more' . ($level ? '' : ' hide') . '">&hellip;</span></a>';
-						$res .= '<span class="collapse' . ($level ? '' : ' expand') . '">';
+						$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';
+						$res .= '<span class="collapse' . (($level>1) ? '' : ' expand') . '">';
 						$res .= PHP_EOL;
 						foreach ($data_array as $key => $value)
 						{
 							$res .= $indent1
 							        . (is_numeric($key) ? '#' : '$') . $key . ' <span class="note">=></span> '
-							        . self::loop($value, $level+1, $recursion+$more_recursion, $data_array)
+							        . self::loop($value, $level+1, array_merge($recursion, $more_recursion), $data_array)
 							        ;
 						}
 						$res .= $indent0;
@@ -97,10 +97,12 @@ abstract class AbstractDebugger
 					$refClass      = new \ReflectionClass($data);
 					$refClass_name = $refClass->getName();
 					$properties    = $refClass->getProperties();
+					/*
 					$methods       = $refClass->getMethods();
+					*/
+					/*
 					$_refClass_parent = $refClass;
 					$_properties = [];
-					/*
 					while ($_refClass_parent=$_refClass_parent->getParentClass())
 					{
 						$_properties = array_merge($_properties, $_refClass_parent->getProperties());
@@ -112,8 +114,8 @@ abstract class AbstractDebugger
 					*/
 					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . $refClass_name . '</span><span class="note">(' . count($properties) . ')</span> ';
 					#$res .= '<abbr>&#x25bc;</abbr> ';
-					$res .= '<span class="note">{</span><span class="more' . ($level ? '' : ' hide') . '">&hellip;</span></a>';
-					$res .= '<span class="collapse' . ($level ? '' : ' expand') . '">';
+					$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';
+					$res .= '<span class="collapse' . (($level>1) ? '' : ' expand') . '">';
 					$res .= PHP_EOL;
 					foreach ($properties as $property)
 					{
@@ -128,7 +130,7 @@ abstract class AbstractDebugger
 							        . ($property->isPrivate() ? ' <span class="mark">private</span>' : '')
 							        . ' <span class="note">=></span> '
 							        #. $property->getValue($data)
-							        . self::loop($property->getValue($data), $level+1, $recursion+$more_recursion+[$data])
+							        . self::loop($property->getValue($data), $level+1, array_merge($recursion, $more_recursion, [$data]))
 							        ;
 						}
 						else
@@ -142,6 +144,7 @@ abstract class AbstractDebugger
 						$res .= '</span>';
 						$_more = false;
 					}
+					/*
 					if ($methods)
 					{
 						$res .= $indent1 . '<a class="LemmonDebugerExpander" href="#"><span class="mark">methods</span> ';
@@ -166,6 +169,7 @@ abstract class AbstractDebugger
 						}
 						$res .= $indent1 . '<span class="note">}</span>' . PHP_EOL . '</span>';
 					}
+					*/
 					$res .= $indent0;
 					$res .= '<span class="note">}</span></span>';
 				}
