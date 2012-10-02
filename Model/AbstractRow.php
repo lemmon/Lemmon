@@ -16,10 +16,10 @@ namespace Lemmon\Model;
  */
 abstract class AbstractRow
 {
+	static protected $model;
+
 	protected $data = [];
 	
-	private $_model;
-
 
 	final function __construct($data=null)
 	{
@@ -28,6 +28,17 @@ abstract class AbstractRow
 		{
 			throw new \Exception('[todo]');
 		}
+	}
+
+
+	static function find($cond)
+	{
+		if (!isset(self::$model))
+		{
+			throw new \Exception('No model has been set up.');
+		}
+		
+		return call_user_func([self::$model, 'find'], $cond)->first();
 	}
 
 

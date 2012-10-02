@@ -35,9 +35,9 @@
 					<strong>Line:</strong> <?php echo $trace['line'] ?>
 					<?php endif ?>
 					<em style="color:#268bd2"><?php echo $trace['class'] . $trace['type'] . ($trace['function'] ? $trace['function'] . '()' : '') ?></em>
-					<span class="more<?php if (!$i): ?> hide<?php endif ?>">&hellip;</span>
+					<span class="more<?php if ($i < 2): ?> hide<?php endif ?>">&hellip;</span>
 				</a>
-				<span class="collapse<?php if (!$i): ?> expand<?php endif ?>">
+				<span class="collapse<?php if ($i < 2): ?> expand<?php endif ?>">
 					<?php if (isset($trace['file'])): ?>
 					<pre class="LemmonDebuggerDump source"><?php echo self::printSource($trace['file'], $trace['line']) ?></pre>
 					<?php endif ?>

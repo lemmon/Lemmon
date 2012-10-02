@@ -48,7 +48,7 @@ abstract class AbstractDebugger
 			case 'array':
 				if ($data)
 				{
-					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">array</span><span class="note">(' . count($data) . ')</span> ';
+					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">array</span><span class="note">(' . count($data) . ')</span>';
 					$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';
 					$res .= '<span class="collapse' . (($level>1) ? '' : ' expand') . '">';
 					$res .= PHP_EOL;
@@ -64,7 +64,7 @@ abstract class AbstractDebugger
 				}
 				else
 				{
-					$res .= '<span class="mark">array</span><span class="note">(0)</span> <span class="note">{}</span>';
+					$res .= '<span class="mark">array</span><span class="note">(0)</span><span class="note">{}</span>';
 				}
 				break;
 			case 'object':
@@ -73,7 +73,7 @@ abstract class AbstractDebugger
 					if ($data)
 					{
 						$data_array = (array)$data;
-						$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . get_class($data) . '</span><span class="note">(' . count($data_array) . ')</span> ';
+						$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . get_class($data) . '</span><span class="note">(' . count($data_array) . ')</span>';
 						$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';
 						$res .= '<span class="collapse' . (($level>1) ? '' : ' expand') . '">';
 						$res .= PHP_EOL;
@@ -89,7 +89,7 @@ abstract class AbstractDebugger
 					}
 					else
 					{
-						$res .= '<span class="mark">array</span><span class="note">(0)</span> <span class="note">{}</span>';
+						$res .= '<span class="mark">array</span><span class="note">(0)</span><span class="note">{}</span>';
 					}
 				}
 				elseif (!in_array($data, $recursion))

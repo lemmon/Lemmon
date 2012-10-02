@@ -81,10 +81,15 @@ abstract class AbstractModel implements \IteratorAggregate
 		$class_name = get_called_class();
 		$model = new $class_name;
 
-		if (is_int($cond) or is_string($cond))
+		if (func_num_args() > 1)
+		{
+			// many rows
+			throw new \Exception('[todo] Many rows.');
+		}
+		elseif (is_int($cond) or is_string($cond))
 		{
 			// returns Row
-			return $model->where([$model->primary => $cond])->first();
+			return $model->where([$model->primary => $cond]);
 		}
 		elseif (is_array($cond))
 		{

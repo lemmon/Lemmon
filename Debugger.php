@@ -59,12 +59,7 @@ class Debugger extends Debugger\AbstractDebugger
 		$error = error_get_last();
 		if (isset($types[$error['type']]))
 		{
-			/*
-			ob_start();
-			include __DIR__ . '/Debugger/_fatal_error.php';
-			self::_ob();
-			*/
-			self::_exceptionHandler(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'], null));
+			self::exceptionHandler(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'], null));
 		}
 	}
 
@@ -74,6 +69,7 @@ class Debugger extends Debugger\AbstractDebugger
 		@header('HTTP/1.1 500 Internal Server Error');
 		try
 		{
+			ob_start();
 			include __DIR__ . '/Debugger/_exception.php';
 		}
 		catch (\Exception $e)
