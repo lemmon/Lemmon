@@ -10,12 +10,14 @@ class Lemmon_Array
 	{
 		return is_array($array) ? reset($array) : null;
 	}
-	
+
+
 	public static function last($array)
 	{
 		return is_array($array) ? end($array) : null;
 	}
-	
+
+
 	public static function assoc($array, $assoc)
 	{
 		$res = array();
@@ -31,12 +33,19 @@ class Lemmon_Array
 		}
 		return $res;
 	}
-	
+
+
 	public static function hasKey($array, $key)
 	{
-		return array_key_exists($key, $array);
+		if (is_array($array))
+			return array_key_exists($key, $array);
+		elseif (is_object($array))
+			return $array->{$key} !== false;
+		else
+			return false;
 	}
-	
+
+
 	public static function isIn($key, $array)
 	{
 		return is_array($array) && in_array($key, $array);

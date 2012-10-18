@@ -18,7 +18,9 @@ abstract class AbstractStatement implements StatementInterface
 {
 	protected $_query;
 	protected $_table;
+	protected $_join = [];
 	protected $_where = [];
+	protected $_group;
 	protected $_order;
 	protected $_limit;
 	protected $_offset;
@@ -35,7 +37,9 @@ abstract class AbstractStatement implements StatementInterface
 		{
 			$this->_query  = $query->_query;
 			$this->_table  = $query->_table;
+			$this->_join   = $query->_join;
 			$this->_where  = $query->_where;
+			$this->_group  = $query->_group;
 			$this->_order  = $query->_order;
 			$this->_limit  = $query->_limit;
 			$this->_offset = $query->_offset;
@@ -46,7 +50,7 @@ abstract class AbstractStatement implements StatementInterface
 		}
 		
 		// table
-		if ($table) $this->from($table);
+		if ($table) $this->setTable($table);
 	}
 
 
@@ -56,11 +60,58 @@ abstract class AbstractStatement implements StatementInterface
 	}
 
 
-	function from($table)
+	function toString()
 	{
-		$this->_table = new Table(is_array($table) ? $table : func_get_args());
-		return $this;
+		return $this->getQueryString();
 	}
+
+
+	function setTable($table, $alias=null)
+	{
+		if (is_array($table))
+		{
+			if (is_int(key($table)))
+			{
+				$this->_table = new Table(current($table));
+			}
+			else
+			{
+				$this->_table = new Table(current($table), key($table));
+			}
+		}
+		else
+		{
+			$this->_table = new Table($table, $alias);
+		}
+	}
+
+
+	function getTable()
+	{
+		return $this->_table;
+	}
+
+
+	function join($table, $arg, $value=null)
+	{
+		if (is_array($arg))
+		{
+			$this->_join[] = new Join($this->getTable(), $table, $arg);
+		}
+		else
+		{
+			$this->_join[] = new Join($this->getTable(), $table, [$arg => $value]);
+		}
+		$this->getTable()->forceName(true);
+	}
+
+
+	/* DEV helper function */
+	function _J()
+	{
+		return $this->_join;
+	}
+	/* /DEV */
 
 
 	function where($expr, $value=false)
@@ -73,7 +124,7 @@ abstract class AbstractStatement implements StatementInterface
 				{
 					if (!is_array($_value))
 					{
-						$this->_where[] = new Where($_value);
+						$this->_where[] = new Where($this->getTable(), $_value);
 					}
 					else
 					{
@@ -82,7 +133,7 @@ abstract class AbstractStatement implements StatementInterface
 				}
 				else
 				{
-					$this->_where[] = new Where($_expr, $_value);
+					$this->_where[] = new Where($this->getTable(), $_expr, $_value);
 				}
 			}
 		}
@@ -93,7 +144,7 @@ abstract class AbstractStatement implements StatementInterface
 		}
 		else
 		{
-			$this->_where[] = new Where($expr, $value);
+			$this->_where[] = new Where($this->getTable(), $expr, $value);
 		}
 		return $this;
 	}
@@ -107,6 +158,12 @@ abstract class AbstractStatement implements StatementInterface
 		return $w;
 	}
 	/* /DEV */
+
+
+	function group($group)
+	{
+		$this->_group = new Expression($group);
+	}
 
 
 	function order($order)
@@ -141,6 +198,12 @@ abstract class AbstractStatement implements StatementInterface
 		}
 		$this->_offset = (int)$offset;
 		return $this;
+	}
+
+
+	function exec()
+	{
+		return $this->_query->exec($this->getQueryString());
 	}
 
 

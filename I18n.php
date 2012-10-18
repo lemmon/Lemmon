@@ -139,13 +139,14 @@ class Lemmon_I18N
 	
 	static public function tn($str_sg, $str_pl, $n)
 	{
+		$args = array_slice(func_get_args(), 2);
 		if (self::$_strings[':pl ' . $str_sg])
 			$strings = self::$_strings[':pl ' . $str_sg];
 		elseif (is_array($str_pl))
 			$strings = array_merge(array($str_sg), $str_pl);
 		else
 			$strings = array($str_sg, $str_pl);
-		$str = sprintf($strings[ self::nRule($n) ], $n);
+		$str = vsprintf($strings[ self::nRule($n) ], $args);
 		$str = preg_replace('/^\w+__\s?/', '', $str);
 		return $str;
 	}

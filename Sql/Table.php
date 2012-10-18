@@ -16,36 +16,55 @@ namespace Lemmon\Sql;
  */
 class Table
 {
-	private $_table;
+	private $_name;
+	private $_alias;
+	private $_forceName;
 
 
-	function __construct($table)
+	function __construct($table, $alias=null)
 	{
-		if (is_string($table))
+		if (is_array($table))
 		{
-			$this->_table = func_get_args();
-		}
-		elseif (is_array($table))
-		{
-			$this->_table = $table;
+			$this->_name = current($table);
+			$this->_alias = key($table);
 		}
 		else
 		{
-			throw new \Exception('[todo] Unknown $table type.');
+			$this->_name = $table;
+			$this->_alias = $alias;
 		}
+	}
+
+
+	function forceName($force = true)
+	{
+		$this->_forceName = $force;
+		return $this;
 	}
 
 
 	function __toString()
 	{
-		$table = $this->_table;
-		foreach ($table as $_alias => $_table)
-		{
-			if (is_int($_alias))
-				$table[$_alias] = Quote::field($_table);
-			else
-				$table[$_alias] = Quote::field($_table) . ' AS ' . Quote::field($_alias);
-		}
-		return join(', ', $table);
+		return $this->toString();
+	}
+
+
+	function toString()
+	{
+		$res = Quote::field($this->_name);
+		if ($alias = $this->_alias) $res .= ' AS ' . Quote::field($alias);
+		return $res;
+	}
+
+
+	function getAlias()
+	{
+		return $this->_forceName ? $this->getAliasOrName() : $this->_alias;
+	}
+
+
+	function getAliasOrName()
+	{
+		return ($this->_alias) ?: $this->_name;
 	}
 }

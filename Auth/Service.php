@@ -17,13 +17,13 @@ namespace Lemmon\Auth;
 class Service
 {
 	/** @var string salt prefix configuration */
-	private $_saltPrefix = '$2x$08$';
+	protected $_saltPrefix = '$2x$08$';
 
 	/** @var int salt length */
-	private $_saltLength = 22;
+	protected $_saltLength = 22;
 
 	/** @var string itoa64 */
-	private $_itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	protected $_itoa64 = './ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 
 	/**

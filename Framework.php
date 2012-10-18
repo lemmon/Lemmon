@@ -104,6 +104,7 @@ class Framework
 	 */
 	static function run(array $params=null)
 	{
+		
 		#try
 		#{
 			// controller
@@ -115,6 +116,9 @@ class Framework
 			
 			// create controller
 			$controller = new $controller_class_name($params);
+			
+			// POST
+			$controller->data['f'] = $_POST;
 			
 			// template
 			Template::appendFilesystem('app/views/' . $controller_name);
@@ -167,17 +171,6 @@ class Framework
 			$res->exec();
 			exit;
 		}
-		elseif (is_a($res, 'Lemmon_Mailer'))
-		{
-			echo $res->getBody();
-			/*
-			die;
-			Template::display(LIBS_DIR . '/Lemmon/Template/email.html', array(
-				'message' => $res,
-				'link'    => $controller->route,
-			));
-			*/
-		}
 		else
 		{
 			// display plain text result
@@ -198,7 +191,7 @@ class Framework
 		{
 			$data['link']  = $this->route;
 			$data['flash'] = $_SESSION['__FLASH__'];
-			$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
+			#$data['f']     = array_merge_recursive($_POST, (array)$data['f']);
 		}
 		//
 		return $data;

@@ -25,7 +25,7 @@ abstract class AbstractDebugger
 
 	static function loop($data, $level=0, $recursion=[], $more_recursion=[])
 	{
-		#if ($level==5) return PHP_EOL;
+		if ($level==7) return PHP_EOL;
 		$res = '';
 		$indent0 = sprintf('%' . (($level+0) * 4) . 's', '');
 		$indent1 = sprintf('%' . (($level+1) * 4) . 's', '');
@@ -92,7 +92,7 @@ abstract class AbstractDebugger
 						$res .= '<span class="mark">array</span><span class="note">(0)</span><span class="note">{}</span>';
 					}
 				}
-				elseif (!in_array($data, $recursion))
+				elseif (!in_array($data, $recursion, true))
 				{
 					$refClass      = new \ReflectionClass($data);
 					$refClass_name = $refClass->getName();
@@ -100,18 +100,18 @@ abstract class AbstractDebugger
 					/*
 					$methods       = $refClass->getMethods();
 					*/
-					/*
+					/* */
 					$_refClass_parent = $refClass;
 					$_properties = [];
 					while ($_refClass_parent=$_refClass_parent->getParentClass())
 					{
-						$_properties = array_merge($_properties, $_refClass_parent->getProperties());
+						$_properties = array_merge($_properties, $_refClass_parent->getProperties(\ReflectionProperty::IS_PRIVATE));
 					}
 					if ($_properties)
 					{
 						$properties = array_merge($properties, ['MORE'], $_properties);
 					}
-					*/
+					/* */
 					$res .= '<a class="LemmonDebugerExpander" href="#"><span class="mark">' . $refClass_name . '</span><span class="note">(' . count($properties) . ')</span> ';
 					#$res .= '<abbr>&#x25bc;</abbr> ';
 					$res .= '<span class="note">{</span><span class="more' . (($level>1) ? '' : ' hide') . '">&hellip;</span></a>';

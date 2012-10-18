@@ -37,37 +37,58 @@ class Link
 		$this->_route = $route;
 		
 		// url
-		$link = $this->_parseUrl($this->_linkRaw=(string)$link);
+		$link = $this->_parseUrl($this->_linkRaw = (string)$link);
 
 		// check for registered link
 		if ($link{0}==':') 
 		{
-			if (!($link=$route->getDefinedRoutes()[$link])) throw new \Exception(sprintf('Route `%s` not defined', $this->_linkRaw));
+			if (!($link = $route->getDefinedRoutes()[$link])) throw new \Exception(sprintf('Route `%s` not defined', $this->_linkRaw));
 		}
 		
 		// match link variables with params
-		preg_match_all('/@?(\$([\w\.]+))/i', $link, $m,  PREG_SET_ORDER);
+		preg_match_all('#@?(\$(\(?)(?<match>[\w\.]+)\)?)#', $link, $m, PREG_SET_ORDER);
 		foreach ($m as $replace)
 		{
-			if (is_array($params) and array_key_exists($replace[2], $params))
+			if (is_array($params) and array_key_exists($replace['match'], $params))
 			{
-				$link = str_replace($replace[0], $params[$replace[2]], $link);
+				$link = str_replace($replace[0], $params[$replace['match']], $link);
 			}
-			elseif (is_object($params) and method_exists($params, $method='get'.$replace[2]))
+			elseif (is_object($params) and method_exists($params, $method= ' get' . $replace['match']))
 			{
 				$link = str_replace($replace[0], $params->{$method}(), $link);
 			}
-			elseif (strpos($replace[2], '.'))
+			elseif (strpos($replace['match'], '.'))
 			{
-				$_replace = explode('.', $replace[2]);
-				if (count($_replace)==2)
-					$link = str_replace($replace[0], $params->{$_replace[0]}->{$_replace[1]}, $link);
-				elseif (count($_replace)==3)
-					$link = str_replace($replace[0], $params->{$_replace[0]}->{$_replace[1]}->{$_replace[2]}, $link);
+				$_replace = explode('.', $replace['match']);
+				$_params = $params;
+				foreach ($_replace as $_param)
+				{
+					if (is_array($_params) and array_key_exists($_param, $_params))
+					{
+						$_params = $_params[$_param];
+					}
+					elseif (is_object($_params) and isset($_params->{$_param}))
+					{
+						$_params = $_params->{$_param};
+					}
+					else
+					{
+						$_params = false;
+						break;
+					}
+				}
+				if ($_params !== false)
+				{
+					$link = str_replace($replace[0], $_params, $link);
+				}
+				else
+				{
+					$link = str_replace($replace[1], '', $link);
+				}
 			}
-			elseif (is_object($params) and isset($params->{$replace[2]}))
+			elseif (is_object($params) and isset($params->{$replace['match']}))
 			{
-				$link = str_replace($replace[0], $params->{$replace[2]}, $link);
+				$link = str_replace($replace[0], $params->{$replace['match']}, $link);
 			}
 			else
 			{
@@ -76,7 +97,7 @@ class Link
 		}
 		
 		// asciize
-		while (($i=strpos($link, '{'))!==false)
+		while (($i = strpos($link, '{')) !== false)
 		{
 			$j = strpos($link, '}', $i);
 			$link = substr_replace($link, \Lemmon\String::asciize(substr($link, $i+1, $j-$i-1)), $i, $j-$i+1);
@@ -84,7 +105,7 @@ class Link
 		
 		// keep current values
 		$link = explode('/', $link);
-		foreach ($link as $key => $val) if ($val=='@') $link[$key] = $route->getParam($key+1);
+		foreach ($link as $key => $val) if ($val == '@') $link[$key] = $route->getParam($key + 1);
 		$link = join('/', $link);
 		$link = rtrim($link, '/');
 		

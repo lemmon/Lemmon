@@ -105,6 +105,16 @@ class Flash
 	}
 
 
+	function errorFields($fields)
+	{
+		foreach ($fields as $key => $val)
+		{
+			if (is_int($key)) $this->errorField($val);
+			else              $this->errorField($key, $val);
+		}
+	}
+
+
 	/**
 	 * Process the message.
 	 */

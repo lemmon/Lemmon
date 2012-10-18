@@ -36,6 +36,67 @@ class String
 	{
 		return $html;
 	}
+	
+	
+	public static function sanitizeHtml($html)
+	{
+		/* *
+		$html = '<p>če</p>' . $html;
+		$html = '<p>č</p>' . $html;
+		$html = '<p>c</p>' . $html;
+		$html = "<ul><li>Foo</li><br><li>Bar\nBaz\n</li></ul>" . $html;
+		/* */
+		
+		$html = preg_replace('#[ ]*\r?\n[ ]*#', "\n", $html); // remove \r's
+		$html = preg_replace('#\xEF\xBB\xBF#', '', $html); // remove stupid characters
+		$html = preg_replace('#<(\w+)>(\xC2\xA0|\s+)*</\\1>#', '', $html); // remove whitespace including nbsp's
+		
+		/* *
+		#$html = "\t\r\n";
+		$res = '';
+		for ($i=0; $i < 50; $i++)
+		{
+			if ($ord = ord($html{$i}))
+			{
+				if ($ord > 122 or $ord < 47) $res .= sprintf('\\x%02s', strtoupper(base_convert($ord, 10, 16)));
+				else                         $res .= chr($ord);
+			}
+		}
+		return $res;
+		/* */
+		
+		$html = preg_replace('#<\w+>(\xC2\xA0|\s+)*</p>#', '', $html); // remove whitespace including nbsp's
+		$html = preg_replace('#</(p|h\d|ol|ul|dl|div|table)>#', "\n\n", $html); // paragraphs
+		$html = preg_replace('#[\t ]*<br(\s*/)?>[\t ]*#', "\n", $html); // new lines
+		$html = preg_replace('#[\t ]*\n[\t ]*#', "\n", $html); // whitespace remove
+		$html = trim($html);
+		// split blocks/paragraphs
+		$html = preg_split('#\n{2,}#', $html);
+		//
+		foreach ($html as $i => $line)
+		{
+			preg_match('#^<(p|h\d|ol|ul|dl|table)#', $line, $tag);
+			$tag_open = $tag[1];
+			// more cleanup
+			if (!$tag_open or ($tag_open!='ul' and $tag_open!='ul')) $line = preg_replace('#</?li[^>]*>#i', '', $line); // remove LIs from non lists
+			elseif (!$tag_open or ($tag_open!='dl')) $line = preg_replace('#</?(dt|dd)[^>]*>#i', '', $line); // remove DTs and DDs from non definition lists
+			else $line = str_replace("\n", "<br>\n", $line); // newlines to BRs
+			// wrap blocks
+			if ($tag_open)
+			{
+				$tag_close = '</' .$tag_open . '>';
+				if (substr($line, -strlen($tag_close)) != $tag_close) $line .= $tag_close;
+			}
+			else
+			{
+				$line = '<p>' . $line . '</p>';
+			}
+			//
+			$html[$i] = $line;
+		}
+		//
+		return join("\n\n", $html);
+	}
 
 
 	/**
@@ -49,8 +110,9 @@ class String
 		if ($text)
 		{
 			$text = trim($text);
-			$text = preg_replace('/(\r?\n){2,}/', '</p><p>', $text);
-			$text = preg_replace('/(\r?\n)/', '<br>', $text);
+			$text = preg_replace('#[ ]*\r?\n[ ]*#', "\n", $text);
+			$text = preg_replace('/\n{2,}/', '</p><p>', $text);
+			$text = preg_replace('/\n/', '<br>', $text);
 			$text = $text ? ('<p>' . $text . '</p>') : '';
 			// match E-mails
 			$text = preg_replace('/([\w]+)@([\w]{2,})\.([\w\.]{2,})/i', "$1[at]$2[dot]$3", $text);
@@ -82,7 +144,7 @@ class String
 	 * @return string
 	 * @todo   perhaps better is to convert "..." to &hellip; or test it with Twig what's best
 	 */
-	static public function line($str, $len=150)
+	static public function line($str, $len = 150)
 	{
 		$str = strip_tags($str);
 		$str = trim(preg_replace('/\s+/', ' ', $str));

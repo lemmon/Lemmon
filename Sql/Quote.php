@@ -20,7 +20,7 @@ class Quote
 
 	static function field($field)
 	{
-		$field = explode('.', $field);
+		$field = explode('.', trim($field, '.'));
 		foreach ($field as $i => $_field)
 		{
 			if ($_field!='*')
@@ -53,13 +53,13 @@ class Quote
 	}
 
 
-	static private function _field($field)
+	static function _field($field)
 	{
 		return str_replace('`', '\\`', $field);
 	}
 
 
-	static private function _value($value)
+	static function _value($value)
 	{
 		return str_replace('\'', '\\\'', $value);
 	}

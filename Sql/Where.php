@@ -16,17 +16,20 @@ namespace Lemmon\Sql;
  */
 class Where
 {
+	private $_table;
 	private $_originalExpression;
 	private $_expressionString;
 
 
-	function __construct($expr, $value=false)
+	function __construct(Table $table, $expr, $value=false)
 	{
 		$expression = '';
+		$args = func_get_args();
+		array_shift($args);
 		
 		//
 		// one argument
-		if ($value==false)
+		if ($value === false)
 		{
 			if ($expr instanceof Expression)
 			{
@@ -38,10 +41,10 @@ class Where
 			}
 		}
 		//
-		// more than two arguments
-		elseif (func_num_args()>2)
+		// three or more arguments
+		elseif (func_num_args() > 3)
 		{
-			$expression = new Expression(func_get_args());
+			$expression = new Expression($args);
 		}
 		//
 		// two arguments
@@ -57,11 +60,11 @@ class Where
 			{
 				if ($expr{0}=='!')
 				{
-					$expression = sprintf('%s IS NOT NULL', Quote::field(substr($expr, 1)));
+					$expression = sprintf('%s IS NOT NULL', Quote::field($table->getAlias() . '.' . substr($expr, 1)));
 				}
 				else
 				{
-					$expression = sprintf('%s IS NULL', Quote::field($expr));
+					$expression = sprintf('%s IS NULL', Quote::field($table->getAlias() . '.' . $expr));
 				}
 			}
 			// field (NOT) IN (array)
@@ -69,11 +72,11 @@ class Where
 			{
 				if ($expr{0}=='!')
 				{
-					$expression = sprintf('%s NOT IN (%s)', Quote::field(substr($expr, 1)), Quote::value($value));
+					$expression = sprintf('%s NOT IN (%s)', Quote::field($table->getAlias() . '.' . substr($expr, 1)), Quote::value($value));
 				}
 				else
 				{
-					$expression = sprintf('%s IN (%s)', Quote::field($expr), Quote::value($value));
+					$expression = sprintf('%s IN (%s)', Quote::field($table->getAlias() . '.' . $expr), Quote::value($value));
 				}
 			}
 			// field = value
@@ -82,17 +85,17 @@ class Where
 				// expression
 				if (is_object($value) and $value instanceof Expression)
 				{
-					$expression = new Expression(sprintf('%s = ?', $expr), $value);
+					$expression = new Expression(sprintf('%s.%s = ?', $table->getAlias(), $expr), $value);
 				}
 				else
 				{
 					if ($expr{0}=='!')
 					{
-						$expression = sprintf('%s != %s', Quote::field(substr($expr, 1)), Quote::value($value));
+						$expression = sprintf('%s != %s', Quote::field($table->getAlias() . '.' . substr($expr, 1)), Quote::value($value));
 					}
 					else
 					{
-						$expression = sprintf('%s = %s', Quote::field($expr), Quote::value($value));
+						$expression = sprintf('%s = %s', Quote::field($table->getAlias() . '.' . $expr), Quote::value($value));
 					}
 				}
 			}
@@ -111,9 +114,12 @@ class Where
 		}
 		else
 		{
-			$this->_originalExpression = func_get_args();
+			$this->_originalExpression = $args;
 			$this->_expressionString = $expression;
 		}
+		
+		// table
+		$this->_table = $table;
 	}
 
 

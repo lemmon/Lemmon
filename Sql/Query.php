@@ -22,7 +22,7 @@ class Query
 	#private $_statement;
 
 
-	function __construct($query=null)
+	function __construct($query = null)
 	{
 		// adapter
 		if (true/*is_null($adapter)*/)
@@ -57,9 +57,21 @@ class Query
 	}
 
 
-	function select($table=null)
+	function select($table = null)
 	{
-		return /*$this->_statement = */new Select($this, is_array($table) ? $table : func_get_args());
+		return new Select($this, is_array($table) ? $table : func_get_args());
+	}
+
+
+	function insert($table = null)
+	{
+		return new Insert($this, $table);
+	}
+
+
+	function replace($table = null)
+	{
+		return new Replace($this, $table);
 	}
 
 
@@ -69,8 +81,8 @@ class Query
 	}
 
 
-	function exec($query=null)
+	function exec($query)
 	{
-		return $this->_adapter->getPdo()->query(($query) ?: $this->_statement->getQueryString());
+ 		return $this->_adapter->getPdo()->query($query);
 	}
 }

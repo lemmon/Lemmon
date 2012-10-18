@@ -21,22 +21,22 @@ abstract class AbstractModel implements \IteratorAggregate
 {
 	const FETCH_AS_ARRAY = 1;
 
+	static $rowClass;
+	static $table;
+	static $primary = 'id';
+	static $fields;
+	static $sanitize;
+	static $required;
+	static $unique;
+	static $timestmp;
+	static $hasOne;
+	static $hasMany;
+	static $belongsTo;
+	static $hasAndBelongsToMany;
 
 	private $_query;
 	private $_statement;
-
-	protected $table;
-	protected $rowClass;
-	protected $primary             = 'id';
-	protected $required            = [];
-	protected $unique              = [];
-	protected $timestamp           = [];
-	protected $hasOne              = [];
-	protected $hasMany             = [];
-	protected $belongsTo           = [];
-	protected $hasAndBelongsToMany = [];
-
-	private $_restrict = [];
+	private $_schema;
 
 
 	final function __construct()
@@ -47,17 +47,16 @@ abstract class AbstractModel implements \IteratorAggregate
 		$this->_query = $query = DbAdapter::getDefault()->query();
 		$this->_statement = $statement = new SqlStatement($query);
 		
-		// table
-		if (!isset($this->table))
-		{
-			$this->table = \Lemmon\String::classToTableName($class_name);
-		}
-		$statement->from($this->table);
+		// schema
+		$this->_schema = $schema = Schema::factory($class_name);
 		
-		// primary key
-		if (!isset($this->primary))
+		// table
+		$statement->setTable($schema->table);
+		
+		// init model
+		if (method_exists($this, '__init'))
 		{
-			throw new \Exception('[todo] Automatic primary key.');
+			$this->__init();
 		}
 	}
 
@@ -89,7 +88,7 @@ abstract class AbstractModel implements \IteratorAggregate
 		elseif (is_int($cond) or is_string($cond))
 		{
 			// returns Row
-			return $model->where([$model->primary => $cond]);
+			return $model->wherePrimary($cond);
 		}
 		elseif (is_array($cond))
 		{
@@ -108,16 +107,37 @@ abstract class AbstractModel implements \IteratorAggregate
 	}
 
 
+	function wherePrimary($id)
+	{
+		return $this->where([$this->_schema->primary[0] => $id]);
+	}
+
+
+	function create()
+	{
+		return new $this->_schema->rowClass;
+	}
+
+
 	function getIterator($flags=null)
 	{
-		$pdo_statement = (new \Lemmon\Sql\Select($this->_statement))->exec();
+		$query = new \Lemmon\Sql\Select($this->_statement);
+		$query->cols($this->_schema->table . '.*');
+		$pdo_statement = $query->exec();
 		// fetch into row
-		if (isset($this->rowClass) and !($flags & self::FETCH_AS_ARRAY))
+		if ($rowClass = $this->_schema->rowClass and !($flags & self::FETCH_AS_ARRAY))
 		{
-			$pdo_statement->setFetchMode(\PDO::FETCH_CLASS, $this->rowClass);
+			$pdo_statement->setFetchMode(\PDO::FETCH_CLASS, $rowClass);
 		}
 		//
 		return $pdo_statement;
+	}
+
+
+	function count()
+	{
+		$query = new \Lemmon\Sql\Select($this->_statement);
+		return $query->count();
 	}
 
 

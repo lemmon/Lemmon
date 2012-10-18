@@ -24,6 +24,7 @@ class Adapter
 	function __construct($driver=[])
 	{
 		$this->_pdo = new \PDO("mysql:dbname={$driver['database']};host={$driver['host']}", $driver['username'], $driver['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$driver['encoding']}'"]);
+		$this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
 		$this->_pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ); 
 		
 		// default adapter

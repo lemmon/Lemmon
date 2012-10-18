@@ -233,13 +233,13 @@ class Route
 	 * defines Controller and Action if passed in the pattern. Slashes should
 	 * not be escaped.
 	 *
-	 * `$this->match('$controller(/$action)', array('controller'=>'[\w\-]+', 'action'=>'[\w\-]+'));`
+	 * `$this->match('$controller(/$action)', ['controller'=>'[\w\-]+', 'action'=>'[\w\-]+']);`
 	 *
 	 * @param  string  $pattern    case insensitive regex pattern
 	 * @param  array   $conditions array of case insensitive regex pattern bits
 	 * @return boolean
 	 */
-	final function match($pattern, $conditions=array())
+	final function match($pattern, $conditions = [])
 	{
 		$pattern = str_replace('/', '\/', $pattern);
 		$pattern = str_replace('.', '\.', $pattern);
@@ -282,9 +282,9 @@ class Route
 	 * @param  mixed  $params
 	 * @return mixed
 	 */
-	final function returnTo($link, $params=null)
+	final function returnTo($link, $params = null)
 	{
-		if ($redir=$_GET['redir'])
+		if ($redir = $_GET['redir'])
 		{
 			return $this->to($redir);
 		}
@@ -301,7 +301,7 @@ class Route
 	 * @param  mixed      $params
 	 * @return Route\Link
 	 */
-	final function to($link, $params=null)
+	final function to($link, $params = null)
 	{
 		return new Route\Link($this, $link, $params);
 	}

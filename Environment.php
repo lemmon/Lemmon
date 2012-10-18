@@ -18,7 +18,7 @@ namespace Lemmon;
  */
 class Environment
 {
-	static private $_development = false;
+	static private $_development = null;
 
 
 	/**
@@ -27,9 +27,12 @@ class Environment
 	function __construct()
 	{
 		// defaults
-		if ($_SERVER['SERVER_ADDR']=='127.0.0.1')
+		if (is_null(self::$_development))
 		{
-			self::setDev(true);
+			if ($_SERVER['SERVER_ADDR']=='127.0.0.1')
+			{
+				self::setDev(true);
+			}
 		}
 		// init class
 		if (method_exists($this, '__init'))

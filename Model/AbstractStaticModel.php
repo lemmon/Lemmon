@@ -12,8 +12,23 @@
 namespace Lemmon\Model;
 
 /**
- * Model.
+ * Static model.
  */
-interface RowInterface
+abstract class AbstractStaticModel /*implements \IteratorAggregate*/
 {
+	static protected $data = [];
+	
+	protected $name = 'name';
+	
+	private $_id;
+
+
+	function __construct($id = null)
+	{
+		// id
+		if (isset($id))
+		{
+			$this->_id = $id;
+		}
+	}
 }

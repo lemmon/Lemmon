@@ -26,8 +26,12 @@ class Select extends AbstractStatement
 		$q[] = 'SELECT ' . (is_array($this->_select) ? join(', ', $this->_select) : $this->_select);
 		// from
 		$q[] = 'FROM ' . $this->_table;
+		// join
+		if ($join = $this->_join) foreach ($join as $_join) $q[] = $_join->toString();
 		// where
 		if ($this->_where) $q[] = 'WHERE ' . join(' AND ', $this->_where);
+		// gropu
+		if ($this->_group) $q[] = 'GROUP BY ' . $this->_group;
 		// order
 		if ($this->_order) $q[] = 'ORDER BY ' . $this->_order;
 		// limit
@@ -36,6 +40,13 @@ class Select extends AbstractStatement
 		if ($this->_offset) $q[] = 'OFFSET ' . $this->_offset;
 		//
 		return join(' ', $q);
+	}
+
+
+	function from($table, $alias=null)
+	{
+		$this->setTable($table, $alias);
+		return $this;
 	}
 
 
@@ -52,12 +63,6 @@ class Select extends AbstractStatement
 		}
 		$this->_select = $select;
 		return $this;
-	}
-
-
-	function exec()
-	{
-		return $this->_query->exec($this->getQueryString());
 	}
 
 
@@ -94,5 +99,13 @@ class Select extends AbstractStatement
 		$pairs = clone $this;
 		$pairs->cols($field1, $field2);
 		return $pairs->exec()->fetchAll(\PDO::FETCH_COLUMN|\PDO::FETCH_UNIQUE);
+	}
+
+
+	function distinct($field)
+	{
+		$pairs = clone $this;
+		$pairs->cols($field);
+		return array_keys($pairs->exec()->fetchAll(\PDO::FETCH_UNIQUE));
 	}
 }

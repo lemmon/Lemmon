@@ -41,7 +41,7 @@
 					<?php if (isset($trace['file'])): ?>
 					<pre class="LemmonDebuggerDump source"><?php echo self::printSource($trace['file'], $trace['line']) ?></pre>
 					<?php endif ?>
-					<?php if ($trace['args']): ?>
+					<?php if ($i < 7 and $trace['args']): ?>
 					<h4>Arguments</h4>
 					<?php echo self::dumpArray($trace['args']) ?>
 					<?php endif ?>
