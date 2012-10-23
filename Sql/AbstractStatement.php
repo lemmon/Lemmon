@@ -168,6 +168,8 @@ abstract class AbstractStatement implements StatementInterface
 
 	function order($order)
 	{
+		$this->_order = new Expression($order);
+		/*
 		$order = join(', ', is_array($order) ? $order : func_get_args());
 		preg_match_all('/([\w\.]+)\s*(asc|desc)?/i', $order, $m);
 		foreach ($m[0] as $i => $_order)
@@ -175,6 +177,7 @@ abstract class AbstractStatement implements StatementInterface
 			$m[0][$i] = str_replace($m[1][$i], Quote::field($m[1][$i]), $m[0][$i]);
 		}
 		$this->_order = join(', ', $m[0]);
+		*/
 		return $this;
 	}
 

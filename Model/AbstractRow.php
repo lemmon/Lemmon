@@ -24,6 +24,7 @@ abstract class AbstractRow
 	static protected $model;
 
 	protected $data = [];
+	protected $dataPrev = [];
 
 	private $_schema;
 
@@ -41,6 +42,9 @@ abstract class AbstractRow
 			throw new \Exception('[todo]');
 		}
 	}
+
+
+	protected function onValidate(){}
 
 
 	static function find($cond)
@@ -89,6 +93,11 @@ abstract class AbstractRow
 				throw new ValidationException(I18n::tn('Missing field %2$s', 'Missing %d fields (%s)', count($fields), join(', ', $fields)), array_keys($fields));
 			}
 		}
+		// user defined validation
+		if ($this->onValidate($f) === false)
+		{
+			throw new \ValidationException('?');
+		}
 		//
 		return;
 	}
@@ -115,6 +124,7 @@ abstract class AbstractRow
 
 	function set($data)
 	{
+		$this->dataPrev += $this->data + array_intersect_key($this->data, $data);
 		foreach ($data as $field => $value) self::__set($field, $value);
 	}
 

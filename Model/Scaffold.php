@@ -94,7 +94,40 @@ abstract class Scaffold extends \Application
 
 	function update()
 	{
-		
+		if ($id = $this->route->id and $item = $this->_model->wherePrimary($this->route->id)->first())
+		{
+			// POST
+			if ($f = $_POST)
+			{
+				// sanitize fields
+				$f = $this->_sanitize($f);
+				// save
+				try
+				{
+					$item->set($f);
+					$item->save();
+					$this->flash->notice(\Lemmon_I18n::t('Item has been updated'));
+					return $this->request->redir(':section');
+				}
+				catch (\Lemmon\Model\ValidationException $e)
+				{
+					$this->flash->error($e->getMessage())
+					            ->error(\Lemmon_I18n::t('Item has NOT been updated'))
+					            ->errorFields($e->getFields());
+				}
+			}
+			// default values
+			else
+			{
+				$this->data['f'] = $item;
+			}
+			// model
+			$this->data['item'] = $item;
+		}
+		else
+		{
+			throw new \Lemmon\Http\Exception(404, \Lemmon_I18n::t('Entry NOT found.'));
+		}
 	}
 
 

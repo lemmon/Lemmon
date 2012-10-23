@@ -45,7 +45,7 @@ class Environment
 	/**
 	 * Set development environment.
 	 */
-	static function setDev($is=true)
+	static function setDev($is = true)
 	{
 		self::$_development = (bool)$is;
 	}
@@ -57,6 +57,6 @@ class Environment
 	 */
 	static function isDev()
 	{
-		return self::$_development;
+		return (bool)self::$_development;
 	}
 }
