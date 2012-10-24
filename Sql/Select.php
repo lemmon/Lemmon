@@ -30,7 +30,7 @@ class Select extends AbstractStatement
 		if ($join = $this->_join) foreach ($join as $_join) $q[] = $_join->toString();
 		// where
 		if ($this->_where) $q[] = 'WHERE ' . join(' AND ', $this->_where);
-		// gropu
+		// group
 		if ($this->_group) $q[] = 'GROUP BY ' . $this->_group;
 		// order
 		if ($this->_order) $q[] = 'ORDER BY ' . $this->_order;

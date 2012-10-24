@@ -69,6 +69,12 @@ class Query
 	}
 
 
+	function update($table = null)
+	{
+		return new Update($this, $table);
+	}
+
+
 	function replace($table = null)
 	{
 		return new Replace($this, $table);
