@@ -36,7 +36,7 @@ class Template
 	}
 
 
-	static function setFilesystem($filesystem, $include_lemmon=false)
+	static function setFilesystem($filesystem, $include_lemmon = false)
 	{
 		$filesystem = array(ROOT_DIR . '/' . $filesystem);
 		if ($include_lemmon) $filesystem[] = LIBS_DIR . '/Lemmon/Template';

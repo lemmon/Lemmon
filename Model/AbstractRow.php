@@ -21,15 +21,23 @@ use \Lemmon\Db\Adapter as DbAdapter,
  */
 abstract class AbstractRow
 {
+	const STATE_EMPTY    = 0b000; //  0
+	const STATE_NEW      = 0b001; //  1
+	const STATE_LOADED   = 0b010; //  2
+	const STATE_MODIFIED = 0b011; //  3
+	const STATE_CREATED  = 0b100; //  4
+	const STATE_UPDATED  = 0b110; //  6
+	
 	static protected $model;
 
 	protected $data = [];
-	protected $dataPrev = [];
+	protected $dataDefault = [];
 
 	private $_schema;
+	public $_state;
 
 
-	final function __construct($data=null)
+	final function __construct($data = null)
 	{
 		if (!isset(static::$model)) throw new \Exception('No model has been defined.');
 	
@@ -37,14 +45,27 @@ abstract class AbstractRow
 		$this->_schema = Schema::factory(static::$model);
 		
 		// data
-		if (isset($data))
+		if ($data)
 		{
-			throw new \Exception('[todo]');
+			if (is_array($data))
+			{
+				$this->dataDefault = $data;
+				$this->set($data);
+				$this->_state = self::STATE_LOADED;
+			}
+		}
+		else
+		{
+			$this->_state = self::STATE_EMPTY;
 		}
 	}
 
 
 	protected function onValidate(){}
+	protected function onBeforeCreate(){}
+	protected function onBeforeUpdate(){}
+	protected function onAfterCreate(){}
+	protected function onAfterUpdate(){}
 
 
 	static function find($cond)
@@ -103,19 +124,31 @@ abstract class AbstractRow
 	}
 
 
-	function save()
+	function save($force = false)
 	{
 		// data
 		$data = $this->data;
 		// validate
-		if ($this->_sanitize($data) !== false and $this->_validate($data) !== false)
+		if ($force or ($this->_sanitize($data) !== false and $this->_validate($data) !== false))
 		{
+			// before create/update event
+			($this->_state & 0b10) ? $this->onBeforeUpdate($data) : $this->onBeforeCreate($data);
 			// query
 			$q = new \Lemmon\Sql\Replace(DbAdapter::getDefault()->query(), $this->_schema->get('table'));
 			// set values
 			$q->set($data);
 			// execute
 			$q->exec();
+			// insert id
+			if ($id = $q->getInsertId())
+			{
+				$this->data[$this->_schema->get('primary')[0]] = $id;
+			}
+			// after create/update event
+			($this->_state & 0b10) ? $this->onAfterUpdate($data) : $this->onAfterCreate($data);
+			// state
+			$this->_state |= 0b100; // needs to reload
+			$this->_state ^= 0b1;   // not modified
 		}
 		//
 		return $this;
@@ -124,8 +157,9 @@ abstract class AbstractRow
 
 	function set($data)
 	{
-		$this->dataPrev += $this->data + array_intersect_key($this->data, $data);
-		foreach ($data as $field => $value) self::__set($field, $value);
+		$this->reload();
+		foreach ($data as $field => $value) $this->_set($field, $value);
+		$this->_state |= 0b1;
 	}
 
 
@@ -133,10 +167,28 @@ abstract class AbstractRow
 	{
 		return array_key_exists($key, $this->data) || method_exists($this, $method = 'get' . $key);
 	}
+	
+	
+	private function _getPrimaryData()
+	{
+		return array_intersect_key($this->data, array_flip($this->_schema->primary));
+	}
+	
+	
+	final function reload()
+	{
+		if ($this->_state & 0b100)
+		{
+			$this->dataDefault = $this->data;
+			$this->data = (array)(new \Lemmon\Sql\Select(DbAdapter::getDefault()->query(), $this->_schema->get('table')))->where($this->_getPrimaryData())->first();
+			$this->_state = self::STATE_LOADED;
+		}
+	}
 
 
 	function __get($key)
 	{
+		$this->reload();
 		if (method_exists($this, $method = 'get' . $key))
 		{
 			return $this->{$method}();
@@ -149,6 +201,14 @@ abstract class AbstractRow
 
 
 	function __set($key, $val)
+	{
+		$this->reload();
+		$this->_set($key, $val);
+		$this->_state |= 0b1;
+	}
+
+
+	private function _set($key, $val)
 	{
 		$this->data[$key] = $val;
 	}

@@ -46,7 +46,7 @@ class Replace extends AbstractStatement
 
 	function setTable($table)
 	{
-		if (!is_string($table)) throw new \Exception('Only single table is allowed on Replace query.');
+		if (!is_string($table)) throw new \Exception('Only single table is allowed on Replace query at this time.');
 		parent::setTable($table);
 	}
 
@@ -68,6 +68,12 @@ class Replace extends AbstractStatement
 	{
 		if (is_array($value)) throw new \Exception('Array is not allowed on replaced value.');
 		$this->_values[$field] = $value;
+	}
+
+
+	function getInsertId()
+	{
+		return $this->_insertId;
 	}
 
 

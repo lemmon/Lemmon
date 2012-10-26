@@ -36,7 +36,7 @@ class Expression
 		}, $expr);
 
 		// quote fields
-		$expr = preg_replace_callback('/[a-z0-9\_\.]+/', function($m){
+		$expr = preg_replace_callback('/[a-z\_\.][a-z0-9\_\.]+/', function($m){
 			return Quote::field($m[0]);
 		}, $expr);
 

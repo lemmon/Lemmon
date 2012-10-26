@@ -43,6 +43,7 @@ class Lemmon_Template_Extension extends Twig_Extension
 			'html'          => new Twig_Filter_Function('Lemmon\String::text', ['pre_escape' => 'html', 'is_safe' => ['html']]),
 			'html_sanitize' => new Twig_Filter_Function('Lemmon\String::sanitizeHtml', ['is_safe' => ['html']]),
 			'line'          => new Twig_Filter_Function('Lemmon\String::line'),
+			'p'             => new Twig_Filter_Function('Lemmon\String::paragraph'),
 			
 			// Numbers
 			'round'        => new Twig_Filter_Function('round'),

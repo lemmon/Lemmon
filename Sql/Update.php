@@ -45,7 +45,7 @@ class Update extends AbstractStatement
 
 	function setTable($table)
 	{
-		if (!is_string($table)) throw new \Exception('Only single table is allowed on Replace query.');
+		if (!is_string($table)) throw new \Exception('Only single table is allowed on Update query at this time.');
 		parent::setTable($table);
 	}
 
