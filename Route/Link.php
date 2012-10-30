@@ -53,7 +53,7 @@ class Link
 			{
 				$link = str_replace($replace[0], $params[$replace['match']], $link);
 			}
-			elseif (is_object($params) and method_exists($params, $method= ' get' . $replace['match']))
+			elseif (is_object($params) and method_exists($params, $method = 'get' . $replace['match']))
 			{
 				$link = str_replace($replace[0], $params->{$method}(), $link);
 			}
