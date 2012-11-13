@@ -86,7 +86,7 @@ class Select extends AbstractStatement
 	}
 
 
-	function assoc($field='id')
+	function assoc($field = 'id')
 	{
 		$res = [];
 		foreach ($this->all() as $row) $res[$row->{$field}] = $row;
@@ -94,7 +94,7 @@ class Select extends AbstractStatement
 	}
 
 
-	function pairs($field1='id', $field2='name')
+	function pairs($field1 = 'id', $field2 = 'name')
 	{
 		$pairs = clone $this;
 		$pairs->cols($field1, $field2);

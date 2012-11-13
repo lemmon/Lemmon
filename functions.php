@@ -1,15 +1,16 @@
 <?php
 
 
-function dump($dump)
+function dump($data)
 {
-	echo '<pre>'.print_r($dump, 1).'</pre>';
+	if (is_array($data)) echo \Lemmon\Debugger::dumpArray($data);
+	else                 echo \Lemmon\Debugger::dump($data);
 }
 
 
-function _t($line)
+function _t($phrase)
 {
-	return call_user_func_array('Lemmon_I18n::t', func_get_args());
+	return Lemmon_I18n::t($phrase);
 }
 
 

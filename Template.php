@@ -76,10 +76,10 @@ class Template
 	 * @param string $file
 	 * @param array  $data
 	 */
-	static function display($file, array $data=array())
+	static function display($file, array $data = [])
 	{
 		// setup template filesystem
-		if ($file{0}=='/')
+		if ($file{0} == '/')
 		{
 			$template_loader = new \Twig_Loader_Filesystem(dirname($file));
 			$file_name = basename($file);

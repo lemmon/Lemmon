@@ -21,7 +21,7 @@ class Adapter
 	private $_pdo;
 
 
-	function __construct($driver=[])
+	function __construct($driver = [])
 	{
 		$this->_pdo = new \PDO("mysql:dbname={$driver['database']};host={$driver['host']}", $driver['username'], $driver['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$driver['encoding']}'"]);
 		$this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
@@ -37,7 +37,7 @@ class Adapter
 
 	static function getDefault()
 	{
-		if ($adapter=self::$_default)
+		if ($adapter = self::$_default)
 		{
 			return $adapter;
 		}

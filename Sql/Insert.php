@@ -51,7 +51,7 @@ class Insert extends AbstractStatement
 	}
 
 
-	function set($field, $value=false)
+	function set($field, $value = false)
 	{
 		if (is_array($field))
 		{
@@ -61,6 +61,7 @@ class Insert extends AbstractStatement
 		{
 			$this->_set($field, $value);
 		}
+		return $this;
 	}
 
 

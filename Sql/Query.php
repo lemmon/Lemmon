@@ -19,10 +19,10 @@ use \Lemmon\Db\Adapter as DbAdapter;
 class Query
 {
 	private $_adapter;
-	#private $_statement;
+	private $_statement;
 
 
-	function __construct($query = null)
+	function __construct($query = null, $adapter = null)
 	{
 		// adapter
 		if (true/*is_null($adapter)*/)
@@ -43,8 +43,10 @@ class Query
 		// query
 		if (isset($query))
 		{
+			throw new \Exception('Not this way.');
 			if (is_string($query))
 			{
+				dump(func_get_args());die('--6');
 				$statement = new Statement($this);
 				$statement = call_user_func_array([$statement, 'setQuery'], func_get_args());
 				$this->_statement = $statement;

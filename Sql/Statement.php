@@ -21,7 +21,7 @@ class Statement extends AbstractStatement
 
 	function setQuery($query)
 	{
-		$this->_expression = new Expression($this, func_get_args());
+		$this->_expression = new Expression(func_get_args());
 		return $this;
 	}
 

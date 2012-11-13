@@ -60,6 +60,7 @@ class Update extends AbstractStatement
 		{
 			$this->_set($field, $value);
 		}
+		return $this;
 	}
 
 
