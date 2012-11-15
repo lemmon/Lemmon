@@ -31,14 +31,26 @@ class Link
 	 * @param  array         $params
 	 * @return string
 	 */
-	final function __construct(\Lemmon\Route $route, $link, $params=null)
+	final function __construct(\Lemmon\Route $route, $link, $params = null)
 	{
 		// route
 		$this->_route = $route;
 		
 		// url
 		$link = $this->_parseUrl($this->_linkRaw = (string)$link);
-
+		
+		// arguments
+		$args = array_slice(func_get_args(), 1);
+		
+		// params
+		/*
+		$params = (is_array($params)) ? $params : [];
+		$params['!app'] = [
+			'controller' => \Application::getController(),
+			'action'     => \Application::getAction(),
+		];
+		*/
+		
 		// check for registered link
 		if ($link{0}==':') 
 		{
@@ -46,10 +58,18 @@ class Link
 		}
 		
 		// match link variables with params
-		preg_match_all('#@?(\$(\(?)(?<match>[\w\.]+)\)?)#', $link, $m, PREG_SET_ORDER);
+		preg_match_all('#@?((%(?<argument>\d+)|\$(\(?)((?<call>\w+::\w+)|(?<match>[\w\.]+))\)?))#', $link, $m, PREG_SET_ORDER);
 		foreach ($m as $replace)
 		{
-			if (is_array($params) and array_key_exists($replace['match'], $params))
+			if ($_call = $replace['call'] and $_res = call_user_func($_call))
+			{
+				$link = str_replace($replace[0], $_res, $link);
+			}
+			elseif ($_arg = (int)$replace['argument'] and $_arg = $args[$_arg] and !is_array($_arg) and $_arg = (string)$_arg)
+			{
+				$link = str_replace($replace[0], $_arg, $link);
+			}
+			elseif (is_array($params) and array_key_exists($replace['match'], $params))
 			{
 				$link = str_replace($replace[0], $params[$replace['match']], $link);
 			}
