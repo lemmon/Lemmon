@@ -25,7 +25,6 @@ class Framework
 	protected $env;
 	protected $db;
 	protected $route;
-	protected $tpl;
 
 	protected $flash;
 	
@@ -102,66 +101,45 @@ class Framework
 	 * Run the application.
 	 * @param array $params
 	 */
-	static function run(array $params=null)
+	static function run(array $params = [])
 	{
+		// controller
+		$controller_name = self::$_controller;
+		$action_name     = self::$_action;
 		
-		#try
-		#{
-			// controller
-			$controller_name = self::$_controller;
-			$action_name     = self::$_action;
-			
-			$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
-			$action_method_name = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $action_name))));
-			
-			// create controller
-			$controller = new $controller_class_name($params);
-			
-			// POST
-			$controller->data['f'] = $_POST;
-			
-			// template
-			Template::appendFilesystem('app/views/' . $controller_name);
+		$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
+		$action_method_name = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $action_name))));
+		
+		// create controller
+		$controller = new $controller_class_name($params);
+		
+		// POST
+		$controller->data['f'] = $_POST;
+		
+		// template
+		Template::appendFilesystem('app/views/' . $controller_name);
 
-			// init controller
-			if (!method_exists($controller, '__init') or ($res=$controller->__init())===null)
+		// init controller
+		if (($res = $controller->__initApplication()) === null and ($res = $controller->__init()) === null)
+		{
+			// find action
+			if (method_exists($controller, $action_method_name))
 			{
-				// find action
-				if (method_exists($controller, $action_method_name))
-				{
-					// execute action
-					$res = $controller->{$action_method_name}();
-				}
-				else
-				{
-					// error on missing action
-					throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_method_name, get_class($controller)));
-				}
+				// execute action
+				$res = $controller->{$action_method_name}();
 			}
-		#}
-		#catch (\Exception $exception)
-		#{
-		#	// handle the exception
-		#	$trace = $exception->getTrace();
-		#	if ($trace[0]['file'])
-		#	{
-		#		$trace[0]['block'] = array_slice(file($trace[0]['file']), $trace[0]['line']-8, 15, true);
-		#	}
-		#	echo Template::display(LIBS_DIR . '/Lemmon/Template/exception.html', array(
-		#		'exception' => $exception,
-		#		'exception_block' => array_slice(file($exception->getFile()), $exception->getLine()-8, 15, true),
-		#		'trace' => $trace,
-		#	));
-		#	exit;
-		#}
+			else
+			{
+				// error on missing action
+				throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_method_name, get_class($controller)));
+			}
+		}
 		
 		// process the result
 		if ($res === null)
 		{
-			// load template
-			$data = $controller->getData(true);
 			// render
- 			$html = Template::display($action_name, $data);
+ 			$html = Template::display($action_name, $controller->getData(true));
 			// print
 			echo $html;
 		}
@@ -171,12 +149,21 @@ class Framework
 			$res->exec();
 			exit;
 		}
-		else
+		elseif (is_string($res))
 		{
 			// display plain text result
+			#header('Content-Type: text/plain');
 			echo $res;
 		}
+		else
+		{
+			dump($res);
+		}
 	}
+
+
+	protected function __initApplication(){}
+	protected function __init(){}
 
 
 	/**
@@ -202,13 +189,17 @@ class Framework
 	 * Runs application.
 	 * @return string
 	 */
-	final function __construct(array $params=null)
+	final function __construct(array $params = [])
 	{
 		// assign necessary classes
-		$this->log   = $params['log'];
-		$this->db    = $params['db'];
-		$this->env   = $params['env'];
-		$this->route = $params['route'];
+		foreach ($params as $key => $param)
+		{
+			$this->{$key} = $param;
+		}
+		#$this->log   = $params['log'];
+		#$this->db    = $params['db'];
+		#$this->env   = $params['env'];
+		#$this->route = $params['route'];
 		
 		// create rest of the classes
 		$this->flash   = new Flash($this->route);

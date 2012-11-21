@@ -19,7 +19,7 @@ class I18n
 	static $_cache = [];
 
 
-	function getLocales()
+	static function getLocales()
 	{
 		if (array_key_exists('locales', self::$_cache))
 			return self::$_cache['locales'];

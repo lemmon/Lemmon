@@ -17,6 +17,8 @@ namespace Lemmon\Model;
 abstract class Scaffold extends \Application
 {
 	protected $model;
+	
+	protected $item;
 
 	private $_model;
 
@@ -66,7 +68,7 @@ abstract class Scaffold extends \Application
 
 	function create()
 	{
-		$item = $this->_model->create();
+		$this->item = $item = $this->_model->create();
 		// on POST
 		if ($f = $_POST)
 		{

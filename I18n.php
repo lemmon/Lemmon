@@ -17,25 +17,25 @@ class Lemmon_I18N
 	
 	static $_nRule;
 	
-	static private $_nuberDecimalPoint = '.';
-	static private $_nuberThousandsSeparator = ',';
-	static private $_currencyLocal = array('$#', 2, '.', ',');
-	static private $_currencyInternational = array('# USD', 2, '.', ',');
-	static private $_days = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
-	static private $_daysShort = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-	static private $_moths = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
-	static private $_mothsShort = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec');
+	static $_nuberDecimalPoint = '.';
+	static $_nuberThousandsSeparator = ',';
+	static $_currencyLocal = array('$#', 2, '.', ',');
+	static $_currencyInternational = array('# USD', 2, '.', ',');
+	static $_days = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
+	static $_daysShort = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
+	static $_moths = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
+	static $_mothsShort = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec');
 
 
 	public static function setBase($base)
 	{
-		return self::$_base=rtrim( ($base{0}=='/') ? $base : ROOT_DIR . '/' . $base , '/' );
+		return self::$_base = rtrim( ($base{0}=='/') ? $base : ROOT_DIR . '/' . $base , '/' );
 	}
 
 
 	public static function getBase()
 	{
-		return ($base=self::$_base)
+		return ($base = self::$_base)
 		     ? $base
 		     : self::setBase('i18n');
 	}

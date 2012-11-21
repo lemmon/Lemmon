@@ -50,7 +50,7 @@ class String
 		$html = preg_replace('#[ ]*\r?\n[ ]*#', "\n", $html); // remove \r's
 		$html = preg_replace('#\xEF\xBB\xBF#', '', $html); // remove stupid characters
 		$html = preg_replace('#<(\w+)>(\xC2\xA0|\s+)*</\\1>#', '', $html); // remove whitespace including nbsp's
-		
+
 		/* *
 		#$html = "\t\r\n";
 		$res = '';
