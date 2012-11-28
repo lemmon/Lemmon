@@ -19,6 +19,7 @@ abstract class Scaffold extends \Application
 	protected $model;
 	
 	protected $item;
+	protected $redir = ':section';
 
 	private $_model;
 
@@ -58,15 +59,22 @@ abstract class Scaffold extends \Application
 		// sanitize fields
 		foreach ($f as $key => $val)
 		{
-			if ($val) $f[$key] = trim($f[$key]);
-			else $f[$key] = null;
+			if ($val)
+			{
+				if (is_string($val)) $f[$key] = trim($f[$key]);
+				elseif (is_array($val)) $f[$key] = $this->_sanitize($val);
+			}
+			else
+			{
+				$f[$key] = null;
+			}
 		}
 		//
 		return $f;
 	}
 
 
-	function create()
+	function create(array $params = [])
 	{
 		$this->item = $item = $this->_model->create();
 		// on POST
@@ -80,7 +88,7 @@ abstract class Scaffold extends \Application
 				$item->set($f);
 				$item->save();
 				$this->flash->notice(\Lemmon_I18n::t('Item has been created'));
-				return $this->request->redir(':section');
+				return $this->request->redir(($params['redir']) ?: $this->redir, $item);
 			}
 			catch (\Lemmon\Model\ValidationException $e)
 			{
@@ -96,7 +104,7 @@ abstract class Scaffold extends \Application
 
 	function update()
 	{
-		if ($id = $this->route->id and $item = $this->_model->wherePrimary($this->route->id)->first())
+		if ($id = $this->route->id and $this->item = $item = $this->_model->wherePrimary($this->route->id)->first())
 		{
 			// POST
 			if ($f = $_POST)
@@ -109,7 +117,7 @@ abstract class Scaffold extends \Application
 					$item->set($f);
 					$item->save();
 					$this->flash->notice(\Lemmon_I18n::t('Item has been updated'));
-					return $this->request->redir(':section');
+					return $this->request->redir(':section', $item);
 				}
 				catch (\Lemmon\Model\ValidationException $e)
 				{

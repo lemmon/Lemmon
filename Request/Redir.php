@@ -29,7 +29,7 @@ class Redir
 	 * @param string    $link
 	 * @param Framework $controller
 	 */
-	function __construct($link, \Lemmon\Framework $controller=null)
+	function __construct($link, \Lemmon\Framework $controller = null)
 	{
 		$this->_link = (string)$link;
 		$this->_controller = $controller;

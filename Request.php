@@ -35,9 +35,9 @@ class Request
 	 * @param  mixed         $params
 	 * @return Request\Redir
 	 */
-	function redir($link, $params=null)
+	function redir($link, $params = null)
 	{
-		if ($redir=$_GET['redir'])
+		if ($redir = $_GET['redir'])
 		{
 			return new Request\Redir($redir, $this->_controller);
 		}

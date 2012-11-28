@@ -149,7 +149,7 @@ class Framework
 			$res->exec();
 			exit;
 		}
-		elseif (is_string($res))
+		elseif (is_string($res) or is_int($res))
 		{
 			// display plain text result
 			#header('Content-Type: text/plain');

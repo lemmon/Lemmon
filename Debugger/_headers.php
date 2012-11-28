@@ -12,6 +12,7 @@
 pre.LemmonDebuggerDump {
 	border:1px solid #eee8d5;
 	padding:9px 10px 8px;
+	white-space:pre-wrap;
 }
 table.LemmonDebuggerDump {
 	width:100%;
@@ -26,7 +27,7 @@ table.LemmonDebuggerDump td {
 	border-right:1px solid #eee8d5;
 	border-bottom:1px solid #eee8d5;
 	background:#fdf6e3 !important;
-	white-space:pre;
+	white-space:pre-wrap;
 	vertical-align:top;
 }
 table.LemmonDebuggerDump th {

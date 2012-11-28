@@ -83,6 +83,12 @@ class Query
 	}
 
 
+	function delete($table = null)
+	{
+		return new Delete($this, $table);
+	}
+
+
 	function getAdapter()
 	{
 		return $this->_adapter;

@@ -17,9 +17,10 @@ namespace Lemmon;
 class Route
 {
 	private static $_instance;
+
+	protected $_root;
 	
 	private $_urlParsed;
-	private $_root;
 	private $_route;
 	private $_params = array();
 	private $_matches = array();
@@ -29,19 +30,22 @@ class Route
 	private $_uploadURL;
 
 
+	protected function __init(){}
+
+
 	/**
 	 * Build a Route Controller.
 	 *
 	 * Defines all the necessary parameters required to run this class
 	 * properly.
 	 */
-	final function __construct()
+	final function __construct(array $params = [])
 	{
 		// current instance
 		self::$_instance = $this;
-		
+
 		// get root
-		$this->_root = $root = substr($_SERVER['SCRIPT_NAME'], 0, -strlen(basename($_SERVER['SCRIPT_NAME'])));
+		$this->_root = $root = rtrim((($this->_root) ?: dirname($_SERVER['SCRIPT_NAME'])), '/') . '/';
 		
 		// parse url
 		$this->_urlParsed = $url_parsed = parse_url('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
@@ -57,13 +61,10 @@ class Route
 		
 		// default upload dirs
 		$this->_uploadDir = ROOT_DIR . '/' . 'uploads/';
-		$this->_uploadURL = $this->_root . 'uploads/';
+		$this->_uploadURL = $root . 'uploads/';
 		
 		// init class
-		if (method_exists($this, '__init'))
-		{
-			$this->__init();
-		}
+		$this->__init();
 	}
 
 

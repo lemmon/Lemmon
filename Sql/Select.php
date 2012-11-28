@@ -94,10 +94,10 @@ class Select extends AbstractStatement
 	}
 
 
-	function pairs($field1 = 'id', $field2 = 'name')
+	function pairs($field1 = null, $field2 = null)
 	{
 		$pairs = clone $this;
-		$pairs->cols($field1, $field2);
+		if ($field1 and $field2) $pairs->cols($field1, $field2);
 		return $pairs->exec()->fetchAll(\PDO::FETCH_COLUMN|\PDO::FETCH_UNIQUE);
 	}
 

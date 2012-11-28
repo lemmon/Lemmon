@@ -115,9 +115,11 @@ abstract class AbstractRow
 			}
 		}
 		// user defined validation
-		if ($this->onValidate($f) === false)
+		$_msg = '';
+		$_fields = [];
+		if ($this->onValidate($f, $_msg, $_fields) === false)
 		{
-			throw new \ValidationException('?');
+			throw new ValidationException($_msg, $_fields);
 		}
 		//
 		return;

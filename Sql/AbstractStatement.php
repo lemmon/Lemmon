@@ -163,6 +163,7 @@ abstract class AbstractStatement implements StatementInterface
 	function group($group)
 	{
 		$this->_group = new Expression($group);
+		return $this;
 	}
 
 
