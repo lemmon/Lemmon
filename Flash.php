@@ -98,7 +98,7 @@ class Flash
 	 * @param  string $message
 	 * @return Flash
 	 */
-	function errorField($field, $message='')
+	function errorField($field, $message = '')
 	{
 		$_SESSION['__FLASH__']['error_fields'][$field][] = $message;
 		return $this;

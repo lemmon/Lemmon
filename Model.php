@@ -835,7 +835,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 		$time = time();
 		foreach ($_FILES as $field => $file) if ($args=$this->_files[$field])
 		{
-			if ($file['error']==UPLOAD_ERR_OK)
+			if ($file['error'] == UPLOAD_ERR_OK)
 			{
 				$upload_base = Lemmon\Route::getInstance()->getUploadDir() . '/';
 				$upload_dir = strftime(rtrim($args['path'], '/')) . '/';
@@ -873,13 +873,18 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 					throw new Lemmon_Exception('Error moving uploaded file');
 				}
 			}
-			elseif ($file['error']==UPLOAD_ERR_NO_FILE)
+			elseif ($file['error'] == UPLOAD_ERR_NO_FILE)
 			{
 				$row[$field] = $this->{$field};
 			}
+			elseif ($file['error'] == UPLOAD_ERR_INI_SIZE)
+			{
+				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (exceeds max. file size of %s)', Lemmon\String::human($field), ini_get('upload_max_filesize'))->errorField($field);
+				$ok = false;
+			}
 			else
 			{
-				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (errno. %i)', Lemmon\String::human($field), $file['error'])->errorField($field);
+				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (errno. %d)', Lemmon\String::human($field), $file['error'])->errorField($field);
 				$ok = false;
 			}
 		}

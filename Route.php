@@ -17,6 +17,7 @@ namespace Lemmon;
 class Route
 {
 	private static $_instance;
+	private static $_host;
 
 	protected $_root;
 	
@@ -39,16 +40,20 @@ class Route
 	 * Defines all the necessary parameters required to run this class
 	 * properly.
 	 */
-	final function __construct(array $params = [])
+	final function __construct(array $config = [])
 	{
 		// current instance
 		self::$_instance = $this;
+		
+		// host
+		if (isset($config['host']))
+			self::$_host = $config['host'];
 
 		// get root
-		$this->_root = $root = rtrim((($this->_root) ?: dirname($_SERVER['SCRIPT_NAME'])), '/') . '/';
+		$this->_root = $root = ($config['root']) ?: (rtrim((($this->_root) ?: dirname($_SERVER['SCRIPT_NAME'])), '/') . '/');
 		
 		// parse url
-		$this->_urlParsed = $url_parsed = parse_url('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+		$this->_urlParsed = $url_parsed = parse_url('http://' . self::getHost() . $_SERVER['REQUEST_URI']);
 		
 		// get route
 		$this->_route = $route = substr($url_parsed['path'], strlen($root));
@@ -62,6 +67,10 @@ class Route
 		// default upload dirs
 		$this->_uploadDir = ROOT_DIR . '/' . 'uploads/';
 		$this->_uploadURL = $root . 'uploads/';
+		
+		// defaults
+		$this->register('home', '/');
+		$this->register('self', $this->_route);
 		
 		// init class
 		$this->__init();
@@ -124,7 +133,7 @@ class Route
 	 */
 	final static function getHost()
 	{
-		return $_SERVER['HTTP_HOST'];
+		return (self::$_host) ?: $_SERVER['HTTP_HOST'];
 	}
 
 
@@ -244,6 +253,7 @@ class Route
 	{
 		$pattern = str_replace('/', '\/', $pattern);
 		$pattern = str_replace('.', '\.', $pattern);
+		$pattern = str_replace('*', '.*', $pattern);
 		$pattern = '^' . str_replace(')', ')?', $pattern);
 		
 		if (is_array($conditions)) foreach ($conditions as $key => $val)

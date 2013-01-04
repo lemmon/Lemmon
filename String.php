@@ -36,36 +36,25 @@ class String
 	{
 		return $html;
 	}
-	
-	
+
+
+	private static function _sanitizeImageBlock($block)
+	{
+		preg_match_all('#([^=\s]+)="([^"]*)"#i', $block[2], $m, PREG_SET_ORDER);
+		foreach ($m as $_arg) $args[$_arg[1]] = $_arg[2];
+		if (preg_match('#(left|right|center)#i', $block[1], $m)) $align = $m[1];
+		$src = preg_replace('#uploads(/0\d*x\d*[a-z]*)?#i', 'uploads/0' . $args['width'] . 'x', $args['src']);
+		$res = '<div class="image' . ($align ? ' ' . $align : '') . '" style="width:' . $args['width'] . 'px"><img src="'  . $src .'" width="' . $args['width'] . '"></div>';
+		return $res;
+	}
+
+
 	public static function sanitizeHtml($html)
 	{
-		/* *
-		$html = '<p>če</p>' . $html;
-		$html = '<p>č</p>' . $html;
-		$html = '<p>c</p>' . $html;
-		$html = "<ul><li>Foo</li><br><li>Bar\nBaz\n</li></ul>" . $html;
-		/* */
-		
 		$html = preg_replace('#[ ]*\r?\n[ ]*#', "\n", $html); // remove \r's
 		$html = preg_replace('#\xEF\xBB\xBF#', '', $html); // remove stupid characters
 		$html = preg_replace('#<(\w+)>(\xC2\xA0|\s+)*</\\1>#', '', $html); // remove whitespace including nbsp's
-
-		/* *
-		#$html = "\t\r\n";
-		$res = '';
-		for ($i=0; $i < 50; $i++)
-		{
-			if ($ord = ord($html{$i}))
-			{
-				if ($ord > 122 or $ord < 47) $res .= sprintf('\\x%02s', strtoupper(base_convert($ord, 10, 16)));
-				else                         $res .= chr($ord);
-			}
-		}
-		return $res;
-		/* */
-		
-		$html = preg_replace('#<\w+>(\xC2\xA0|\s+)*</p>#', '', $html); // remove whitespace including nbsp's
+		$html = preg_replace('#<(\w+)[^>]*>(\xC2\xA0|\s+)*</\1>#', '', $html); // remove whitespace including nbsp's
 		$html = preg_replace('#</(p|h\d|ol|ul|dl|div|table)>#', "\n\n", $html); // paragraphs
 		$html = preg_replace('#[\t ]*<br(\s*/)?>[\t ]*#', "\n", $html); // new lines
 		$html = preg_replace('#[\t ]*\n[\t ]*#', "\n", $html); // whitespace remove
@@ -75,24 +64,34 @@ class String
 		//
 		foreach ($html as $i => $line)
 		{
-			preg_match('#^<(p|h\d|ol|ul|dl|table)#', $line, $tag);
-			$tag_open = $tag[1];
-			// more cleanup
-			if (!$tag_open or ($tag_open!='ul' and $tag_open!='ul')) $line = preg_replace('#</?li[^>]*>#i', '', $line); // remove LIs from non lists
-			elseif (!$tag_open or ($tag_open!='dl')) $line = preg_replace('#</?(dt|dd)[^>]*>#i', '', $line); // remove DTs and DDs from non definition lists
-			else $line = str_replace("\n", "<br>\n", $line); // newlines to BRs
-			// wrap blocks
-			if ($tag_open)
+			// process images
+			preg_match('#class="([^"]+)".+<img([^>]*)>#i', $line, $m);
+			if ($m)
 			{
-				$tag_close = '</' .$tag_open . '>';
-				if (substr($line, -strlen($tag_close)) != $tag_close) $line .= $tag_close;
+				$line = self::_sanitizeImageBlock($m);
 			}
+			// rest
 			else
 			{
-				$line = '<p>' . $line . '</p>';
+				preg_match('#^<(p|h\d|ol|ul|dl|div|table)#', $line, $tag);
+				$tag_open = $tag[1];
+				// more cleanup
+				if (!$tag_open or ($tag_open!='ul' and $tag_open!='ul')) $line = preg_replace('#</?li[^>]*>#i', '', $line); // remove LIs from non lists
+				elseif (!$tag_open or ($tag_open!='dl')) $line = preg_replace('#</?(dt|dd)[^>]*>#i', '', $line); // remove DTs and DDs from non definition lists
+				else $line = str_replace("\n", "<br>\n", $line); // newlines to BRs
+				// wrap blocks
+				if ($tag_open)
+				{
+					$tag_close = '</' .$tag_open . '>';
+					if (substr($line, -strlen($tag_close)) != $tag_close) $line .= $tag_close;
+				}
+				else
+				{
+					$line = '<p>' . $line . '</p>';
+				}
 			}
 			//
-			$html[$i] = $line;
+			$html[$i] = str_replace("\n", "<br>\n", $line);
 		}
 		//
 		return join("\n\n", $html);
@@ -160,6 +159,21 @@ class String
 		$text = preg_replace('/[ ]*\n[ ]*/', "\n", $text);
 		$text = explode("\n\n", $text);
 		return $text[0];
+	}
+
+
+	static function str2byte($str)
+	{
+		if(is_numeric($str))
+			return (int)$str;
+		
+		if(!preg_match('/^([0-9]+) ?([KMGTPEZY])?B?$/i', trim($str), $match))
+			return 0;
+		
+		if(!empty($match[2]))
+			return $match[1] * pow(1024, 1 + (int) stripos('KMGTPEZY', $match[2]));
+		
+		return (int)$match[1];
 	}
 
 

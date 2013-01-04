@@ -55,11 +55,12 @@ class Redir
 		$link = (string)$this;
 
 		// assign new hash for flash messages
-		if ($c=$this->_controller)
+		if ($c = $this->_controller)
 		{
 			$c->getFlash()->assignNewLink($link);
 		}
 
+		$_SESSION['x'] = 'y';
 		// redirect
 		if ($this->_code)
 		{

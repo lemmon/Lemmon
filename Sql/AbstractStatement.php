@@ -26,7 +26,7 @@ abstract class AbstractStatement implements StatementInterface
 	protected $_offset;
 
 
-	function __construct($query, $table=null)
+	function __construct($query, $table = null)
 	{
 		// query
 		if ($query instanceof Query)
@@ -66,7 +66,7 @@ abstract class AbstractStatement implements StatementInterface
 	}
 
 
-	function setTable($table, $alias=null)
+	function setTable($table, $alias = null)
 	{
 		if (is_array($table))
 		{
@@ -92,7 +92,7 @@ abstract class AbstractStatement implements StatementInterface
 	}
 
 
-	function join($table, $arg, $value=null)
+	function join($table, $arg, $value = null)
 	{
 		if (is_array($arg))
 		{
@@ -114,37 +114,40 @@ abstract class AbstractStatement implements StatementInterface
 	/* /DEV */
 
 
-	function where($expr, $value=false)
+	function where($expr, $value = false)
 	{
-		if (is_array($expr))
+		if ($expr)
 		{
-			foreach ($expr as $_expr => $_value)
+			if (is_array($expr))
 			{
-				if (is_numeric($_expr))
+				foreach ($expr as $_expr => $_value)
 				{
-					if (!is_array($_value))
+					if (is_numeric($_expr))
 					{
-						$this->_where[] = new Where($this->getTable(), $_value);
+						if (!is_array($_value))
+						{
+							$this->_where[] = new Where($this->getTable(), $_value);
+						}
+						else
+						{
+							throw new \Exception('This kind of array is not supported.');
+						}
 					}
 					else
 					{
-						throw new \Exception('This kind of array is not supported.');
+						$this->_where[] = new Where($this->getTable(), $_expr, $_value);
 					}
 				}
-				else
-				{
-					$this->_where[] = new Where($this->getTable(), $_expr, $_value);
-				}
 			}
-		}
-		elseif (func_num_args()>2)
-		{
-			$_where = new \ReflectionClass(__NAMESPACE__ . '\Where');
-			$this->_where[] = $_where->newInstanceArgs(func_get_args());
-		}
-		else
-		{
-			$this->_where[] = new Where($this->getTable(), $expr, $value);
+			elseif (func_num_args() > 2)
+			{
+				$_where = new \ReflectionClass(__NAMESPACE__ . '\Where');
+				$this->_where[] = $_where->newInstanceArgs(func_get_args());
+			}
+			else
+			{
+				$this->_where[] = new Where($this->getTable(), $expr, $value);
+			}
 		}
 		return $this;
 	}

@@ -21,14 +21,15 @@ class Framework
 	private static $_controller = 'index';
 	private static $_action = 'index';
 
-	protected $log;
 	protected $env;
 	protected $db;
 	protected $route;
+	protected $template;
+	protected $log;
 
 	protected $flash;
 	
-	protected $data = array();
+	protected $data = [];
 
 
 	/**
@@ -42,16 +43,12 @@ class Framework
 		$loader->addMask('*_Controller', function($class){
 			return '$root/app/controllers/' . strtolower(str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1_$2', substr($class, 0, -11)))) . '_controller.php';
 		});
-		
 		// register mailers
 		$loader->addMask('*Mailer', '$root/app/mailers/$file.php');
-		
 		// register application class
 		$loader->addMask('Application', '$root/app/controllers/application.php');
-		
 		// register models
 		$loader->add('$root/app/models/$file.php');
-		
 		//
 		return $loader;
 	}
@@ -105,16 +102,20 @@ class Framework
 	{
 		// controller
 		$controller_name = self::$_controller;
-		$action_name     = self::$_action;
+		$action_name = self::$_action;
 		
-		$controller_class_name = str_replace(array('. ', ' '), array('_', ''), ucwords(str_replace(array('/', '_'), array('. ', ' '), $controller_name))) . '_Controller';
+		$controller_class_name = str_replace(['. ', ' '], ['_', ''], ucwords(str_replace(['/', '_'], ['. ', ' '], $controller_name))) . '_Controller';
 		$action_method_name = lcfirst(str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $action_name))));
 		
 		// create controller
 		$controller = new $controller_class_name($params);
 		
-		// POST
-		$controller->data['f'] = $_POST;
+		// common template data
+		$controller->data = [
+			'f'     => $_POST,
+			'flash' => $controller->getFlash(),
+			'link'  => $controller->getRoute(),
+		];
 		
 		// template
 		Template::appendFilesystem('app/views/' . $controller_name);
@@ -136,11 +137,15 @@ class Framework
 		}
 		
 		// process the result
-		if ($res === null)
+		if ($controller->template instanceof Template\Template and ($res === null or $res instanceof Template\Template))
 		{
-			// render
- 			$html = Template::display($action_name, $controller->getData(true));
-			// print
+			$template = ($res) ?: $controller->template;
+			$html = $template->render($controller->data);
+			echo $html;
+		}
+		elseif ($res === null)
+		{
+			$html = Template::display($action_name, $controller->getData(true));
 			echo $html;
 		}
 		elseif ($res instanceof Request\Redir)
@@ -155,7 +160,7 @@ class Framework
 			#header('Content-Type: text/plain');
 			echo $res;
 		}
-		else
+		elseif ($res)
 		{
 			dump($res);
 		}
@@ -170,7 +175,7 @@ class Framework
 	 * Runs application.
 	 * @return string
 	 */
-	final function getData($include_data=false)
+	final function getData($include_data = false)
 	{
 		$data = $this->data;
 		// include framework's data
@@ -185,6 +190,12 @@ class Framework
 	}
 
 
+	final function setData(array $data)
+	{
+		$this->data = array_merge($this->data, $data);
+	}
+
+
 	/**
 	 * Runs application.
 	 * @return string
@@ -196,10 +207,6 @@ class Framework
 		{
 			$this->{$key} = $param;
 		}
-		#$this->log   = $params['log'];
-		#$this->db    = $params['db'];
-		#$this->env   = $params['env'];
-		#$this->route = $params['route'];
 		
 		// create rest of the classes
 		$this->flash   = new Flash($this->route);
@@ -226,6 +233,12 @@ class Framework
 	function getRoute()
 	{
 		return $this->route;
+	}
+
+
+	function getRequest()
+	{
+		return $this->request;
 	}
 
 

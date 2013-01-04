@@ -66,6 +66,7 @@ abstract class AbstractRow
 	protected function onBeforeUpdate(){}
 	protected function onAfterCreate(){}
 	protected function onAfterUpdate(){}
+	protected function upload(){}
 
 
 	static function find($cond)
@@ -88,7 +89,7 @@ abstract class AbstractRow
 	}
 
 
-	private function _validate(&$f)
+	private function _validate(&$f, &$to_upload)
 	{
 		// required fields
 		if (is_array($r = $this->_schema->get('required')))
@@ -104,6 +105,10 @@ abstract class AbstractRow
 					case 'allow_null':
 						if (!array_key_exists($field, $f)) $fields[$field] = I18n::t(String::human($field));
 						break;
+					case 'upload':
+						if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK)
+							and !isset($f[$field])) $fields[$field] = I18n::t(String::human($field));
+						break;
 					default:
 						throw new \Exception(sprintf('Unknown flag `%s` on field `%s`.', $condition, $field));
 						break;
@@ -112,6 +117,50 @@ abstract class AbstractRow
 			if ($fields)
 			{
 				throw new ValidationException(I18n::tn('Missing field %2$s', 'Missing %d fields (%s)', count($fields), join(', ', $fields)), array_keys($fields));
+			}
+		}
+		// uploads
+		if ($uploads = $this->_schema->uploads and $base_dir = $this->_schema->uploadDir)
+		{
+			$to_upload = [];
+			// uploads
+			foreach ($_FILES as $field => $file)
+			{
+				$upload_dir = strftime($uploads[$field]);
+				// upload dir
+				$_dir = $base_dir . ($upload_dir ? '/' . $upload_dir : '');
+				if (!($_dir and (is_dir($_dir) or @mkdir($_dir, 0777, true)) and is_writable($_dir)))
+				{
+					throw new \Exception(sprintf('Invalid upload dir %s.', $_dir));
+				}
+				// upload
+				if ($file['error'] == UPLOAD_ERR_OK)
+				{
+					$_file = [
+						'base' => substr($file['name'], 0, strrpos($file['name'], '.')),
+						'ext'  => substr($file['name'], strrpos($file['name'], '.') + 1),
+					];
+					$file_name = String::asciize($_file['base']) . '.' . time() . '.' . $_file['ext'];
+					$file = $_dir . '/' . $file_name;
+					$f[$field] = ($upload_dir ? $upload_dir . '/' : '') . $file_name;
+					$to_upload[$field] = [
+						'dir' => $base_dir,
+						'file' => ($upload_dir ? $upload_dir . '/' : '') . $file_name,
+						'_old' => $this->data[$field],
+					];
+					if (file_exists($file))
+					{
+						throw new \Exception(sprintf('File %s already exists at provided location.', $file));
+					}
+				}
+				elseif ($file['error'] == UPLOAD_ERR_NO_FILE)
+				{
+					// upload stays the same
+				}
+				else
+				{
+					throw new \Exception(sprintf('File upload error no #%d.', $file['error']));
+				}
 			}
 		}
 		// user defined validation
@@ -126,12 +175,38 @@ abstract class AbstractRow
 	}
 
 
+	private function _uploads($to_upload, &$f)
+	{
+		if ($to_upload)
+		{
+			foreach ($to_upload as $field => $upload)
+			{
+				$file = $_FILES[$field];
+				// old file
+				if ($upload['_old']) @unlink($upload['dir'] . '/' . $upload['_old']);
+				unset($upload['_old']);
+				$file_fullpath = join('/', $upload);
+				// new file
+				if (move_uploaded_file($file['tmp_name'], $file_fullpath))
+				{
+					$upload = $upload['file'];
+					$this->upload($field, $file_fullpath, $f);
+				}
+				else
+				{
+					throw new \Exception(sprintf('Unknown error occured when moving uploaded %s (%s).', $field, $upload));
+				}
+			}
+		}
+	}
+
+
 	function save($force = false)
 	{
 		// data
 		$data = $this->data;
 		// validate
-		if ($force or ($this->_sanitize($data) !== false and $this->_validate($data) !== false))
+		if ($force or ($this->_sanitize($data) !== false and $this->_validate($data, $to_upload) !== false and $this->_uploads($to_upload, $data) !== false))
 		{
 			// before create/update event
 			($this->_state & 0b10) ? $this->onBeforeUpdate($data) : $this->onBeforeCreate($data);
@@ -195,6 +270,12 @@ abstract class AbstractRow
 		{
 			return $this->{$method}();
 		}
+		/*
+		elseif (array_key_exists($key, $this->_schema->uploads))
+		{
+			return new \Lemmon\Files\File($this->_schema->uploadDir . '/' . $this->data[$key]);
+		}
+		*/
 		else
 		{
 			return $this->data[$key];

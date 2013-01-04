@@ -16,6 +16,7 @@ namespace Lemmon;
  */
 abstract class Mailer implements Mailer\MailerInterface
 {
+	private $_res;
 
 
 	final function __construct()
@@ -40,6 +41,12 @@ abstract class Mailer implements Mailer\MailerInterface
 	}
 
 
+	final function getRes()
+	{
+		return $this->_res;
+	}
+
+
 	final static function __callStatic($class_name, $arguments)
 	{
 		$called_class_name = get_called_class();
@@ -54,8 +61,8 @@ abstract class Mailer implements Mailer\MailerInterface
 				$mail = call_user_func_array(array($mailer, $m[2]), $arguments);
 				if (method_exists($mailer, $m[1]))
 				{
-					$mailer->{$m[1]}($mail);
-					return $this;
+					$mailer->_res = $mailer->{$m[1]}($mail);
+					return $mailer;
 				}
 				else
 				{

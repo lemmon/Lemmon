@@ -25,6 +25,7 @@ abstract class AbstractModel implements \IteratorAggregate
 	static $table;
 	static $primary = 'id';
 	static $fields;
+	static $uploads;
 	static $sanitize;
 	static $required;
 	static $unique;
@@ -33,6 +34,7 @@ abstract class AbstractModel implements \IteratorAggregate
 	static $hasMany;
 	static $belongsTo;
 	static $hasAndBelongsToMany;
+	static $uploadDir;
 
 	private $_query;
 	private $_statement;
@@ -75,7 +77,7 @@ abstract class AbstractModel implements \IteratorAggregate
 	}
 
 
-	static function find($cond=null)
+	static function find($cond = null)
 	{
 		$class_name = get_called_class();
 		$model = new $class_name;
@@ -119,26 +121,18 @@ abstract class AbstractModel implements \IteratorAggregate
 	}
 
 
-	function getIterator($flags = null)
+	function getIterator()
 	{
 		return new \ArrayIterator($this->all());
 	}
 
 
-	private function _getIterator($flags = null)
+	private function _getIterator()
 	{
 		$query = new \Lemmon\Sql\Select($this->_statement);
 		$query->cols($this->_schema->table . '.*');
 		$pdo_statement = $query->exec();
-		// fetch into row
-		/*
-		if ($rowClass = $this->_schema->rowClass and !($flags & self::FETCH_AS_ARRAY))
-		{
-			$pdo_statement->setFetchMode(\PDO::FETCH_CLASS, $rowClass);
-		}
-		*/
 		$pdo_statement->setFetchMode(\PDO::FETCH_ASSOC);
-		//
 		return $pdo_statement;
 	}
 
@@ -150,11 +144,11 @@ abstract class AbstractModel implements \IteratorAggregate
 	}
 
 
-	function all($flags = null)
+	function all()
 	{
 		$res = [];
 		$rowClass = $this->_schema->rowClass;
-		foreach ($this->_getIterator($flags)->fetchAll() as $row)
+		foreach ($this->_getIterator()->fetchAll() as $row)
 		{
 			$res[] = new $rowClass($row);
 		}
@@ -162,10 +156,22 @@ abstract class AbstractModel implements \IteratorAggregate
 	}
 
 
-	function first($flags = null)
+	function allByPrimary()
+	{
+		$res = [];
+		$rowClass = $this->_schema->rowClass;
+		foreach ($this->_getIterator()->fetchAll() as $row)
+		{
+			$res[$row['id']] = new $rowClass($row);
+		}
+		return $res;
+	}
+
+
+	function first()
 	{
 		$rowClass = $this->_schema->rowClass;
-		if ($row = $this->_getIterator($flags)->fetch())
+		if ($row = $this->_getIterator()->fetch())
 		{
 			return new $rowClass($row);
 		}
