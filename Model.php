@@ -879,7 +879,7 @@ abstract class Lemmon_Model extends Lemmon_MySQL_Query_Builder
 			}
 			elseif ($file['error'] == UPLOAD_ERR_INI_SIZE)
 			{
-				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (exceeds max. file size of %s)', Lemmon\String::human($field), ini_get('upload_max_filesize'))->errorField($field);
+				Lemmon\Framework::getInstance()->getFlash()->error('Error uploading %s (exceeds max. file size of %s)', Lemmon\String::human($field), Lemmon_I18n::fileSize(Lemmon\String::str2byte(ini_get('upload_max_filesize')), 0))->errorField($field);
 				$ok = false;
 			}
 			else
