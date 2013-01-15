@@ -21,7 +21,7 @@ class Where
 	private $_expressionString;
 
 
-	function __construct(Table $table, $expr, $value=false)
+	function __construct(Table $table, $expr, $value = false)
 	{
 		$expression = '';
 		$args = func_get_args();

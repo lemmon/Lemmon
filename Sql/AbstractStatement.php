@@ -142,7 +142,7 @@ abstract class AbstractStatement implements StatementInterface
 			elseif (func_num_args() > 2)
 			{
 				$_where = new \ReflectionClass(__NAMESPACE__ . '\Where');
-				$this->_where[] = $_where->newInstanceArgs(func_get_args());
+				$this->_where[] = $_where->newInstanceArgs(array_merge([$this->getTable()], func_get_args()));
 			}
 			else
 			{
