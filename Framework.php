@@ -117,7 +117,7 @@ class Framework
 			'link'  => $controller->getRoute(),
 		];
 		
-		// template
+		// template (legacy)
 		Template::appendFilesystem('app/views/' . $controller_name);
 
 		// init controller
@@ -137,7 +137,7 @@ class Framework
 		}
 		
 		// process the result
-		if ($controller->template instanceof Template\Template and ($res === null or $res instanceof Template\Template))
+		if (($res === null and $controller->template instanceof Template\Template) or ($res instanceof Template\Template))
 		{
 			$template = ($res) ?: $controller->template;
 			$html = $template->render($controller->data);
