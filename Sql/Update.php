@@ -29,7 +29,10 @@ class Update extends AbstractStatement
 		// fields & values
 		foreach ($this->_values as $field => $value)
 		{
-			$values[] = Quote::field($field) . ' = ' . ($value instanceof Expression ? $value : Quote::value($value));
+			if (is_int($field) and $value instanceof Expression)
+				$values[] = $value;
+			else
+				$values[] = Quote::field($field) . ' = ' . ($value instanceof Expression ? $value : Quote::value($value));
 		}
 		$q[] = 'SET ' . join(', ', $values);
 		// where
@@ -50,7 +53,7 @@ class Update extends AbstractStatement
 	}
 
 
-	function set($field, $value=false)
+	function set($field, $value = false)
 	{
 		if (is_array($field))
 		{
