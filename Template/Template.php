@@ -94,12 +94,18 @@ class Template
 	}
 
 
-	function appendFilesystem($filesystem)
+	function appendFilesystem($filesystem, $base = null)
 	{
+		if (!$base)
+			$base = $this->_filesystem[0];
+		
 		foreach (explode('/', trim($filesystem, '/')) as $part)
 		{
-			array_unshift($this->_filesystem, $this->_filesystem[0] . '/' . $part);
+			if ($path = realpath($base . '/' . $part))
+				array_unshift($this->_filesystem, $path);
+			$base = $this->_filesystem[0];
 		}
+
 		return $this;
 	}
 

@@ -22,19 +22,19 @@ class Autoloader
 	const INCLUDE_PSR0 = 2;
 
 
-	private $_masks = array();
-	private $_files = array();
+	private $_masks = [];
+	private $_files = [];
 
 
 	/**
 	 * Register masked class name.
 	 * @param  string     $mask
-	 * @param  string     $file
+	 * @param  string     $path
 	 * @return Autoloader
 	 */
-	function addMask($mask, $file)
+	function addMask($mask, $path)
 	{
-		$this->_masks['/^' . str_replace('*', '.+', $mask) . '$/'] = $file;
+		$this->_masks[] = ['mask' => '/^' . str_replace('*', '.+', $mask) . '$/', 'path' => $path];
 	}
 
 
@@ -90,11 +90,11 @@ class Autoloader
 	function findFile($class)
 	{
 		// masks
-		foreach ($this->_masks as $mask => $file) if (preg_match($mask, $class))
+		foreach ($this->_masks as $_mask) if (preg_match($_mask['mask'], $class))
 		{
-			if (is_callable($file)) $file = $file($class);
-			$file = $this->_parse($file, $class);
-			if (is_file($file)) return $file;
+			if (is_callable($_mask['path'])) $_mask['path'] = $_mask['path']($class);
+			$path = $this->_parse($_mask['path'], $class);
+			if (is_file($path)) return $path;
 		}
 		// files
 		foreach ($this->_files as $path)
