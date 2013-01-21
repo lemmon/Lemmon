@@ -61,6 +61,6 @@ class Quote
 
 	static function _value($value)
 	{
-		return str_replace('\'', '\\\'', $value);
+		return str_replace('\\', '\\\\', $value);
 	}
 }
