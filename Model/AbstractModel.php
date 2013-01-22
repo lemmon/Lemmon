@@ -29,7 +29,7 @@ abstract class AbstractModel implements \IteratorAggregate
 	static $sanitize;
 	static $required;
 	static $unique;
-	static $timestmp;
+	static $timestamp;
 	static $hasOne;
 	static $hasMany;
 	static $belongsTo;

@@ -64,8 +64,8 @@ class Schema
 		}
 		// unique
 		# TODO
-		// timestmp
-		if ($timestamp = $model_name::$timestmp and is_array($timestamp))
+		// timestamp
+		if ($timestamp = $model_name::$timestamp and is_array($timestamp))
 		{
 			$s['timestamp'] = $timestamp;
 		}
