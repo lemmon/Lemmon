@@ -295,4 +295,10 @@ abstract class AbstractRow
 	{
 		$this->data[$key] = $val;
 	}
+
+
+	function getDefault($key)
+	{
+		return $this->dataDefault[$key];
+	}
 }
