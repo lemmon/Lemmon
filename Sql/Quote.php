@@ -20,15 +20,24 @@ class Quote
 
 	static function field($field)
 	{
-		$field = explode('.', trim($field, '.'));
-		foreach ($field as $i => $_field)
+		if (is_array($field))
 		{
-			if ($_field!='*')
-			{
-				$field[$i] = '`' . self::_field($_field) . '`';
-			}
+			foreach ($field as $i => $_field)
+				$field[$i] = self::field($_field);
+			return $field;
 		}
-		return join('.', $field);
+		else
+		{
+			$field = explode('.', trim($field, '.'));
+			foreach ($field as $i => $_field)
+			{
+				if ($_field!='*')
+				{
+					$field[$i] = '`' . self::_field($_field) . '`';
+				}
+			}
+			return join('.', $field);
+		}
 	}
 
 

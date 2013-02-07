@@ -104,8 +104,21 @@ class Select extends AbstractStatement
 
 	function distinct($field)
 	{
-		$pairs = clone $this;
-		$pairs->cols($field);
-		return array_keys($pairs->exec()->fetchAll(\PDO::FETCH_UNIQUE));
+		$distinct = clone $this;
+		// exec
+		if (is_string($field))
+		{
+			// one field
+			$distinct->cols($field);
+			return array_keys($distinct->exec()->fetchAll(\PDO::FETCH_UNIQUE));
+		}
+		elseif (is_array($field))
+		{
+			// more fields
+			$distinct->_select = 'DISTINCT ' . join(', ', Quote::field($field));
+			return $distinct->exec()->fetchAll();
+		}
+		else
+			throw new \Execption('Unknown field type.');
 	}
 }
