@@ -65,7 +65,7 @@ class Link
 			{
 				$link = str_replace($replace[0], $_res, $link);
 			}
-			elseif ($_arg = (int)$replace['argument'] and $_arg = $args[$_arg] and (is_string($_arg) or is_int($_arg)))
+			elseif ($_arg = (int)$replace['argument'] and $_arg = $args[$_arg] and (is_string($_arg) or is_numeric($_arg)))
 			{
 				$link = str_replace($replace[0], $_arg, $link);
 			}
