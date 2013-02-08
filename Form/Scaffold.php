@@ -18,6 +18,74 @@ class Scaffold
 {
 
 
+	static function index(\Lemmon\Framework $controller, array $config = [])
+	{
+		//
+		// model
+		$model = self::_getModel($controller, $config);
+		//
+		// list
+		if ($config['paginate'])
+		{
+			// paginate
+			$perpage  = (int)(($config['paginate.perpage']) ?: 25);
+			$page     = (int)(($config['paginate.page']) ?: $controller->getRoute()->page);
+			$range    = 3;
+			$n        = $model->count();
+			$pages    = ceil($n / $perpage);
+			$paginate = [
+				'page'     => $page,
+				'pages'    => $pages,
+				'perpage'  => $perpage,
+				'total'    => $n,
+				'page_min' => 0,
+				'page_max' => $pages - 1,
+			];
+			// adjust paginator range
+			if ($range)
+			{
+				$page_min = $page - $range;
+				$page_max = $page + $range;
+				if ($page_min < 0)
+				{
+					$page_max -= $page_min;
+					$page_min = 0;
+				}
+				if ($page_max > $pages - 1)
+				{
+					$page_min -= $page_max - $pages + 1;
+					$page_max = $pages - 1;
+				}
+				if ($page_min < $range)
+				{
+					$page_min = 0;
+				}
+				if ($page_max > $pages - $range - 1)
+				{
+					$page_max = $pages-1;
+				}
+				$paginate['page_min'] = $page_min;
+				$paginate['page_max'] = $page_max;
+			}
+			// paginate sql query
+			$model->limit($perpage);
+			$model->offset($page * $perpage);
+			// res
+			$controller->setData([
+				'data'     => $model->all(),
+				'paginate' => $paginate,
+			]);
+		}
+		else
+		{
+			// all
+			$controller->setData([
+				'data' => $model->all(),
+			]);
+		}
+	}
+
+
 	static function create(\Lemmon\Framework $controller, array $config = [])
 	{
 		//
