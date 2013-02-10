@@ -72,7 +72,7 @@ class Scaffold
 			$model->offset($page * $perpage);
 			// res
 			$controller->setData([
-				'data'     => $model->all(),
+				'data'     => $model,
 				'paginate' => $paginate,
 			]);
 		}
@@ -80,7 +80,7 @@ class Scaffold
 		{
 			// all
 			$controller->setData([
-				'data' => $model->all(),
+				'data' => $model,
 			]);
 		}
 	}
