@@ -75,15 +75,29 @@ class Autoloader
 
 	private function _parse($path, $class)
 	{
-		return str_replace(
-			array('$root', '$lib', '$class', '$file'),
-			array(
+ 		return str_replace(
+			['$root', '$lib', '$class', '$file'],
+			[
 				ROOT_DIR,
 				LIBS_DIR,
-				str_replace(array('_', '\\'), DIRECTORY_SEPARATOR, $class),
+				$this->_psr0Base($class),
 				strtolower(preg_replace('/(.)([A-Z])/u', '$1_$2', $class)),
-				),
+			],
 			$path);
+	}
+
+
+	private function _psr0Base($class)
+	{
+		$class = ltrim($class, '\\');
+		if ($i = strrpos($class, '\\'))
+		{
+			$namespace = substr($class, 0, $i);
+			$class = substr($class, $i + 1);
+			$filename  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+		}
+		$filename .= str_replace('_', DIRECTORY_SEPARATOR, $class);
+		return $filename;
 	}
 
 
