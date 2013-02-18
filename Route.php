@@ -314,6 +314,14 @@ class Route
 	 */
 	final function to($link, $params = null)
 	{
+		$args = func_get_args();
+		array_unshift($args, $this);
+		$r = new \ReflectionClass(__NAMESPACE__ . '\Route\Link');
+		return $r->newInstanceArgs($args);
+		die;
+		/*
+		dump(func_get_args());
 		return new Route\Link($this, $link, $params);
+		*/
 	}
 }

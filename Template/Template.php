@@ -96,16 +96,44 @@ class Template
 
 	function appendFilesystem($filesystem, $base = null)
 	{
-		if (!$base)
-			$base = $this->_filesystem[0];
-		
-		foreach (explode('/', trim($filesystem, '/')) as $part)
+		if ($filesystem{0} != '/')
 		{
-			if ($path = realpath($base . '/' . $part))
-				array_unshift($this->_filesystem, $path);
-			$base = $this->_filesystem[0];
-		}
+			if (!$base)
+				$base = $this->_filesystem[0];
 
+			foreach (explode('/', trim($filesystem, '/')) as $part)
+			{
+				if ($path = realpath($base . '/' . $part))
+					array_unshift($this->_filesystem, $path);
+				$base = $this->_filesystem[0];
+			}
+		}
+		elseif ($path = realpath($filesystem))
+		{
+			array_unshift($this->_filesystem, $path);
+		}
+		return $this;
+	}
+
+
+	function extendFilesystem($filesystem, $base = null)
+	{
+		if ($filesystem{0} != '/')
+		{
+			if (!$base)
+				$base = end($this->_filesystem);
+
+			foreach (explode('/', trim($filesystem, '/')) as $part)
+			{
+				if ($path = realpath($base . '/' . $part))
+					$this->_filesystem[] = $path;
+				$base = end($this->_filesystem);
+			}
+		}
+		elseif ($path = realpath($filesystem))
+		{
+			$this->_filesystem[] = $path;
+		}
 		return $this;
 	}
 
