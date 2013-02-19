@@ -318,10 +318,5 @@ class Route
 		array_unshift($args, $this);
 		$r = new \ReflectionClass(__NAMESPACE__ . '\Route\Link');
 		return $r->newInstanceArgs($args);
-		die;
-		/*
-		dump(func_get_args());
-		return new Route\Link($this, $link, $params);
-		*/
 	}
 }

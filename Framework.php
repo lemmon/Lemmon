@@ -148,6 +148,10 @@ class Framework
 			$html = Template::display($action_name, $controller->getData(true));
 			echo $html;
 		}
+		elseif ($res instanceof Route\Link)
+		{
+			$controller->request->redir((string)$res)->exec();
+		}
 		elseif ($res instanceof Request\Redir)
 		{
 			// redirect
