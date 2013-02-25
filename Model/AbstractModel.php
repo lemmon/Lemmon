@@ -17,7 +17,7 @@ use \Lemmon\Db\Adapter as DbAdapter,
 /**
  * Model.
  */
-abstract class AbstractModel implements \IteratorAggregate
+abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 {
 	const FETCH_AS_ARRAY = 1;
 
@@ -39,6 +39,8 @@ abstract class AbstractModel implements \IteratorAggregate
 	private $_query;
 	private $_statement;
 	private $_schema;
+
+	private $_all;
 
 
 	final function __construct()
@@ -67,6 +69,7 @@ abstract class AbstractModel implements \IteratorAggregate
 	{
 		if (method_exists($this->_statement, $method))
 		{
+			unset($this->_all);
 			call_user_func_array([$this->_statement, $method], $args);
 			return $this;
 		}
@@ -125,6 +128,33 @@ abstract class AbstractModel implements \IteratorAggregate
 	{
 		return new \ArrayIterator($this->all());
 	}
+
+
+
+
+	function offsetExists($i)
+	{
+		$all = ($this->_all) ?: ($this->_all = $this->all());
+		return array_key_exists($i, $all);
+	}
+	
+	function offsetGet($i)
+	{
+		$all = ($this->_all) ?: ($this->_all = $this->all());
+		return $all[$i];
+	}
+	
+	function offsetSet($offset, $value)
+	{
+		return false;
+	}
+	
+	function offsetUnset($offset)
+	{
+		return false;
+	}
+
+
 
 
 	private function _getIterator()
