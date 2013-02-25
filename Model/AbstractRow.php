@@ -237,6 +237,13 @@ abstract class AbstractRow
 		$this->reload();
 		foreach ($data as $field => $value) $this->_set($field, $value);
 		$this->_state |= 0b1;
+		return $this;
+	}
+
+
+	function getData()
+	{
+		return $this->data;
 	}
 
 
