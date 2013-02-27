@@ -27,6 +27,7 @@ class ExtensionTwig extends \Twig_Extension
 			'tn'           => new \Twig_Filter_Function('Lemmon_I18n::tn'),
 			'tDate'        => new \Twig_Filter_Function('Lemmon_I18n::date'),
 			'tDateTime'    => new \Twig_Filter_Function('Lemmon_I18n::datetime'),
+			'tNum'         => new \Twig_Filter_Function('Lemmon_I18n::num'),
 			'tPrice'       => new \Twig_Filter_Function('Lemmon_I18n::price', ['pre_escape' => 'html', 'is_safe' => ['html']]),
 			'tPriceInt'    => new \Twig_Filter_Function('Lemmon_I18n::priceInt', ['pre_escape' => 'html', 'is_safe' => ['html']]),
 			'tTime'        => new \Twig_Filter_Function('Lemmon_I18n::time'),
