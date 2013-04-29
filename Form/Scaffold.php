@@ -104,6 +104,13 @@ class Scaffold
         // scaffolding
         if ($item = $model->create())
         {
+            // model
+            $controller->setData(['item' => $item]);
+            // force data
+            if ($config['force'])
+            {
+                $item->set($config['force']);
+            }
             // POST
             if ($f = $_POST)
             {
@@ -129,8 +136,6 @@ class Scaffold
                 // default values
                 $controller->setData(['f' => $config['default']]);
             }
-            // template data
-            $controller->setData(['item' => $item]);
         }
     }
 
@@ -158,6 +163,13 @@ class Scaffold
         // scaffolding
         if ($id = $controller->getRoute()->id and $item = $model->wherePrimary($id)->first())
         {
+            // model
+            $controller->setData(['item' => $item]);
+            // force data
+            if ($config['force'])
+            {
+                $item->set($config['force']);
+            }
             // POST
             if ($f = $_POST)
             {
@@ -183,8 +195,6 @@ class Scaffold
             {
                 $controller->setData(['f' => $item]);
             }
-            // model
-            $controller->setData(['item' => $item]);
         }
         else
         {
