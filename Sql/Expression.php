@@ -35,10 +35,24 @@ class Expression
             return strtoupper($m[1]) . '(';
         }, $expr);
 
+        // remove strings
+        $strings = [];
+        $i = 0;
+        $expr = preg_replace_callback('/"([^"]+)"/', function($m) use (&$i, &$strings){
+            $i++;
+            $strings[$i] = $m[0];
+            return ':@' . $i;
+        }, $expr);
+        
         // quote fields
-        $expr = preg_replace_callback('/[a-z\_][a-z0-9\_\.]*\*?/', function($m){
+        $expr = preg_replace_callback('/[0-9_]*[a-z][a-z0-9_\.]*\*?/', function($m){
             return Quote::field($m[0]);
         }, $expr);
+        
+        // paste strings back
+        foreach ($strings as $i => $string) {
+            $expr = str_replace(':@' . $i, $string, $expr);
+        }
 
         // match and replace arguments
         if ($args)

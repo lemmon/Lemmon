@@ -16,53 +16,53 @@ namespace Lemmon\Sql;
  */
 class Join
 {
-	private $_table;
-	private $_type = 'INNER';
-	private $_join;
-	private $_conditions = [];
+    private $_table;
+    private $_type = 'INNER';
+    private $_join;
+    private $_conditions = [];
 
 
-	function __construct(Table $table, $join, $args)
-	{
-		// tables
-		$this->_table = $table;
-		$this->_join = $join = new Table($join);
-		$join->forceName(true);
-		// conditions
-		foreach ($args as $key => $val)
-		{
-			if (is_string($val))
-			{
-				$args[$key] = new Expression(sprintf('%s.%s = %s.%s', $table->getAliasOrName(), $val, $join->getAlias(), $key));
-			}
-			else
-			{
-				$args[$key] = new Where($join, $key, $val);
-			}
-		}
-		$this->_conditions = $args;
-	}
+    function __construct(Table $table, $join, $args)
+    {
+        // tables
+        $this->_table = $table;
+        $this->_join = $join = new Table($join);
+        $join->forceName(true);
+        // conditions
+        foreach ($args as $key => $val)
+        {
+            if (is_string($val))
+            {
+                $args[$key] = new Expression(sprintf('%s.%s = %s.%s', $table->getAliasOrName(), $val, $join->getAlias(), $key));
+            }
+            else
+            {
+                $args[$key] = new Where($join, $key, $val);
+            }
+        }
+        $this->_conditions = $args;
+    }
 
 
-	function __toString()
-	{
-		return $this->toString();
-	}
+    function __toString()
+    {
+        return $this->toString();
+    }
 
 
-	function toString()
-	{
-		$q = [];
-		// type
-		$q[] = $this->_type;
-		// join
-		$q[] = 'JOIN';
-		// table
-		$q[] = $this->_join->toString();
-		// conditions
-		$q[] = 'ON';
-		$q[] = '(' . join(' AND ', $this->_conditions) . ')';
-		// 
-		return join(' ', $q);
-	}
+    function toString()
+    {
+        $q = [];
+        // type
+        $q[] = $this->_type;
+        // join
+        $q[] = 'JOIN';
+        // table
+        $q[] = $this->_join->toString();
+        // conditions
+        $q[] = 'ON';
+        $q[] = '(' . join(' AND ', $this->_conditions) . ')';
+        // 
+        return join(' ', $q);
+    }
 }

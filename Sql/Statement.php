@@ -16,25 +16,22 @@ namespace Lemmon\Sql;
  */
 class Statement extends AbstractStatement
 {
-	private $_expression;
+    private $_expression;
 
 
-	function setQuery($query)
-	{
-		$this->_expression = new Expression(func_get_args());
-		return $this;
-	}
+    function setQuery($query)
+    {
+        $this->_expression = new Expression(func_get_args());
+        return $this;
+    }
 
 
-	function getQueryString()
-	{
-		if (isset($this->_expression))
-		{
-			return (string)$this->_expression;
-		}
-		else
-		{
-			throw new \Exception('No query is defined.');
-		}
-	}
+    function getQueryString()
+    {
+        if (isset($this->_expression)) {
+            return (string)$this->_expression;
+        } else {
+            throw new \Exception('No query is defined.');
+        }
+    }
 }

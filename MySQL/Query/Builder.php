@@ -150,7 +150,7 @@ class Lemmon_MySQL_Query_Builder extends Lemmon_MySQL_Query
 	
 	final public function findLikeL($a, $b)
 	{
-		$this->_findPush( $this->parse('%t.%n LIKE %slr', $this->getTable(), $a, $b) );
+		$this->_findPush( $this->parse('%t.%n LIKE %sll', $this->getTable(), $a, $b) );
 		return $this;
 	}
 	

@@ -94,7 +94,21 @@ class Scaffold
     }
 
 
-    static function create(\Lemmon\Framework $controller, array $config = [])
+    static private function _redir($config, $item)
+    {
+        if ($config['redir']){
+            if (is_string($config['redir'])) {
+                return $config['redir'];
+            } elseif (is_callable($config['redir'])) {
+                return $config['redir']($item);
+            }
+        } else {
+            return ':section';
+        }
+    }
+
+
+    static function create(\Lemmon\Framework $controller, array $config = [], &$item = null)
     {
         //
         // model
@@ -122,7 +136,7 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(\Lemmon_I18n::t('Item has been created'));
-                    return $controller->getRequest()->redir(($config['redir']) ?: ':section', $item);
+                    return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 }
                 catch (\Lemmon\Model\ValidationException $e)
                 {
@@ -181,7 +195,7 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(\Lemmon_I18n::t('Item has been updated'));
-                    return $controller->getRequest()->redir(($config['redir']) ?: ':section', $item);
+                    return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 }
                 catch (\Lemmon\Model\ValidationException $e)
                 {
