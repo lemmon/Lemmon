@@ -16,14 +16,14 @@ namespace Lemmon\I18n;
  */
 class I18n
 {
-	static $_cache = [];
+    static $_cache = [];
 
 
-	static function getLocales()
-	{
-		if (array_key_exists('locales', self::$_cache))
-			return self::$_cache['locales'];
-		else
-			return self::$_cache['locales'] = include __DIR__ . '/data/locales.php';
-	}
+    static function getLocales()
+    {
+        if (array_key_exists('locales', self::$_cache))
+            return self::$_cache['locales'];
+        else
+            return self::$_cache['locales'] = include __DIR__ . '/data/locales.php';
+    }
 }

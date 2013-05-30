@@ -19,6 +19,7 @@ class Lemmon_Template_Extension extends Twig_Extension
 			't' => new Twig_Filter_Function('Lemmon_I18n::t'),
 			'tn' => new Twig_Filter_Function('Lemmon_I18n::tn'),
 			'tDate' => new Twig_Filter_Function('Lemmon_I18n::date'),
+			'ttDate' => new Twig_Filter_Function('Lemmon_I18n::date2'),
 			'tTime' => new Twig_Filter_Function('Lemmon_I18n::time'),
 			'tDateTime' => new Twig_Filter_Function('Lemmon_I18n::datetime'),
 			'tPrice' => new Twig_Filter_Function('Lemmon_I18n::price'),

@@ -251,14 +251,14 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     {
         return array_key_exists($key, $this->data) || method_exists($this, $method = 'get' . $key);
     }
-    
-    
+
+
     private function _getPrimaryData()
     {
         return array_intersect_key($this->data, array_flip($this->_schema->primary));
     }
-    
-    
+
+
     final function reload()
     {
         if ($this->_state & 0b100)

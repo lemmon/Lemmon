@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Lemmon\Db;
+namespace Lemmon\Db\Adapter;
 
 /**
  * Db Adapter.
@@ -21,11 +21,13 @@ class Adapter
     private $_pdo;
 
 
-    function __construct($driver = [])
+    function __construct($driver)
     {
-        $this->_pdo = new \PDO("mysql:dbname={$driver['database']};host={$driver['host']}", $driver['username'], $driver['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$driver['encoding']}'"]);
-        $this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
-        $this->_pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ); 
+        $pdo = new \PDO("mysql:dbname={$driver['database']};host={$driver['host']}", $driver['username'], $driver['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$driver['encoding']}'"]);
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
+        $pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ); 
+        
+        $this->_pdo = $pdo;
         
         // default adapter
         if (!isset(self::$_default)) {

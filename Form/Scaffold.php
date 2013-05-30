@@ -69,11 +69,10 @@ class Scaffold
     {
         //
         // model
-        $model = self::_getModel($controller, $config);
+        $model = self::getModel($controller, $config);
         //
         // list
-        if ($config['paginate'])
-        {
+        if ($config['paginate']) {
             // paginate values
             $perpage  = (int)(($config['paginate.perpage']) ?: 25);
             $page     = (int)(($config['paginate.page']) ?: $controller->getRoute()->page);
@@ -83,10 +82,8 @@ class Scaffold
                 'data'     => $model,
                 'paginate' => self::paginate($model, $page, $perpage, $range),
             ]);
-        }
-        else
-        {
-            // all
+        } else {
+            // display all
             $controller->setData([
                 'data' => $model,
             ]);
@@ -112,7 +109,7 @@ class Scaffold
     {
         //
         // model
-        $model = self::_getModel($controller, $config);
+        $model = self::getModel($controller, $config);
         $item = $model->create();
         //
         // scaffolding
@@ -154,17 +151,20 @@ class Scaffold
     }
 
 
-    static private function _getModel(\Lemmon\Framework $controller, array &$config = [])
+    static function getModelName(\Lemmon\Framework $controller, array &$config = [])
     {
-        //
-        // model name
-        if (!$config['model'])
-        {
-            $config['model'] = \Lemmon\String::tableToClassName(end(explode('/', $controller::getController())));
+        return $config['model'] ?: \Lemmon\String::tableToClassName(end(explode('/', $controller::getController())));
+    }
+
+
+    static function getModel(\Lemmon\Framework $controller, array &$config = [])
+    {
+        if ($config['model'] instanceof \Lemmon\Model\AbstactModel) {
+            return $config['model'];
+        } else {
+            $config['model'] = self::getModelName($controller, $config);
+            return new $config['model'];
         }
-        //
-        // model
-        return new $config['model'];
     }
 
 
@@ -172,46 +172,37 @@ class Scaffold
     {
         //
         // model
-        $model = self::_getModel($controller, $config);
+        $model = self::getModel($controller, $config);
         //
         // scaffolding
-        if ($id = $controller->getRoute()->id and $item = $model->wherePrimary($id)->first())
-        {
+        if ($id = $controller->getRoute()->id and $item = $model->wherePrimary($id)->first()) {
             // model
             $controller->setData(['item' => $item]);
             // force data
-            if ($config['force'])
-            {
+            if ($config['force']) {
                 $item->set($config['force']);
             }
-            // POST
-            if ($f = $_POST)
-            {
+            // on POST
+            if ($f = $_POST) {
                 // sanitize fields
                 $f = self::_sanitize($f);
                 // save
-                try
-                {
+                try {
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(\Lemmon_I18n::t('Item has been updated'));
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
-                }
-                catch (\Lemmon\Model\ValidationException $e)
-                {
+                } catch (\Lemmon\Model\ValidationException $e) {
+                    // error saving property
                     $controller->getFlash()->setError($e->getMessage())
                                            ->setError(\Lemmon_I18n::t('Item has NOT been updated'))
                                            ->setErrorFields($e->getFields());
                 }
-            }
-            // default values
-            else
-            {
+            } else {
+                // default values
                 $controller->setData(['f' => $item]);
             }
-        }
-        else
-        {
+        } else {
             throw new \Lemmon\Http\Exception(404, \Lemmon_I18n::t('Entry not found.'));
         }
     }

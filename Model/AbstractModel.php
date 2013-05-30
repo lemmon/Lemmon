@@ -58,8 +58,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $statement->setTable($schema->table);
         
         // init model
-        if (method_exists($this, '__init'))
-        {
+        if (method_exists($this, '__init')) {
             $this->__init();
         }
     }

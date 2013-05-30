@@ -12,19 +12,19 @@ class Lemmon_I18N
     static private $_base = '';
     
     static private $_locale;
-    static private $_localeSections = array();
-    static private $_strings = array();
+    static private $_localeSections = [];
+    static private $_strings = [];
     
     static $_nRule;
     
     static $_nuberDecimalPoint = '.';
     static $_nuberThousandsSeparator = ',';
-    static $_currencyLocal = array('$#', 2, '.', ',');
-    static $_currencyInternational = array('# USD', 2, '.', ',');
-    static $_days = array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday');
-    static $_daysShort = array('Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat');
-    static $_moths = array('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December');
-    static $_mothsShort = array('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec');
+    static $_currencyLocal = ['$#', 2, '.', ','];
+    static $_currencyInternational = ['# USD', 2, '.', ','];
+    static $_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    static $_daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    static $_moths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    static $_mothsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
 
 
     public static function setBase($base)
@@ -103,7 +103,7 @@ class Lemmon_I18N
         }
     }
     
-    static public function t($str, $vars=array())
+    static public function t($str, $vars = [])
     {
         $str = (string)$str;
         $args = func_get_args();
@@ -151,15 +151,30 @@ class Lemmon_I18N
         return $str;
     }
     
-    static public function date($date, $format='d M Y')
+    static public function date($date, $format = 'd M Y')
     {
-        if ($date)
-        {
-            $time = is_numeric($date) ? $date : strtotime($date);
+        if ($date) {
+            $time = is_numeric($date) ? intval($date) : strtotime($date);
             $date = date($format, $time);
         }
         return $date;
     }
+    
+    
+    static public function date2($date, $format = null)
+    {
+        $ts = is_numeric($date) ? intval($date) : strtotime($date);
+        if (!$format) {
+            $format = '%d %h %Y';
+        }
+        $format = str_replace(['%A', '%h'], [
+            self::$_days[(int)date('w', $ts)],
+            self::$_mothsShort[(int)date('n', $ts) - 1],
+        ], $format);
+        $date = strftime($format, $ts);
+        return $date;
+    }
+    
     
     static public function time($date, $format='h:iA')
     {
