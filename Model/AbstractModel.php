@@ -177,8 +177,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     {
         $res = [];
         $rowClass = $this->_schema->rowClass;
-        foreach ($this->_getIterator()->fetchAll() as $row)
-        {
+        foreach ($this->_getIterator()->fetchAll() as $row) {
             $res[] = new $rowClass($row);
         }
         return $res;
@@ -189,8 +188,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     {
         $res = [];
         $rowClass = $this->_schema->rowClass;
-        foreach ($this->_getIterator()->fetchAll() as $row)
-        {
+        foreach ($this->_getIterator()->fetchAll() as $row) {
             $res[$row['id']] = new $rowClass($row);
         }
         return $res;
@@ -200,8 +198,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     function first()
     {
         $rowClass = $this->_schema->rowClass;
-        if ($row = $this->_getIterator()->fetch())
-        {
+        if ($row = $this->_getIterator()->fetch()) {
             return new $rowClass($row);
         }
     }

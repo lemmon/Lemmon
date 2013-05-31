@@ -34,7 +34,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     protected $dataDefault = [];
 
     private $_schema;
-    public $_state;
+    private $_state;
 
 
     final function __construct($data = null)
@@ -45,22 +45,22 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         $this->_schema = Schema::factory(static::$model);
         
         // data
-        if ($data)
-        {
-            if (is_array($data))
-            {
+        if ($data) {
+            if (is_array($data)) {
                 $this->dataDefault = $data;
                 $this->set($data);
                 $this->_state = self::STATE_LOADED;
             }
-        }
-        else
-        {
+        } else {
             $this->_state = self::STATE_EMPTY;
         }
+        
+        // init
+        $this->__init();
     }
 
 
+    protected function __init(){}
     protected function onValidate(){}
     protected function onBeforeCreate(){}
     protected function onBeforeUpdate(){}
@@ -79,8 +79,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     private function _sanitize(&$f)
     {
         // timestamps
-        if (is_array($ts = $this->_schema->get('timestamp')))
-        {
+        if (is_array($ts = $this->_schema->get('timestamp'))) {
             if (isset($ts[0]) and !isset($f[$ts[0]])) $f[$ts[0]] = new SqlExpression('NOW()');
             if (isset($ts[1])) $f[$ts[1]] = new SqlExpression('NOW()');
         }
@@ -198,6 +197,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                 }
             }
         }
+    }
+
+
+    final function _getState()
+    {
+        return $this->_state;
     }
 
 
