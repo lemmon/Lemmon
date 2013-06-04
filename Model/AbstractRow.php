@@ -91,13 +91,10 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     private function _validate(&$f, &$to_upload)
     {
         // required fields
-        if (is_array($r = $this->_schema->get('required')))
-        {
+        if (is_array($r = $this->_schema->get('required'))) {
             $fields = [];
-            foreach ($r as $field => $condition)
-            {
-                switch ($condition)
-                {
+            foreach ($r as $field => $condition) {
+                switch ($condition) {
                     case 'required':
                         if (!isset($f[$field])) $fields[$field] = I18n::t(String::human($field));
                         break;
@@ -113,28 +110,23 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                         break;
                 }
             }
-            if ($fields)
-            {
+            if ($fields) {
                 throw new ValidationException(I18n::tn('Missing field %2$s', 'Missing %d fields (%s)', count($fields), join(', ', $fields)), array_keys($fields));
             }
         }
         // uploads
-        if ($uploads = $this->_schema->uploads and $base_dir = $this->_schema->uploadDir)
-        {
+        if ($uploads = $this->_schema->uploads and $base_dir = $this->_schema->uploadDir) {
             $to_upload = [];
             // uploads
-            foreach ($_FILES as $field => $file)
-            {
+            foreach ($_FILES as $field => $file) {
                 $upload_dir = strftime($uploads[$field]);
                 // upload dir
                 $_dir = $base_dir . ($upload_dir ? '/' . $upload_dir : '');
-                if (!($_dir and (is_dir($_dir) or @mkdir($_dir, 0777, true)) and is_writable($_dir)))
-                {
+                if (!($_dir and (is_dir($_dir) or @mkdir($_dir, 0777, true)) and is_writable($_dir))) {
                     throw new \Exception(sprintf('Invalid upload dir %s.', $_dir));
                 }
                 // upload
-                if ($file['error'] == UPLOAD_ERR_OK)
-                {
+                if ($file['error'] == UPLOAD_ERR_OK) {
                     $_file = [
                         'base' => substr($file['name'], 0, strrpos($file['name'], '.')),
                         'ext'  => substr($file['name'], strrpos($file['name'], '.') + 1),
@@ -147,17 +139,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                         'file' => ($upload_dir ? $upload_dir . '/' : '') . $file_name,
                         '_old' => $this->data[$field],
                     ];
-                    if (file_exists($file))
-                    {
+                    if (file_exists($file)) {
                         throw new \Exception(sprintf('File %s already exists at provided location.', $file));
                     }
-                }
-                elseif ($file['error'] == UPLOAD_ERR_NO_FILE)
-                {
+                } elseif ($file['error'] == UPLOAD_ERR_NO_FILE) {
                     // upload stays the same
-                }
-                else
-                {
+                } else {
                     throw new \Exception(sprintf('File upload error no #%d.', $file['error']));
                 }
             }
@@ -165,8 +152,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         // user defined validation
         $_msg = '';
         $_fields = [];
-        if ($this->onValidate($f, $_msg, $_fields) === false)
-        {
+        if ($this->onValidate($f, $_msg, $_fields) === false) {
             throw new ValidationException($_msg, $_fields);
         }
         //
@@ -176,23 +162,18 @@ abstract class AbstractRow /*implements \ArrayAccess*/
 
     private function _uploads($to_upload, &$f)
     {
-        if ($to_upload)
-        {
-            foreach ($to_upload as $field => $upload)
-            {
+        if ($to_upload) {
+            foreach ($to_upload as $field => $upload) {
                 $file = $_FILES[$field];
                 // old file
                 if ($upload['_old']) @unlink($upload['dir'] . '/' . $upload['_old']);
                 unset($upload['_old']);
                 $file_fullpath = join('/', $upload);
                 // new file
-                if (move_uploaded_file($file['tmp_name'], $file_fullpath))
-                {
+                if (move_uploaded_file($file['tmp_name'], $file_fullpath)) {
                     $upload = $upload['file'];
                     $this->upload($field, $file_fullpath, $f);
-                }
-                else
-                {
+                } else {
                     throw new \Exception(sprintf('Unknown error occured when moving uploaded %s (%s).', $field, $upload));
                 }
             }
@@ -211,8 +192,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         // data
         $data = $this->data;
         // validate
-        if ($force or ($this->_sanitize($data) !== false and $this->_validate($data, $to_upload) !== false and $this->_uploads($to_upload, $data) !== false))
-        {
+        if ($force or ($this->_state & 0b1 and $this->_sanitize($data) !== false and $this->_validate($data, $to_upload) !== false and $this->_uploads($to_upload, $data) !== false)) {
             // before create/update event
             ($this->_state & 0b10) ? $this->onBeforeUpdate($data) : $this->onBeforeCreate($data);
             // query
@@ -230,7 +210,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             ($this->_state & 0b10) ? $this->onAfterUpdate($data) : $this->onAfterCreate($data);
             // state
             $this->_state |= 0b100; // needs to reload
-            $this->_state ^= 0b1;   // not modified
+            $this->_state &= ~0b1;  // not modified
         }
         //
         return $this;
@@ -241,8 +221,14 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     {
         $this->reload();
         foreach ($data as $field => $value) $this->_set($field, $value);
-        $this->_state |= 0b1;
+        $this->requireSave();
         return $this;
+    }
+
+
+    protected function requireSave()
+    {
+        $this->_state |= 0b1;
     }
 
 
@@ -266,8 +252,8 @@ abstract class AbstractRow /*implements \ArrayAccess*/
 
     final function reload()
     {
-        if ($this->_state & 0b100)
-        {
+        if ($this->_state & 0b100) {
+            // data needs to be reloaded
             $this->dataDefault = $this->data;
             $this->data = (array)(new \Lemmon\Sql\Select(DbAdapter::getDefault()->query(), $this->_schema->get('table')))->where($this->_getPrimaryData())->first();
             $this->_state = self::STATE_LOADED;
@@ -278,8 +264,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     function __get($key)
     {
         $this->reload();
-        if (method_exists($this, $method = 'get' . $key))
-        {
+        if (method_exists($this, $method = 'get' . $key)) {
             return $this->{$method}();
         }
         /*
@@ -288,8 +273,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             return new \Lemmon\Files\File($this->_schema->uploadDir . '/' . $this->data[$key]);
         }
         */
-        else
-        {
+        else {
             return $this->data[$key];
         }
     }
