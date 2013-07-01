@@ -18,103 +18,103 @@ namespace Lemmon;
  */
 class Autoloader
 {
-	const PREPEND = 1;
-	const INCLUDE_PSR0 = 2;
+    const PREPEND = 1;
+    const INCLUDE_PSR0 = 2;
 
 
-	private $_masks = [];
-	private $_files = [];
+    private $_masks = [];
+    private $_files = [];
 
 
-	/**
-	 * Register masked class name.
-	 * @param  string     $mask
-	 * @param  string     $path
-	 * @return Autoloader
-	 */
-	function addMask($mask, $path)
-	{
-		$this->_masks[] = ['mask' => '/^' . str_replace('*', '.+', $mask) . '$/', 'path' => $path];
-	}
+    /**
+     * Register masked class name.
+     * @param  string     $mask
+     * @param  string     $path
+     * @return Autoloader
+     */
+    function addMask($mask, $path)
+    {
+        $this->_masks[] = ['mask' => '/^' . str_replace('*', '.+', $mask) . '$/', 'path' => $path];
+    }
 
 
-	/**
-	 * Register file.
-	 * @param  string     $file
-	 * @return Autoloader
-	 */
-	function add($file)
-	{
-		$this->_files[] = $file;
-	}
+    /**
+     * Register file.
+     * @param  string     $file
+     * @return Autoloader
+     */
+    function add($file)
+    {
+        $this->_files[] = $file;
+    }
 
 
-	/**
-	 * Register.
-	 * @param  int        $switch
-	 * @return Autoloader
-	 */
-	function register($switch=null)
-	{
-		// prepend it
-		if ($switch & self::PREPEND) $prepend = true; else $prepend = false;
-		// register PSR-0
-		if ($switch & self::INCLUDE_PSR0) $this->add('$lib/$class.php');
-		// register
-		spl_autoload_register(array($this, 'loadClass'), true, $prepend);
-		//
-		return $this;
-	}
+    /**
+     * Register.
+     * @param  int        $switch
+     * @return Autoloader
+     */
+    function register($switch = null)
+    {
+        // prepend it
+        if ($switch & self::PREPEND) $prepend = true; else $prepend = false;
+        // register PSR-0
+        if ($switch & self::INCLUDE_PSR0) $this->add('$lib/$class.php');
+        // register
+        spl_autoload_register(array($this, 'loadClass'), true, $prepend);
+        //
+        return $this;
+    }
 
 
-	function loadClass($class)
-	{
-		if ($file=$this->findFile($class)) require $file;
-	}
+    function loadClass($class)
+    {
+        if ($file = $this->findFile($class)) require $file;
+    }
 
 
-	private function _parse($path, $class)
-	{
- 		return str_replace(
-			['$root', '$lib', '$class', '$file'],
-			[
-				ROOT_DIR,
-				LIBS_DIR,
-				$this->_psr0Base($class),
-				strtolower(preg_replace('/(.)([A-Z])/u', '$1_$2', $class)),
-			],
-			$path);
-	}
+    private function _parse($path, $class)
+    {
+         return str_replace(
+            ['$root', '$lib', '$class', '$file'],
+            [
+                ROOT_DIR,
+                LIBS_DIR,
+                $this->_psr0Base($class),
+                strtolower(preg_replace('/(.)([A-Z])/u', '$1_$2', $class)),
+            ],
+            $path);
+    }
 
 
-	private function _psr0Base($class)
-	{
-		$class = ltrim($class, '\\');
-		if ($i = strrpos($class, '\\'))
-		{
-			$namespace = substr($class, 0, $i);
-			$class = substr($class, $i + 1);
-			$filename  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
-		}
-		$filename .= str_replace('_', DIRECTORY_SEPARATOR, $class);
-		return $filename;
-	}
+    private function _psr0Base($class)
+    {
+        $class = ltrim($class, '\\');
+        if ($i = strrpos($class, '\\'))
+        {
+            $namespace = substr($class, 0, $i);
+            $class = substr($class, $i + 1);
+            $filename  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
+        }
+        $filename .= str_replace('_', DIRECTORY_SEPARATOR, $class);
+        return $filename;
+    }
 
 
-	function findFile($class)
-	{
-		// masks
-		foreach ($this->_masks as $_mask) if (preg_match($_mask['mask'], $class))
-		{
-			if (is_callable($_mask['path'])) $_mask['path'] = $_mask['path']($class);
-			$path = $this->_parse($_mask['path'], $class);
-			if (is_file($path)) return $path;
-		}
-		// files
-		foreach ($this->_files as $path)
-		{
-			$file = $this->_parse($path, $class);
-			if (is_file($file)) return $file;
-		}
-	}
+    function findFile($class)
+    {
+        // masks
+        foreach ($this->_masks as $_mask) if (preg_match($_mask['mask'], $class))
+        {
+            if (is_callable($_mask['path'])) $_mask['path'] = $_mask['path']($class);
+            $path = $this->_parse($_mask['path'], $class);
+            if (is_file($path)) return $path;
+        }
+        // files
+        foreach ($this->_files as $path)
+        {
+            $file = $this->_parse($path, $class);
+            if (is_file($file)) return $file;
+        }
+    }
 }

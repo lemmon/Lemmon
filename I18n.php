@@ -55,13 +55,12 @@ class Lemmon_I18N
     }
 
 
-    static public function setLocale($locale)
+    static public function setLocale($locale, $keep_old = false)
     {
         self::$_locale = $locale;
         $locale_file = self::getBase() . '/' . $locale . '.php';
-        if (file_exists($locale_file))
-        {
-            self::$_strings = include $locale_file;
+        if (file_exists($locale_file)) {
+            self::$_strings = array_merge($keep_old ? (array)self::$_strings : [], include $locale_file);
             self::_setSpecialCases();
         }
     }
@@ -126,27 +125,35 @@ class Lemmon_I18N
     
     static public function nRule($n)
     {
-        if (self::$_nRule)
-        {
+        if (self::$_nRule) {
             $nRule = self::$_nRule;
             return $nRule($n);
-        }
-        else
-        {
-            return (!$n or $n>1) ? 1 : 0;
+        } else {
+            return self::nRuleDefault($n);
         }
     }
-    
+
+
+    static function nRuleDefault($n)
+    {
+        return (!$n or $n > 1) ? 1 : 0;
+    }
+
+
     static public function tn($str_sg, $str_pl, $n)
     {
         $args = array_slice(func_get_args(), 2);
-        if (self::$_strings[':pl ' . $str_sg])
+        if (self::$_strings[':pl ' . $str_sg]) {
             $strings = self::$_strings[':pl ' . $str_sg];
-        elseif (is_array($str_pl))
+            $x = self::nRule($n);
+        } elseif (is_array($str_pl)) {
             $strings = array_merge(array($str_sg), $str_pl);
-        else
+            $x = self::nRule($n);
+        } else {
             $strings = array($str_sg, $str_pl);
-        $str = vsprintf($strings[ self::nRule($n) ], $args);
+            $x = self::nRuleDefault($n);
+        }
+        $str = vsprintf($strings[$x], $args);
         $str = preg_replace('/^\w+__\s?/', '', $str);
         return $str;
     }

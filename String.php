@@ -275,7 +275,7 @@ class String
      * @param  string  $lower
      * @return string
      */
-    static public function asciize($str, $sep='-', $lower=true)
+    static public function asciize($str, $sep = '-', $lower = true)
     {
         // asciize
         $str = preg_replace('/[àáâäæãåā]/u', 'a', $str);
