@@ -251,25 +251,21 @@ class Route
      */
     final function match($pattern, $conditions = [])
     {
-        $pattern = str_replace('/', '\/', $pattern);
+        #$pattern = str_replace('/', '\/', $pattern);
         $pattern = str_replace('.', '\.', $pattern);
         $pattern = str_replace('*', '.*', $pattern);
         $pattern = '^' . str_replace(')', ')?', $pattern);
         
-        if (is_array($conditions)) foreach ($conditions as $key => $val)
-        {
+        if (is_array($conditions)) foreach ($conditions as $key => $val) {
             $pattern = str_replace('$' . $key, '(?P<' . $key . '>' . $val . ')', $pattern);
         }
         
-        if (preg_match("/{$pattern}/i", $this->_route, $matches))
-        {
+        if (preg_match("#{$pattern}#i", $this->_route, $matches)) {
             $this->_matches = $matches;
             if ($matches['controller']) Framework::setController($matches['controller']);
             if ($matches['action']) Framework::setAction($matches['action']);
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
     }

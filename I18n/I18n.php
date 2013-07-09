@@ -18,6 +18,15 @@ class I18n
 {
     static $_cache = [];
 
+    private $_localeId;
+    private $_dictonary = [];
+
+
+    function __construct($locale_id = 'en')
+    {
+        $this->setLocale($locale_id);
+    }
+
 
     static function getLocales()
     {
@@ -25,5 +34,34 @@ class I18n
             return self::$_cache['locales'];
         else
             return self::$_cache['locales'] = include __DIR__ . '/data/locales.php';
+    }
+
+
+    function setLocale($locale_id)
+    {
+        $this->_localeId = $locale_id;
+    }
+
+
+    function load($file)
+    {
+        if (file_exists($file)) {
+            $data = include $file;
+            if (is_array($data)) {
+                $this->_dictonary = array_merge($this->_dictonary, $data);
+            }
+        }
+    }
+
+
+    function t($phrase)
+    {
+        $args = func_get_args();
+        array_shift($args);
+        $phrase = array_key_exists($phrase, $this->_dictonary) ? $this->_dictonary[$phrase] : $phrase;
+        if ($args) {
+            $phrase = vsprintf($phrase, $args);
+        }
+        return $phrase;
     }
 }
