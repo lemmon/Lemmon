@@ -32,8 +32,7 @@ class Scaffold
             'page_max' => $pages - 1,
         ];
         // adjust paginator range
-        if ($range)
-        {
+        if ($range) {
             $page_min = $page - $range;
             $page_max = $page + $range;
             if ($page_min < 0)
