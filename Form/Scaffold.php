@@ -11,6 +11,8 @@
 
 namespace Lemmon\Form;
 
+use Lemmon_I18n as I18n;
+
 /**
  * Scaffolding.
  */
@@ -35,22 +37,18 @@ class Scaffold
         if ($range) {
             $page_min = $page - $range;
             $page_max = $page + $range;
-            if ($page_min < 0)
-            {
+            if ($page_min < 0) {
                 $page_max -= $page_min;
                 $page_min = 0;
             }
-            if ($page_max > $pages - 1)
-            {
+            if ($page_max > $pages - 1) {
                 $page_min -= $page_max - $pages + 1;
                 $page_max = $pages - 1;
             }
-            if ($page_min < $range)
-            {
+            if ($page_min < $range) {
                 $page_min = 0;
             }
-            if ($page_max > $pages - $range - 1)
-            {
+            if ($page_max > $pages - $range - 1) {
                 $page_max = $pages-1;
             }
             $paginate['page_min'] = $page_min;
@@ -112,37 +110,29 @@ class Scaffold
         $item = $model->create();
         //
         // scaffolding
-        if ($item = $model->create())
-        {
+        if ($item = $model->create()) {
             // model
             $controller->setData(['item' => $item]);
             // force data
-            if ($config['force'])
-            {
+            if ($config['force']) {
                 $item->set($config['force']);
             }
             // POST
-            if ($f = $_POST)
-            {
+            if ($f = $_POST) {
                 // sanitize fields
                 $f = self::_sanitize($f);
                 // save
-                try
-                {
+                try {
                     $item->set($f);
                     $item->save();
-                    $controller->getFlash()->setNotice(\Lemmon_I18n::t('Item has been created'));
+                    $controller->getFlash()->setNotice(I18n::t('Item has been created'));
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
-                }
-                catch (\Lemmon\Model\ValidationException $e)
-                {
-                    $controller->getFlash()->setError($e->getMessage())
-                                           ->setError(\Lemmon_I18n::t('Item has NOT been created'))
+                } catch (\Lemmon\Model\ValidationException $e) {
+                    $controller->getFlash()->setError(I18n::t('Your input contains errors'))
+                                           ->setError(I18n::t('Item has NOT been created'))
                                            ->setErrorFields($e->getFields());
                 }
-            }
-            elseif ($config['default'] and is_array($config['default']))
-            {
+            } elseif ($config['default'] and is_array($config['default'])) {
                 // default values
                 $controller->setData(['f' => $config['default']]);
             }
@@ -189,12 +179,12 @@ class Scaffold
                 try {
                     $item->set($f);
                     $item->save();
-                    $controller->getFlash()->setNotice(\Lemmon_I18n::t('Item has been updated'));
+                    $controller->getFlash()->setNotice(I18n::t('Item has been updated'));
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 } catch (\Lemmon\Model\ValidationException $e) {
                     // error saving property
-                    $controller->getFlash()->setError($e->getMessage())
-                                           ->setError(\Lemmon_I18n::t('Item has NOT been updated'))
+                    $controller->getFlash()->setError(I18n::t('Your input contains errors'))
+                                           ->setError(I18n::t('Item has NOT been updated'))
                                            ->setErrorFields($e->getFields());
                 }
             } else {
@@ -202,7 +192,7 @@ class Scaffold
                 $controller->setData(['f' => $item]);
             }
         } else {
-            throw new \Lemmon\Http\Exception(404, \Lemmon_I18n::t('Entry not found.'));
+            throw new \Lemmon\Http\Exception(404, I18n::t('Entry not found.'));
         }
     }
 

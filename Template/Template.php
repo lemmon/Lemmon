@@ -98,18 +98,17 @@ class Template
     {
         if ($filesystem{0} != '/')
         {
+            // set base if not defined
             if (!$base)
                 $base = $this->_filesystem[0];
-
-            foreach (explode('/', trim($filesystem, '/')) as $part)
-            {
+            // append dirs
+            foreach (explode('/', trim($filesystem, '/')) as $part) {
                 if ($path = realpath($base . '/' . $part))
                     array_unshift($this->_filesystem, $path);
                 $base = $this->_filesystem[0];
             }
         }
-        elseif ($path = realpath($filesystem))
-        {
+        elseif ($path = realpath($filesystem)) {
             array_unshift($this->_filesystem, $path);
         }
         return $this;

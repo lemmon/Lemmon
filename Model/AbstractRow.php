@@ -96,14 +96,13 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             foreach ($r as $field => $condition) {
                 switch ($condition) {
                     case 'required':
-                        if (!isset($f[$field])) $fields[$field] = I18n::t(String::human($field));
+                        if (!isset($f[$field])) $fields[$field] = I18n::t('This field is required');
                         break;
                     case 'allow_null':
-                        if (!array_key_exists($field, $f)) $fields[$field] = I18n::t(String::human($field));
+                        if (!array_key_exists($field, $f)) $fields[$field] = I18n::t('This field is required');
                         break;
                     case 'upload':
-                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK)
-                            and !isset($f[$field])) $fields[$field] = I18n::t(String::human($field));
+                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK) and !isset($f[$field])) $fields[$field] = I18n::t('Error');
                         break;
                     default:
                         throw new \Exception(sprintf('Unknown flag `%s` on field `%s`.', $condition, $field));
@@ -111,7 +110,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                 }
             }
             if ($fields) {
-                throw new ValidationException(I18n::tn('Missing field %2$s', 'Missing %d fields (%s)', count($fields), join(', ', $fields)), array_keys($fields));
+                throw new ValidationException($fields);
             }
         }
         // uploads
@@ -150,10 +149,9 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             }
         }
         // user defined validation
-        $_msg = '';
         $_fields = [];
-        if ($this->onValidate($f, $_msg, $_fields) === false) {
-            throw new ValidationException($_msg, $_fields);
+        if ($this->onValidate($f, $_fields) === false) {
+            throw new ValidationException($_fields);
         }
         //
         return;
