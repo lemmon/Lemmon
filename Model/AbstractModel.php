@@ -84,46 +84,48 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $class_name = get_called_class();
         $model = new $class_name;
 
-        if (func_num_args() > 1)
-        {
+        if (func_num_args() > 1) {
             // many rows
             throw new \Exception('[todo] Many rows.');
         }
-        elseif (is_int($cond) or is_string($cond))
-        {
+        elseif (is_int($cond) or is_string($cond)) {
             // returns Row
             return $model->wherePrimary($cond);
         }
-        elseif (is_array($cond))
-        {
+        elseif (is_array($cond)) {
             // returns Row
             return $model->where($cond);
         }
-        elseif (is_null($cond))
-        {
+        elseif (is_null($cond)) {
             // returns Model
             return $model;
         }
-        else
-        {
+        else {
+            // error
             throw new \Exception(sprintf('Unknown condition type (%s).', gettype($cond)));
         }
     }
 
 
-    function wherePrimary($id)
+    final protected function getSchema()
+    {
+        return $this->_schema;
+    }
+
+
+    final function wherePrimary($id)
     {
         return $this->where([$this->_schema->primary[0] => $id]);
     }
 
 
-    function create()
+    final function create()
     {
         return new $this->_schema->rowClass;
     }
 
 
-    function getIterator()
+    final function getIterator()
     {
         return new \ArrayIterator($this->all());
     }
@@ -131,24 +133,27 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
 
 
-    function offsetExists($i)
+    final function offsetExists($i)
     {
         $all = ($this->_all) ?: ($this->_all = $this->all());
         return array_key_exists($i, $all);
     }
-    
-    function offsetGet($i)
+
+
+    final function offsetGet($i)
     {
         $all = ($this->_all) ?: ($this->_all = $this->all());
         return $all[$i];
     }
-    
-    function offsetSet($offset, $value)
+
+
+    final function offsetSet($offset, $value)
     {
         return false;
     }
-    
-    function offsetUnset($offset)
+
+
+    final function offsetUnset($offset)
     {
         return false;
     }
@@ -166,14 +171,14 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     }
 
 
-    function count()
+    final function count()
     {
         $query = new \Lemmon\Sql\Select($this->_statement);
         return $query->count();
     }
 
 
-    function all()
+    final function all()
     {
         $res = [];
         $rowClass = $this->_schema->rowClass;
@@ -184,7 +189,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     }
 
 
-    function allByPrimary()
+    final function allByPrimary()
     {
         $res = [];
         $rowClass = $this->_schema->rowClass;
@@ -195,7 +200,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     }
 
 
-    function first()
+    final function first()
     {
         $rowClass = $this->_schema->rowClass;
         if ($row = $this->_getIterator()->fetch()) {

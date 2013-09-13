@@ -13,7 +13,7 @@ namespace Lemmon\Model;
 
 use \Lemmon\Db\Adapter as DbAdapter,
     \Lemmon\Sql\Expression as SqlExpression,
-    \Lemmon_I18N as I18n,
+    \Lemmon_I18n as LemmonI18n,
     \Lemmon\String as String;
 
 /**
@@ -76,6 +76,14 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
+    /*
+    final protected function getSchema()
+    {
+        return $this->_schema;
+    }
+    */
+
+
     private function _sanitize(&$f)
     {
         // timestamps
@@ -96,13 +104,13 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             foreach ($r as $field => $condition) {
                 switch ($condition) {
                     case 'required':
-                        if (!isset($f[$field])) $fields[$field] = I18n::t('This field is required');
+                        if (!isset($f[$field])) $fields[$field] = LemmonI18n::t('This field is required');
                         break;
                     case 'allow_null':
-                        if (!array_key_exists($field, $f)) $fields[$field] = I18n::t('This field is required');
+                        if (!array_key_exists($field, $f)) $fields[$field] = LemmonI18n::t('This field is required');
                         break;
                     case 'upload':
-                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK) and !isset($f[$field])) $fields[$field] = I18n::t('Error');
+                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK) and !isset($f[$field])) $fields[$field] = LemmonI18n::t('Error');
                         break;
                     default:
                         throw new \Exception(sprintf('Unknown flag `%s` on field `%s`.', $condition, $field));

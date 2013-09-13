@@ -7,7 +7,7 @@
  * @link       http://www.lemmonjuice.com
  * @package    lemmon
  */
-class Lemmon_I18N
+class Lemmon_I18n
 {
     static private $_base = '';
     
