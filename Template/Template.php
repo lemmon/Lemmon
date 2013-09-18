@@ -66,7 +66,7 @@ class Template
     }
 
 
-    function render($data)
+    function render(array $data = [])
     {
         //
         // filesystem
@@ -74,10 +74,11 @@ class Template
         //
         // environment
         $twig_environment = new \Twig_Environment($twig_loader, $this->_environment);
-        if ($this->_extension === null)
+        if ($this->_extension === null) {
             $twig_environment->addExtension(new ExtensionTwig());
-        elseif (is_object($this->_extension))
+        } elseif (is_object($this->_extension)) {
             $twig_environment->addExtension($this->_extension);
+        }
         //
         // template
         $twig = $twig_environment->loadTemplate($this->_name . '.html');
