@@ -18,45 +18,53 @@ namespace Lemmon;
  */
 class Environment
 {
-	static private $_development = null;
+    static private $_development = null;
 
 
-	/**
-	 * Constructor.
-	 */
-	function __construct()
-	{
-		// defaults
-		if (is_null(self::$_development))
-		{
-			if ($_SERVER['SERVER_ADDR']=='127.0.0.1')
-			{
-				self::setDev(true);
-			}
-		}
-		// init class
-		if (method_exists($this, '__init'))
-		{
-			$this->__init();
-		}
-	}
+    protected function __init() {}
 
 
-	/**
-	 * Set development environment.
-	 */
-	static function setDev($is = true)
-	{
-		self::$_development = (bool)$is;
-	}
+    /**
+     * Constructor.
+     */
+    function __construct()
+    {
+        // defaults
+        if (is_null(self::$_development)) {
+            if ($_SERVER['SERVER_ADDR'] == '127.0.0.1') {
+                self::setDev(true);
+            }
+        }
+        // init class
+        $this->__init();
+    }
 
 
-	/**
-	 * Get development environment.
-	 * @return bool
-	 */
-	static function isDev()
-	{
-		return (bool)self::$_development;
-	}
+    /**
+     * Set development environment.
+     */
+    static function setDev($is = true)
+    {
+        self::$_development = (bool)$is;
+    }
+
+
+    /**
+     * Test for development environment.
+     * @return bool
+     */
+    static function isDev()
+    {
+        return (bool)self::$_development;
+    }
+
+
+    /**
+     * Test for production environment.
+     * @return bool
+     */
+    static function isProduction()
+    {
+        return !(bool)self::$_development;
+    }
 }

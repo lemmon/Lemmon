@@ -249,7 +249,7 @@ class Route
      * @param  array   $conditions array of case insensitive regex pattern bits
      * @return boolean
      */
-    final function match($pattern, $conditions = [])
+    final function match($pattern, $conditions = [], $flags = 'i')
     {
         #$pattern = str_replace('/', '\/', $pattern);
         $pattern = str_replace('.', '\.', $pattern);
@@ -260,7 +260,7 @@ class Route
             $pattern = str_replace('$' . $key, '(?P<' . $key . '>' . $val . ')', $pattern);
         }
         
-        if (preg_match("#{$pattern}#i", $this->_route, $matches)) {
+        if (preg_match("#{$pattern}#{$flags}", $this->_route, $matches)) {
             $this->_matches = $matches;
             if ($matches['controller']) Framework::setController($matches['controller']);
             if ($matches['action']) Framework::setAction($matches['action']);
