@@ -119,53 +119,50 @@ class Framework
         
         // template (legacy)
         Template::appendFilesystem('app/views/' . $controller_name);
-
+        
         // init controller
-        if (($res = $controller->__initApplication()) === null and ($res = $controller->__init()) === null)
-        {
+        if (($res = $controller->__initApplication()) === null and ($res = $controller->__init()) === null) {
             // find action
-            if (method_exists($controller, $action_method_name))
-            {
+            if (method_exists($controller, $action_method_name)) {
                 // execute action
                 $res = $controller->{$action_method_name}();
             }
-            else
-            {
+            else {
                 // error on missing action
                 throw new \Lemmon_Exception(sprintf('Unknown method `%s()` on `%s`', $action_method_name, get_class($controller)));
             }
         }
         
         // process the result
-        if (($res === null and $controller->template instanceof Template\Template) or ($res instanceof Template\Template))
-        {
+        if (($res === null and $controller->template instanceof Template\Template) or ($res instanceof Template\Template)) {
+            // render template
             $template = ($res) ?: $controller->template;
             $html = $template->render($controller->data);
             echo $html;
         }
-        elseif ($res === null)
-        {
+        elseif ($res === null) {
+            // render template (old)
             $html = Template::display($action_name, $controller->getData(true));
             echo $html;
         }
-        elseif ($res instanceof Route\Link)
-        {
+        elseif ($res instanceof Route\Link) {
+            // redir
             $controller->request->redir((string)$res)->exec();
         }
-        elseif ($res instanceof Request\Redir)
-        {
-            // redirect
+        elseif ($res instanceof Request\Redir) {
+            // redirect (old)
             $res->exec();
             exit;
         }
-        elseif (is_string($res) or is_int($res))
-        {
-            // display plain text result
-            #header('Content-Type: text/plain');
+        elseif (is_string($res) or is_int($res)) {
+            // string
+            /*
+            header('Content-Type: text/plain');
+            */
             echo $res;
         }
-        elseif ($res)
-        {
+        elseif ($res) {
+            // dump
             dump($res);
         }
     }
