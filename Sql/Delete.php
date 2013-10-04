@@ -18,27 +18,27 @@ class Delete extends AbstractStatement
 {
 
 
-	function getQueryString()
-	{
-		$q = [];
-		// delete
-		$q[] = 'DELETE';
-		// from
-		$q[] = 'FROM ' . $this->_table;
-		// where
-		if ($this->_where) $q[] = 'WHERE ' . join(' AND ', $this->_where);
-		// order
-		if ($this->_order) $q[] = 'ORDER BY ' . $this->_order;
-		// limit
-		if ($this->_limit) $q[] = 'LIMIT ' . $this->_limit;
-		//
-		return join(' ', $q);
-	}
+    function getQueryString()
+    {
+        $q = [];
+        // delete
+        $q[] = 'DELETE';
+        // from
+        $q[] = 'FROM ' . $this->_table;
+        // where
+        if ($this->_where) $q[] = 'WHERE ' . join(' AND ', $this->_where);
+        // order
+        if ($this->_order) $q[] = 'ORDER BY ' . $this->_order;
+        // limit
+        if ($this->_limit) $q[] = 'LIMIT ' . $this->_limit;
+        //
+        return join(' ', $q);
+    }
 
 
-	function setTable($table)
-	{
-		if (!is_string($table)) throw new \Exception('Only single table is allowed on Delete query at this time.');
-		parent::setTable($table);
-	}
+    function setTable($table)
+    {
+        if (!is_string($table)) throw new \Exception('Only single table is allowed on Delete query at this time.');
+        parent::setTable($table);
+    }
 }

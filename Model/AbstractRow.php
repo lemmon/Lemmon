@@ -13,7 +13,6 @@ namespace Lemmon\Model;
 
 use \Lemmon\Db\Adapter as DbAdapter,
     \Lemmon\Sql\Expression as SqlExpression,
-    \Lemmon_I18n as LemmonI18n,
     \Lemmon\String as String;
 
 /**
@@ -35,6 +34,8 @@ abstract class AbstractRow /*implements \ArrayAccess*/
 
     private $_schema;
     private $_state;
+
+    private $_errors = [];
 
 
     final function __construct($data = null)
@@ -76,12 +77,13 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    /*
-    final protected function getSchema()
+    static function getModelName()
     {
-        return $this->_schema;
+        if (!isset(static::$model))
+            throw new \Exception('No model has been defined.');
+        
+        return static::$model;
     }
-    */
 
 
     private function _sanitize(&$f)
@@ -96,29 +98,85 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    private function _validate(&$f, &$to_upload)
+    final protected function getSchema()
     {
+        return $this->_schema;
+    }
+
+
+    private function _clearErrors()
+    {
+        $this->_errors = [];
+    }
+
+
+    final protected function setError($field, $message = '', $case = null)
+    {
+        if ($case) {
+            $this->_errors[$field][$case] = $message;
+        } else {
+            $this->_errors[$field][] = $message;
+        }
+        return $this;
+    }
+
+
+    final function getErrors()
+    {
+        return $this->_errors;
+    }
+
+
+    final protected function _isInvalid()
+    {
+        return $this->_errors ? true : false;
+    }
+
+
+    final function isValid()
+    {
+        try {
+            // validate
+            $this->_validate($this->data);
+            // ok
+            return true;
+        } catch (ValidationException $e) {
+            // input is invalid
+            return false;
+        }
+    }
+
+
+    final function isInvalid()
+    {
+        return !$this->isValid();
+    }
+
+
+    private function _validate(&$f, &$to_upload = null)
+    {
+        $ok = true;
+        $this->_clearErrors();
         // required fields
-        if (is_array($r = $this->_schema->get('required'))) {
-            $fields = [];
+        if (is_array($r = $this->_schema->required)) {
             foreach ($r as $field => $condition) {
                 switch ($condition) {
                     case 'required':
-                        if (!isset($f[$field])) $fields[$field] = LemmonI18n::t('This field is required');
+                        if (!isset($f[$field]))
+                            $this->setError($field, _t('This field is required'), $condition);
                         break;
                     case 'allow_null':
-                        if (!array_key_exists($field, $f)) $fields[$field] = LemmonI18n::t('This field is required');
+                        if (!array_key_exists($field, $f))
+                            $this->setError($field, _t('This field is required'), $condition);
                         break;
                     case 'upload':
-                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK) and !isset($f[$field])) $fields[$field] = LemmonI18n::t('Error');
+                        if ((!array_key_exists($field, $_FILES) or $_FILES[$field]['error'] != UPLOAD_ERR_OK) and !isset($f[$field]))
+                            $this->setError($field, _t('Error uploading file'), $condition);
                         break;
                     default:
-                        throw new \Exception(sprintf('Unknown flag `%s` on field `%s`.', $condition, $field));
+                        throw new \Exception(_t('Unknown flag `%s` on field `%s`.', $condition, $field));
                         break;
                 }
-            }
-            if ($fields) {
-                throw new ValidationException($fields);
             }
         }
         // uploads
@@ -130,7 +188,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                 // upload dir
                 $_dir = $base_dir . ($upload_dir ? '/' . $upload_dir : '');
                 if (!($_dir and (is_dir($_dir) or @mkdir($_dir, 0777, true)) and is_writable($_dir))) {
-                    throw new \Exception(sprintf('Invalid upload dir %s.', $_dir));
+                    throw new \Exception(_t('Invalid upload dir %s.', $_dir));
                 }
                 // upload
                 if ($file['error'] == UPLOAD_ERR_OK) {
@@ -138,7 +196,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                         'base' => substr($file['name'], 0, strrpos($file['name'], '.')),
                         'ext'  => substr($file['name'], strrpos($file['name'], '.') + 1),
                     ];
-                    $file_name = String::asciize($_file['base']) . '.' . time() . '.' . $_file['ext'];
+                    $file_name = String::asciize($_file['base']) . '.' . time() . '.' . strtolower($_file['ext']);
                     $file = $_dir . '/' . $file_name;
                     $f[$field] = ($upload_dir ? $upload_dir . '/' : '') . $file_name;
                     $to_upload[$field] = [
@@ -147,22 +205,19 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                         '_old' => $this->data[$field],
                     ];
                     if (file_exists($file)) {
-                        throw new \Exception(sprintf('File %s already exists at provided location.', $file));
+                        throw new \Exception(_t('File %s already exists at provided location.', $file));
                     }
                 } elseif ($file['error'] == UPLOAD_ERR_NO_FILE) {
                     // upload stays the same
                 } else {
-                    throw new \Exception(sprintf('File upload error no #%d.', $file['error']));
+                    throw new \Exception(_t('File upload error no #%d.', $file['error']));
                 }
             }
         }
-        // user defined validation
-        $_fields = [];
-        if ($this->onValidate($f, $_fields) === false) {
-            throw new ValidationException($_fields);
-        }
         //
-        return;
+        if ($this->onValidate($f) === false or $this->_isInvalid()) {
+            throw new ValidationException();
+        }
     }
 
 
@@ -238,7 +293,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    function getData()
+    final function toArray()
     {
         return $this->data;
     }
@@ -294,38 +349,6 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         $this->_set($key, $val);
         $this->_state |= 0b1;
     }
-
-
-    /*
-    function offsetExists($key)
-    {
-        $this->reload();
-        return array_key_exists($key, $this->data);
-    }
-
-
-    function offsetGet($key)
-    {
-        $this->reload();
-        return $this->data[$key];
-    }
-
-
-    function offsetSet($key, $val)
-    {
-        $this->reload();
-        $this->_set($key, $val);
-        $this->_state |= 0b1;
-    }
-
-
-    function offsetUnset($key)
-    {
-        $this->reload();
-        unset($this->data[$key]);
-        $this->_state |= 0b1;
-    }
-    */
 
 
     private function _set($key, $val)

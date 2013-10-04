@@ -18,70 +18,70 @@ use Lemmon;
  */
 class Redir
 {
-	private $_link;
-	private $_code;
+    private $_link;
+    private $_code;
 
-	private $_controller;
-
-
-	/**
-	 * Constructor.
-	 * @param string    $link
-	 * @param Framework $controller
-	 */
-	function __construct($link, \Lemmon\Framework $controller = null)
-	{
-		$this->_link = (string)$link;
-		$this->_controller = $controller;
-	}
+    private $_controller;
 
 
-	/**
-	 * @return string
-	 */
-	function __toString()
-	{
-		return $this->_link;
-	}
+    /**
+     * Constructor.
+     * @param string    $link
+     * @param Framework $controller
+     */
+    function __construct($link, \Lemmon\Framework $controller = null)
+    {
+        $this->_link = (string)$link;
+        $this->_controller = $controller;
+    }
 
 
-	/**
-	 * Execute redirect.
-	 * @param string $link
-	 */
-	public function exec()
-	{
-		// get link to redirect
-		$link = (string)$this;
-
-		// assign new hash for flash messages
-		if ($c = $this->_controller)
-		{
-			$c->getFlash()->assignNewLink($link);
-		}
-
-		$_SESSION['x'] = 'y';
-		// redirect
-		if ($this->_code)
-		{
-			header('Location: ' . $link, true, $this->_code);
-		}
-		else
-		{
-			header('Location: ' . $link);
-		}
-		exit;
-	}
+    /**
+     * @return string
+     */
+    function __toString()
+    {
+        return $this->_link;
+    }
 
 
-	/**
-	 * Sets redirect code.
-	 * @param  int  $code
-	 * @return Redir
-	 */
-	public function setCode($code)
-	{
-		$this->_code = $code;
-		return $this;
-	}
+    /**
+     * Execute redirect.
+     * @param string $link
+     */
+    public function exec()
+    {
+        // get link to redirect
+        $link = (string)$this;
+
+        // assign new hash for flash messages
+        if ($c = $this->_controller)
+        {
+            $c->getFlash()->assignNewLink($link);
+        }
+
+        $_SESSION['x'] = 'y';
+        // redirect
+        if ($this->_code)
+        {
+            header('Location: ' . $link, true, $this->_code);
+        }
+        else
+        {
+            header('Location: ' . $link);
+        }
+        exit;
+    }
+
+
+    /**
+     * Sets redirect code.
+     * @param  int  $code
+     * @return Redir
+     */
+    public function setCode($code)
+    {
+        $this->_code = $code;
+        return $this;
+    }
 }

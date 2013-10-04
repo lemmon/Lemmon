@@ -27,8 +27,7 @@ class Flash
         // route
         $this->_route = $route;
         // links stored in sessions
-        if ($flash = $_SESSION['__FLASH_MESSAGES__'])
-        {
+        if ($flash = $_SESSION['__FLASH_MESSAGES__']) {
             $this->_messages = $flash['messages'];
             $this->_fields = $flash['fields'];
             unset($_SESSION['__FLASH_MESSAGES__']);
@@ -38,14 +37,16 @@ class Flash
 
     function __destruct()
     {
-        if (!$this->_link)
-        {
+        if (!$this->_link) {
             $_SESSION['__FLASH_MESSAGES__'] = [
                 'messages' => $this->_messages,
                 'fields'   => $this->_fields,
             ];
         }
     }
+
+
+    function assignNewLink() {} // [depreciated] legacy fnc
 
 
     function setError($message)
@@ -55,20 +56,29 @@ class Flash
     }
 
 
-    function setErrorField($field, $message = '')
+    function setErrorField($field, $message = '', $case = null)
     {
-        $this->_fields[$field][] = $message;
+        if ($case) {
+            $this->_fields[$field][$case] = $message;
+        } else {
+            $this->_fields[$field][] = $message;
+        }
     }
 
 
     function setErrorFields(array $fields)
     {
-        foreach ($fields as $key => $val)
-        {
-            if (is_int($key)) {
-                $this->setErrorField($val);
+        foreach ($fields as $field => $errors) {
+            if (is_array($errors)) {
+                foreach ($errors as $case => $message) {
+                    if (is_int($case)) {
+                        $this->setErrorField($field, $message);
+                    } else {
+                        $this->setErrorField($field, $message, $case);
+                    }
+                }
             } else {
-                $this->setErrorField($key, $val);
+                $this->setErrorField($field, $errors);
             }
         }
     }
@@ -103,14 +113,10 @@ class Flash
     }
 
 
-    function assignNewLink()
-    {
-        // [depreciated] legacy fnc
-    }
-
-
     private function _assignLink()
     {
-        $this->_link = ($_POST ? microtime(true) : '') . '@' . (string)$this->_route->getSelf();
+        if (!$this->_link) {
+            $this->_link = ($_POST ? microtime(true) : '') . '@' . (string)$this->_route->getSelf();
+        }
     }
 }

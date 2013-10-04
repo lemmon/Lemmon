@@ -147,7 +147,13 @@ class Framework
         }
         elseif ($res instanceof Route\Link) {
             // redir
-            $controller->request->redir((string)$res)->exec();
+            if ($controller->flash instanceof \Lemmon\Form\Flash) {
+                // new redirect
+                $controller->redir((string)$res);
+            } else {
+                // legacy redirect
+                $controller->request->redir((string)$res)->exec();
+            }
         }
         elseif ($res instanceof Request\Redir) {
             // redirect (old)
@@ -234,6 +240,13 @@ class Framework
     function getRoute()
     {
         return $this->route;
+    }
+
+
+    function redir($link, $code = null)
+    {
+        header('Location: ' . $link, true, $code);
+        exit;
     }
 
 

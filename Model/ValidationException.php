@@ -16,18 +16,4 @@ namespace Lemmon\Model;
  */
 class ValidationException extends \Exception
 {
-    protected $_fields = [];
-
-
-    function __construct(array $fields = [])
-    {
-        $this->_fields = $fields;
-        parent::__construct('Validation error.');
-    }
-
-
-    function getFields()
-    {
-        return $this->_fields;
-    }
 }

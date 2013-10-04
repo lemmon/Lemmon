@@ -11,7 +11,7 @@
 
 namespace Lemmon\Form;
 
-use Lemmon_I18n as I18n;
+use \Lemmon\String as String;
 
 /**
  * Scaffolding.
@@ -125,12 +125,12 @@ class Scaffold
                 try {
                     $item->set($f);
                     $item->save();
-                    $controller->getFlash()->setNotice(I18n::t('Item has been created'));
+                    $controller->getFlash()->setNotice(_t('Item has been created'));
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 } catch (\Lemmon\Model\ValidationException $e) {
-                    $controller->getFlash()->setError(I18n::t('Your input contains errors'))
-                                           ->setError(I18n::t('Item has NOT been created'))
-                                           ->setErrorFields($e->getFields());
+                    $controller->getFlash()->setError(_t('Your input contains errors'))
+                                           ->setError(_t('Item has NOT been created'))
+                                           ->setErrorFields($item->getErrors());
                 }
             } elseif ($config['default'] and is_array($config['default'])) {
                 // default values
@@ -142,7 +142,7 @@ class Scaffold
 
     static function getModelName(\Lemmon\Framework $controller, array &$config = [])
     {
-        return $config['model'] ?: \Lemmon\String::tableToClassName(end(explode('/', $controller::getController())));
+        return $config['model'] ?: String::tableToClassName(end(explode('/', $controller::getController())));
     }
 
 
@@ -179,20 +179,20 @@ class Scaffold
                 try {
                     $item->set($f);
                     $item->save();
-                    $controller->getFlash()->setNotice(I18n::t('Item has been updated'));
+                    $controller->getFlash()->setNotice(_t('Item has been updated'));
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 } catch (\Lemmon\Model\ValidationException $e) {
                     // error saving property
-                    $controller->getFlash()->setError(I18n::t('Your input contains errors'))
-                                           ->setError(I18n::t('Item has NOT been updated'))
-                                           ->setErrorFields($e->getFields());
+                    $controller->getFlash()->setError(_t('Your input contains errors'))
+                                           ->setError(_t('Item has NOT been updated'))
+                                           ->setErrorFields($item->getErrors());
                 }
             } else {
                 // default values
                 $controller->setData(['f' => $item]);
             }
         } else {
-            throw new \Lemmon\Http\Exception(404, I18n::t('Entry not found.'));
+            die('Scaffold: Entry not found.');
         }
     }
 
@@ -200,15 +200,12 @@ class Scaffold
     private static function _sanitize($f)
     {
         // sanitize fields
-        foreach ($f as $key => $val)
-        {
-            if ($val)
-            {
+        foreach ($f as $key => $val) {
+            if ($val) {
                 if (is_string($val)) $f[$key] = trim($f[$key]);
                 elseif (is_array($val)) $f[$key] = self::_sanitize($val);
             }
-            else
-            {
+            else {
                 $f[$key] = null;
             }
         }

@@ -20,7 +20,7 @@ class String
     static public function human($str)
     {
         $str = str_replace('_id', '', $str);
-        $str = str_replace(array('-', '_', '.'), ' ', $str);
+        $str = str_replace(['-', '_', '.', '[', ']'], ' ', $str);
         $str = trim($str);
         $str = ucwords($str);
         return $str;
@@ -237,9 +237,9 @@ class String
      * @param  string  $str
      * @return string
      */
-    static public function classToFileName($str)
+    static public function classToFileName($str, $separator = '_')
     {
-        return (str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1_$2', $str)));
+        return (str_replace('__', DIRECTORY_SEPARATOR, preg_replace('/(.)([A-Z])/u', '$1' . $separator . '$2', $str)));
     }
 
 
@@ -248,9 +248,9 @@ class String
      * @param  string  $str
      * @return string
      */
-    static public function classToTableName($str)
+    static public function classToTableName($str, $separator = '_')
     {
-        return strtolower(self::classToFileName($str));
+        return strtolower(self::classToFileName($str, $separator));
     }
 
 
