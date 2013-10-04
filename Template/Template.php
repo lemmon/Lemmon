@@ -54,8 +54,7 @@ class Template
     function display($name)
     {
         /*
-        if ($i = strrpos($name, '/'))
-        {
+        if ($i = strrpos($name, '/')) {
             $dir = substr($name, 0, $i);
             $name = substr($name, strlen($dir) + 1);
             $this->appendFilesystem($dir);
