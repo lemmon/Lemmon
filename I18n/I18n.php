@@ -30,10 +30,13 @@ class I18n
 
     static function getLocales()
     {
-        if (array_key_exists('locales', self::$_cache))
-            return self::$_cache['locales'];
-        else
-            return self::$_cache['locales'] = include __DIR__ . '/data/locales.php';
+        return include __DIR__ . '/data/locales.php';
+    }
+
+
+    static function getCountries()
+    {
+        return include __DIR__ . '/data/countries.php';
     }
 
 

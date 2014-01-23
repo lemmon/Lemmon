@@ -161,9 +161,17 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
 
 
+    final function getStatement()
+    {
+        return $this->_statement;
+    }
+
+
+
+
     private function _getIterator()
     {
-        $query = new \Lemmon\Sql\Select($this->_statement);
+        $query = new \Lemmon\Sql\Select($this->getStatement());
         $query->cols($this->_schema->table . '.*');
         $pdo_statement = $query->exec();
         $pdo_statement->setFetchMode(\PDO::FETCH_ASSOC);
@@ -183,7 +191,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $res = [];
         $rowClass = $this->_schema->rowClass;
         foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[] = new $rowClass($row);
+            $res[] = new $rowClass($row, true);
         }
         return $res;
     }
@@ -194,7 +202,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $res = [];
         $rowClass = $this->_schema->rowClass;
         foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[$row['id']] = new $rowClass($row);
+            $res[$row['id']] = new $rowClass($row, true);
         }
         return $res;
     }
@@ -204,7 +212,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     {
         $rowClass = $this->_schema->rowClass;
         if ($row = $this->_getIterator()->fetch()) {
-            return new $rowClass($row);
+            return new $rowClass($row, true);
         }
     }
 }

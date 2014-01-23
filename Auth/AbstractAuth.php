@@ -28,11 +28,9 @@ abstract class AbstractAuth extends Service
 	/**
 	 * Constructor.
 	 */
-	final function __construct()
-	{
+	final function __construct() {
 		// check for blowfish
-		if (CRYPT_BLOWFISH != 1)
-		{
+		if (CRYPT_BLOWFISH != 1) {
 			throw new Exception('Bcrypt not supported in this installation. See http://php.net/crypt');
 		}
 		
@@ -50,18 +48,16 @@ abstract class AbstractAuth extends Service
 	 */
 	static function getInstance()
 	{
-		if ($instance=self::$_instance)
-		{
+		if ($instance = self::$_instance) {
 			return $instance;
-		}
-		else
-		{
+		} else {
 			return new self();
 		}
 	}
 
 
-	protected function __init(){}
+	protected function __init() {}
+
 
 	/**
 	 * Authenticate event.
@@ -70,9 +66,10 @@ abstract class AbstractAuth extends Service
 	 * @see    self::authenticate()
 	 * @return mixed
 	 */
-	protected function onAuthenticate($username, $password){}
-	protected function onStoreIdentity($identity, $permanent=false){}
+	protected function onAuthenticate($username, $password) {}
+	protected function onStoreIdentity($identity, $permanent = false) {}
 	protected function onClearIdentity(){}
+
 
 	protected function onGetIdentity($identity)
 	{
@@ -89,14 +86,11 @@ abstract class AbstractAuth extends Service
 	 */
 	final function authenticate($username, $password)
 	{
-		if ($identity = $this->onAuthenticate($username, $password))
-		{
+		if ($identity = $this->onAuthenticate($username, $password)) {
 			// successful attempt
 			$this->_identity = $identity;
 			return true;
-		}
-		else
-		{
+		} else {
 			// authetication unsuccessful
 			return false;
 		}
@@ -109,7 +103,7 @@ abstract class AbstractAuth extends Service
 	 * @see    self::onStoreIdentity()
 	 * @return mixed
 	 */
-	final function storeIdentity($permanent=false)
+	final function storeIdentity($permanent = false)
 	{
 		return $this->onStoreIdentity($this->_identity, $permanent);
 	}
@@ -132,8 +126,7 @@ abstract class AbstractAuth extends Service
 	 */
 	final function getIdentity()
 	{
-		if ($identity = $this->_identity)
-		{
+		if ($identity = $this->_identity) {
 			return $this->onGetIdentity($identity);
 		}
 	}

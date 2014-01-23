@@ -46,20 +46,27 @@ class Template
 
     function setExtension($extension)
     {
+        $this->_extension = [$extension];
+        return $this;
+    }
+
+
+    function setExtensions($extension)
+    {
         $this->_extension = $extension;
+        return $this;
+    }
+
+
+    function addExtension($extension)
+    {
+        $this->_extension[] = $extension;
         return $this;
     }
 
 
     function display($name)
     {
-        /*
-        if ($i = strrpos($name, '/')) {
-            $dir = substr($name, 0, $i);
-            $name = substr($name, strlen($dir) + 1);
-            $this->appendFilesystem($dir);
-        }
-        */
         $this->_name = $name;
         return $this;
     }
@@ -73,10 +80,14 @@ class Template
         //
         // environment
         $twig_environment = new \Twig_Environment($twig_loader, $this->_environment);
-        if ($this->_extension === null) {
+        if (is_callable($this->_extension)) {
+            call_user_func($this->_extension, $twig_environment);
+        } elseif (is_array($this->_extension)) {
+            $twig_environment->setExtensions($this->_extension);
+        } elseif ($this->_extension === null) {
             $twig_environment->addExtension(new ExtensionTwig());
-        } elseif (is_object($this->_extension)) {
-            $twig_environment->addExtension($this->_extension);
+        } else {
+            throw new \Exception('Unknown extension type.');
         }
         //
         // template

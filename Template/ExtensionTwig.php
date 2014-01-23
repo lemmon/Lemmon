@@ -32,10 +32,6 @@ class ExtensionTwig extends \Twig_Extension
             'tPriceInt'     => new \Twig_Filter_Function('Lemmon_I18n::priceInt', ['pre_escape' => 'html', 'is_safe' => ['html']]),
             'tTime'         => new \Twig_Filter_Function('Lemmon_I18n::time'),
             
-            // Numbers
-            'round'         => new \Twig_Filter_Function('round'),
-            'floor'         => new \Twig_Filter_Function('floor'),
-            
             // Strings
             'asciize'       => new \Twig_Filter_Function('Lemmon\String::asciize'),
             'html'          => new \Twig_Filter_Function('Lemmon\String::html', ['is_safe' => ['html']]),

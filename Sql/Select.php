@@ -50,6 +50,14 @@ class Select extends AbstractStatement
     }
 
 
+    function col($col)
+    {
+        $query = clone $this;
+        $query->cols(new \Lemmon\Sql\Expression($col));
+        return reset($query->first());
+    }
+
+
     function cols($fields)
     {
         $fields = is_array($fields) ? $fields : func_get_args();

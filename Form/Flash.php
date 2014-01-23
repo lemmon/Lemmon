@@ -63,6 +63,7 @@ class Flash
         } else {
             $this->_fields[$field][] = $message;
         }
+        return $this;
     }
 
 
@@ -72,15 +73,18 @@ class Flash
             if (is_array($errors)) {
                 foreach ($errors as $case => $message) {
                     if (is_int($case)) {
-                        $this->setErrorField($field, $message);
+                        $this->setErrorField($case, $message);
                     } else {
                         $this->setErrorField($field, $message, $case);
                     }
                 }
+            } elseif (is_int($field)) {
+                $this->setErrorField($errors);
             } else {
                 $this->setErrorField($field, $errors);
             }
         }
+        return $this;
     }
 
 

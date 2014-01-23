@@ -29,95 +29,69 @@ class Where
         
         //
         // one argument
-        if ($value === false)
-        {
-            if ($expr instanceof Expression)
-            {
+        if ($value === false) {
+            if ($expr instanceof Expression) {
                 $expression = $expr;
-            }
-            else
-            {
+            } else {
                 $expression = new Expression($expr);
             }
         }
         //
         // three or more arguments
-        elseif (func_num_args() > 3)
-        {
+        elseif (func_num_args() > 3) {
             $expression = new Expression($args);
         }
         //
         // two arguments
-        else
-        {
+        else {
             // expr ... ?
-            if (is_string($expr) and strpos($expr, '?'))
-            {
+            if (is_string($expr) and strpos($expr, '?')) {
                 $expression = new Expression($expr, $value);
             }
             // field IS NULL
-            elseif (is_null($value))
-            {
-                if ($expr{0}=='!')
-                {
+            elseif (is_null($value)) {
+                if ($expr{0} == '!') {
                     $expression = sprintf('%s IS NOT NULL', Quote::field($table->getAlias() . '.' . substr($expr, 1)));
-                }
-                else
-                {
+                } else {
                     $expression = sprintf('%s IS NULL', Quote::field($table->getAlias() . '.' . $expr));
                 }
             }
             // field (NOT) IN (array)
-            elseif (is_array($value))
-            {
-                if ($expr{0}=='!')
-                {
+            elseif (is_array($value)) {
+                if ($expr{0} == '!') {
                     $expression = sprintf('%s NOT IN (%s)', Quote::field($table->getAlias() . '.' . substr($expr, 1)), Quote::value($value));
-                }
-                else
-                {
+                } else {
                     $expression = sprintf('%s IN (%s)', Quote::field($table->getAlias() . '.' . $expr), Quote::value($value));
                 }
             }
             // field = value
-            elseif (!is_numeric($expr))
-            {
+            elseif (!is_numeric($expr)) {
                 // expression
-                if (is_object($value) and $value instanceof Expression)
-                {
+                if (is_object($value) and $value instanceof Expression) {
                     $expression = new Expression(sprintf('%s.%s = ?', $table->getAlias(), $expr), $value);
-                }
-                else
-                {
-                    if ($expr{0}=='!')
-                    {
+                } else {
+                    if ($expr{0} == '!') {
                         $expression = sprintf('%s != %s', Quote::field($table->getAlias() . '.' . substr($expr, 1)), Quote::value($value));
-                    }
-                    else
-                    {
+                    } else {
                         $expression = sprintf('%s = %s', Quote::field($table->getAlias() . '.' . $expr), Quote::value($value));
                     }
                 }
             }
             // error
-            else
-            {
+            else {
                 throw new \Exception(sprintf('Unknown field name %s.', $expr));
             }
         }
-
         //
-        if ($expression instanceof Expression)
-        {
+        //
+        if ($expression instanceof Expression) {
             $this->_originalExpression = $expression;
             $this->_expressionString = $expression->toString();
-        }
-        else
-        {
+        } else {
             $this->_originalExpression = $args;
             $this->_expressionString = $expression;
         }
-        
+        //
         // table
         $this->_table = $table;
     }

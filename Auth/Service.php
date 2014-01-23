@@ -35,7 +35,7 @@ class Service
 		$salt = $this->_saltPrefix;
 		$length = $this->_saltLength;
 		$itoa64 = $this->_itoa64;
-		for ($i=0; $i < $length; $i++) $salt .= $itoa64{mt_rand(0, 63)};
+		for ($i = 0; $i < $length; $i++) $salt .= $itoa64{mt_rand(0, 63)};
 		return $salt;
 	}
 
@@ -45,7 +45,7 @@ class Service
 	 * @param  int    $length
 	 * @return string
 	 */
-	function generatePassword($length=12)
+	function generatePassword($length = 12)
 	{
 		$pass = '';
 		$itoa64 = $this->_itoa64;
@@ -61,7 +61,7 @@ class Service
 	 * @see    self::generateSalt()
 	 * @return string
 	 */
-	function encrypt($pass, $salt=null)
+	function encrypt($pass, $salt = null)
 	{
 		return crypt($pass, ($salt) ?: self::generateSalt());
 	}

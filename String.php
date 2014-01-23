@@ -67,13 +67,11 @@ class String
         {
             // process images
             preg_match('#class="([^"]+)".+<img([^>]*)>#i', $line, $m);
-            if ($m)
-            {
+            if ($m) {
                 $line = self::_sanitizeImageBlock($m);
             }
             // rest
-            else
-            {
+            else {
                 preg_match('#^<(p|h\d|ol|ul|dl|div|table)#', $line, $tag);
                 $tag_open = $tag[1];
                 // more cleanup
@@ -81,18 +79,19 @@ class String
                 elseif (!$tag_open or ($tag_open!='dl')) $line = preg_replace('#</?(dt|dd)[^>]*>#i', '', $line); // remove DTs and DDs from non definition lists
                 else $line = str_replace("\n", "<br>\n", $line); // newlines to BRs
                 // wrap blocks
-                if ($tag_open)
-                {
+                if ($tag_open) {
                     $tag_close = '</' .$tag_open . '>';
                     if (substr($line, -strlen($tag_close)) != $tag_close) $line .= $tag_close;
-                }
-                else
-                {
+                } elseif ($line) {
                     $line = '<p>' . $line . '</p>';
+                } else {
+                    $line = null;
                 }
             }
             //
-            $html[$i] = str_replace("\n", "<br>\n", $line);
+            if ($line) {
+                $html[$i] = str_replace("\n", "<br>\n", $line);
+            }
         }
         //
         return join("\n\n", $html);
@@ -212,20 +211,13 @@ class String
      */
     static public function pl($sg)
     {
-        if (substr($sg, -1)=='y')
-        {
+        if (substr($sg, -1) == 'y') {
             $pl = substr($sg, 0, -1) . 'ies';
-        }
-        elseif (substr($sg, -1)=='x')
-        {
+        } elseif (substr($sg, -1) == 'x') {
             $pl = $sg . 'es';
-        }
-        elseif (substr($sg, -2)=='en')
-        {
+        } elseif (substr($sg, -2) == 'en') {
             $pl = substr($sg, 0, -3);
-        }
-        else
-        {
+        } else {
             $pl = $sg . 's';
         }
         return $pl;

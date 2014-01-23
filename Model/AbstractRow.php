@@ -38,7 +38,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     private $_errors = [];
 
 
-    final function __construct($data = null)
+    final function __construct($data = null, $from_db = false)
     {
         if (!isset(static::$model)) throw new \Exception('No model has been defined.');
     
@@ -50,7 +50,11 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             if (is_array($data)) {
                 $this->dataDefault = $data;
                 $this->set($data);
-                $this->_state = self::STATE_LOADED;
+                if ($from_db) {
+                    $this->_state = self::STATE_LOADED;
+                } else {
+                    $this->_state = self::STATE_NEW;
+                }
             }
         } else {
             $this->_state = self::STATE_EMPTY;
@@ -162,7 +166,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             foreach ($r as $field => $condition) {
                 switch ($condition) {
                     case 'required':
-                        if (!isset($f[$field]))
+                        if (empty($f[$field]))
                             $this->setError($field, _t('This field is required'), $condition);
                         break;
                     case 'allow_null':
@@ -253,7 +257,9 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         // data
         $data = $this->data;
         // validate
-        if ($force or ($this->_state & 0b1 and $this->_sanitize($data) !== false and $this->_validate($data, $to_upload) !== false and $this->_uploads($to_upload, $data) !== false)) {
+        if ($force or ($this->_state & 0b1 and $this->_validate($data, $to_upload) !== false and $this->_uploads($to_upload, $data) !== false)) {
+            // sanitize data
+            $this->_sanitize($data);
             // before create/update event
             ($this->_state & 0b10) ? $this->onBeforeUpdate($data) : $this->onBeforeCreate($data);
             // query
@@ -263,8 +269,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             // execute
             $q->exec();
             // insert id
-            if ($id = $q->getInsertId())
-            {
+            if ($id = $q->getInsertId()) {
                 $this->data[$this->_schema->get('primary')[0]] = $id;
             }
             // after create/update event
@@ -293,8 +298,9 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    final function toArray()
+    function toArray()
     {
+        $this->reload();
         return $this->data;
     }
 
@@ -311,14 +317,15 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    final function reload()
+    final function reload($force = false)
     {
-        if ($this->_state & 0b100) {
+        if ($force or ($this->_state & 0b100)) {
             // data needs to be reloaded
             $this->dataDefault = $this->data;
             $this->data = (array)(new \Lemmon\Sql\Select(DbAdapter::getDefault()->query(), $this->_schema->get('table')))->where($this->_getPrimaryData())->first();
             $this->_state = self::STATE_LOADED;
         }
+        return $this;
     }
 
 

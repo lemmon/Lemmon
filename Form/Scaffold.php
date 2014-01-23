@@ -107,7 +107,6 @@ class Scaffold
         //
         // model
         $model = self::getModel($controller, $config);
-        $item = $model->create();
         //
         // scaffolding
         if ($item = $model->create()) {
@@ -120,7 +119,7 @@ class Scaffold
             // POST
             if ($f = $_POST) {
                 // sanitize fields
-                $f = self::_sanitize($f);
+                $f = self::_sanitize($f, $config);
                 // save
                 try {
                     $item->set($f);
@@ -157,14 +156,9 @@ class Scaffold
     }
 
 
-    static function update(\Lemmon\Framework $controller, array $config = [])
+    static function update(\Lemmon\Framework $controller, array $config = [], &$item = null)
     {
-        //
-        // model
-        $model = self::getModel($controller, $config);
-        //
-        // scaffolding
-        if ($id = $controller->getRoute()->id and $item = $model->wherePrimary($id)->first()) {
+        if ($item or ($id = $controller->getRoute()->id and $model = self::getModel($controller, $config) and $item = $model->wherePrimary($id)->first())) {
             // model
             $controller->setData(['item' => $item]);
             // force data
@@ -174,7 +168,7 @@ class Scaffold
             // on POST
             if ($f = $_POST) {
                 // sanitize fields
-                $f = self::_sanitize($f);
+                $f = self::_sanitize($f, $config);
                 // save
                 try {
                     $item->set($f);
@@ -183,8 +177,7 @@ class Scaffold
                     return $controller->getRoute()->to(self::_redir($config, $item), $item);
                 } catch (\Lemmon\Model\ValidationException $e) {
                     // error saving property
-                    $controller->getFlash()->setError(_t('Your input contains errors'))
-                                           ->setError(_t('Item has NOT been updated'))
+                    $controller->getFlash()->setError(_t('Item has NOT been updated'))
                                            ->setErrorFields($item->getErrors());
                 }
             } else {
@@ -197,6 +190,7 @@ class Scaffold
     }
 
 
+    /*
     private static function _sanitize($f)
     {
         // sanitize fields
@@ -211,5 +205,37 @@ class Scaffold
         }
         //
         return $f;
+    }
+    */
+
+
+    private static function _sanitize($f, $config)
+    {
+        // sanitize
+        $f = self::sanitize($f, false);
+        // validate fields
+        if ($config['fields']) {
+            $f = array_intersect_key($f, array_flip($config['fields']));
+        }
+        //
+        return $f;
+    }
+
+
+    static function sanitize($in, $remove_empty = false)
+    {
+        if (is_array($in)) {
+            foreach ($in as $key => $val) {
+                if ($res = self::sanitize($val, $remove_empty) or !($remove_empty and ($res === null or $res === []))) {
+                    $in[$key] = $res;
+                } else {
+                    unset($in[$key]);
+                }
+            }
+        } else {
+            $in = trim($in);
+            if (strlen($in) == 0) $in = null;
+        }
+        return $in;
     }
 }

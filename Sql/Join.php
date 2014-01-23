@@ -29,14 +29,10 @@ class Join
         $this->_join = $join = new Table($join);
         $join->forceName(true);
         // conditions
-        foreach ($args as $key => $val)
-        {
-            if (is_string($val))
-            {
-                $args[$key] = new Expression(sprintf('%s.%s = %s.%s', $table->getAliasOrName(), $val, $join->getAlias(), $key));
-            }
-            else
-            {
+        foreach ($args as $key => $val) {
+            if (is_string($val) and $val{0} == ':') {
+                $args[$key] = new Expression(sprintf('%s.%s = %s.%s', $table->getAliasOrName(), substr($val, 1), $join->getAlias(), $key));
+            } else {
                 $args[$key] = new Where($join, $key, $val);
             }
         }
