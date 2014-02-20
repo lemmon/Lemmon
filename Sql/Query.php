@@ -24,37 +24,32 @@ class Query
 
     function __construct($query = null, $adapter = null)
     {
+        //
         // adapter
-        if (true/*is_null($adapter)*/)
-        {
+        if (is_null($adapter)) {
+            // default adapter
             $this->_adapter = DbAdapter::getDefault();
-        }
-        /* !todo
-        elseif ($adapter instanceof DbAdapter)
-        {
+        } elseif ($adapter instanceof DbAdapter) {
+            // adapter passed
             $this->_adapter = $adapter;
+        } else {
+            // unknown adapter
+            throw new \Exception('Unknown adapter.');
         }
-        else
-        {
-            throw new \Exception(sprintf('Unknown adapter type (%s).', gettype($adapter)));
-        }
-        */
-        
+        //
         // query
-        if (isset($query))
-        {
+        if (isset($query)) {
             throw new \Exception('Not this way.');
-            if (is_string($query))
-            {
+            /*
+            if (is_string($query)) {
                 dump(func_get_args());die('--6');
                 $statement = new Statement($this);
                 $statement = call_user_func_array([$statement, 'setQuery'], func_get_args());
                 $this->_statement = $statement;
-            }
-            else
-            {
+            } else {
                 throw new \Exception(sprintf('Unknown Query type (%s).', gettype($query)));
             }
+            */
         }
     }
 

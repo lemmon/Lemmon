@@ -22,8 +22,9 @@ class Scaffold
 
     static function paginate(\Lemmon\Model\AbstractModel &$model, $page = 0, $perpage = 25, $range = 3)
     {
+        $_model   = clone $model;
         $page     = (int)$page;
-        $n        = $model->count();
+        $n        = $_model->count();
         $pages    = ceil($n / $perpage);
         $paginate = [
             'page'     => $page,
@@ -90,7 +91,7 @@ class Scaffold
 
     static private function _redir($config, $item)
     {
-        if ($config['redir']){
+        if (is_array($config) and array_key_exists('redir', $config)) {
             if (is_string($config['redir'])) {
                 return $config['redir'];
             } elseif (is_callable($config['redir'])) {
@@ -125,7 +126,7 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(_t('Item has been created'));
-                    return $controller->getRoute()->to(self::_redir($config, $item), $item);
+                    return ($redir = self::_redir($config, $item)) ? $controller->getRoute()->to($redir, $item) : null;
                 } catch (\Lemmon\Model\ValidationException $e) {
                     $controller->getFlash()->setError(_t('Your input contains errors'))
                                            ->setError(_t('Item has NOT been created'))
@@ -174,7 +175,7 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(_t('Item has been updated'));
-                    return $controller->getRoute()->to(self::_redir($config, $item), $item);
+                    return ($redir = self::_redir($config, $item)) ? $controller->getRoute()->to($redir, $item) : ('='.$redir);
                 } catch (\Lemmon\Model\ValidationException $e) {
                     // error saving property
                     $controller->getFlash()->setError(_t('Item has NOT been updated'))

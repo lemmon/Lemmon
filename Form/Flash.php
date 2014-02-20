@@ -73,7 +73,7 @@ class Flash
             if (is_array($errors)) {
                 foreach ($errors as $case => $message) {
                     if (is_int($case)) {
-                        $this->setErrorField($case, $message);
+                        $this->setErrorField($field, $message);
                     } else {
                         $this->setErrorField($field, $message, $case);
                     }

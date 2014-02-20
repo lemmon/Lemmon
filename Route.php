@@ -56,11 +56,10 @@ class Route
         $this->_urlParsed = $url_parsed = parse_url('http://' . self::getHost() . $_SERVER['REQUEST_URI']);
         
         // get route
-        $this->_route = $route = substr($url_parsed['path'], strlen($root));
+        $this->_route = $route = (string)substr($url_parsed['path'], strlen($root));
         
         // process route
-        if ($route)
-        {
+        if ($route) {
             $this->_params = explode('/', $route);
         }
         
@@ -111,18 +110,13 @@ class Route
     */
     final function getParam($param)
     {
-        if (strpos($param, '/'))
-        {
+        if (strpos($param, '/')) {
             $param = explode('/', $param);
             foreach ($param as $key => $val) $param[$key] = self::getParam($key+1);
             return join('/', $param);
-        }
-        elseif (is_numeric($param))
-        {
+        } elseif (is_numeric($param)) {
             return $this->_params[$param-1];
-        }
-        else
-        {
+        } else {
             return $this->{$param};
         }
     }
@@ -251,7 +245,6 @@ class Route
      */
     final function match($pattern, $conditions = [], $flags = 'i')
     {
-        #$pattern = str_replace('/', '\/', $pattern);
         $pattern = str_replace('.', '\.', $pattern);
         $pattern = str_replace('*', '.*', $pattern);
         $pattern = '^' . str_replace(')', ')?', $pattern);
@@ -291,12 +284,9 @@ class Route
      */
     final function returnTo($link, $params = null)
     {
-        if ($redir = $_GET['redir'])
-        {
+        if ($redir = $_GET['redir']) {
             return $this->to($redir);
-        }
-        else
-        {
+        } else {
             return $this->to($link, $params);
         }
     }

@@ -50,8 +50,14 @@ class Adapter
     }
 
 
-    function query()
+    function query($query = null)
     {
-        return new \Lemmon\Sql\Query();
+        return new \Lemmon\Sql\Query($query, $this);
+    }
+
+
+    function select($table = null)
+    {
+        return $this->query()->select($table);
     }
 }

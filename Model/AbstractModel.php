@@ -66,14 +66,11 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     function __call($method, $args)
     {
-        if (method_exists($this->_statement, $method))
-        {
+        if (method_exists($this->_statement, $method)) {
             unset($this->_all);
             call_user_func_array([$this->_statement, $method], $args);
             return $this;
-        }
-        else
-        {
+        } else {
             throw new \Exception(sprintf('Unknown method %s().', $method));
         }
     }
@@ -181,8 +178,12 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     final function count()
     {
-        $query = new \Lemmon\Sql\Select($this->_statement);
-        return $query->count();
+        if ($this->_all) {
+            return count($this->_all);
+        } else {
+            $query = new \Lemmon\Sql\Select($this->_statement);
+            return $query->count();
+        }
     }
 
 
