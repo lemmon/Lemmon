@@ -92,10 +92,10 @@ class Scaffold
     static private function _redir($config, $item)
     {
         if (is_array($config) and array_key_exists('redir', $config)) {
-            if (is_string($config['redir'])) {
-                return $config['redir'];
-            } elseif (is_callable($config['redir'])) {
+            if (is_callable($config['redir'])) {
                 return $config['redir']($item);
+            } else {
+                return $config['redir'];
             }
         } else {
             return ':section';
@@ -126,7 +126,9 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(_t('Item has been created'));
-                    return ($redir = self::_redir($config, $item)) ? $controller->getRoute()->to($redir, $item) : null;
+                    if ($redir = self::_redir($config, $item)) {
+                        return ($redir instanceof \Lemmon\Route\Link) ? $redir : $controller->getRoute()->to($redir, $item);
+                    }
                 } catch (\Lemmon\Model\ValidationException $e) {
                     $controller->getFlash()->setError(_t('Your input contains errors'))
                                            ->setError(_t('Item has NOT been created'))
@@ -175,7 +177,9 @@ class Scaffold
                     $item->set($f);
                     $item->save();
                     $controller->getFlash()->setNotice(_t('Item has been updated'));
-                    return ($redir = self::_redir($config, $item)) ? $controller->getRoute()->to($redir, $item) : ('='.$redir);
+                    if ($redir = self::_redir($config, $item)) {
+                        return ($redir instanceof \Lemmon\Route\Link) ? $redir : $controller->getRoute()->to($redir, $item);
+                    }
                 } catch (\Lemmon\Model\ValidationException $e) {
                     // error saving property
                     $controller->getFlash()->setError(_t('Item has NOT been updated'))
