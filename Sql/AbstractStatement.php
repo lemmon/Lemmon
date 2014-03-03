@@ -31,8 +31,7 @@ abstract class AbstractStatement implements StatementInterface
         // query
         if ($query instanceof Query) {
             $this->_query = $query;
-        }
-        elseif ($query instanceof Statement) {
+        } elseif ($query instanceof Statement) {
             $this->_query  = $query->_query;
             $this->_table  = $query->_table;
             $this->_join   = $query->_join;
@@ -43,11 +42,12 @@ abstract class AbstractStatement implements StatementInterface
             $this->_offset = $query->_offset;
         }
         else {
-            throw new \Exception('Unknown query type.');
+            throw new \Exception('Unknown query type :%s.', gettype($query));
         }
-        
         // table
-        if ($table) $this->setTable($table);
+        if ($table) {
+            $this->setTable($table);
+        }
     }
 
 
@@ -107,36 +107,23 @@ abstract class AbstractStatement implements StatementInterface
 
     function where($expr, $value = false)
     {
-        if ($expr)
-        {
-            if (is_array($expr))
-            {
-                foreach ($expr as $_expr => $_value)
-                {
-                    if (is_numeric($_expr))
-                    {
-                        if (!is_array($_value))
-                        {
+        if ($expr) {
+            if (is_array($expr)) {
+                foreach ($expr as $_expr => $_value) {
+                    if (is_numeric($_expr)) {
+                        if (!is_array($_value)) {
                             $this->_where[] = new Where($this->getTable(), $_value);
-                        }
-                        else
-                        {
+                        } else {
                             throw new \Exception('This kind of array is not supported.');
                         }
-                    }
-                    else
-                    {
+                    } else {
                         $this->_where[] = new Where($this->getTable(), $_expr, $_value);
                     }
                 }
-            }
-            elseif (func_num_args() > 2)
-            {
+            } elseif (func_num_args() > 2) {
                 $_where = new \ReflectionClass(__NAMESPACE__ . '\Where');
                 $this->_where[] = $_where->newInstanceArgs(array_merge([$this->getTable()], func_get_args()));
-            }
-            else
-            {
+            } else {
                 $this->_where[] = new Where($this->getTable(), $expr, $value);
             }
         }
@@ -179,8 +166,7 @@ abstract class AbstractStatement implements StatementInterface
 
     function limit($limit)
     {
-        if (!is_numeric($limit))
-        {
+        if (!is_numeric($limit)) {
             throw new \Exception('Limit can only be an integer value.');
         }
         $this->_limit = (int)$limit;
@@ -190,8 +176,7 @@ abstract class AbstractStatement implements StatementInterface
 
     function offset($offset)
     {
-        if (!is_numeric($offset))
-        {
+        if (!is_numeric($offset)) {
             throw new \Exception('Offset can only be an integer value.');
         }
         $this->_offset = (int)$offset;
@@ -207,7 +192,7 @@ abstract class AbstractStatement implements StatementInterface
 
     function __call($name, $args)
     {
-        throw new \Exception(sprintf('[todo] Missing method %s().', $name));
+        throw new \Exception(sprintf('TODO: Missing method: %s().', $name));
         /*
         if (method_exists($this->_query, $name))
         {

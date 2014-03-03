@@ -21,6 +21,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 {
     const FETCH_AS_ARRAY = 1;
 
+    static $adapter;
     static $rowClass;
     static $table;
     static $primary = 'id';
@@ -36,6 +37,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     static $hasAndBelongsToMany;
     static $uploadDir;
 
+    private $_adapter;
     private $_query;
     private $_statement;
     private $_schema;
@@ -43,23 +45,41 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     private $_all;
 
 
-    final function __construct()
+    protected function __init() {}
+
+
+    final function __construct($adapter = null, array $cond = [])
     {
-        $class_name = get_class($this);
-        
         // adapter
-        $this->_query = $query = DbAdapter::getDefault()->query();
-        $this->_statement = $statement = new SqlStatement($query);
+        if ($adapter or $adapter = self::$adapter) {
+            if ($adapter instanceof DbAdapter) {
+                $this->_adapter = $adapter;
+            } elseif (is_string($adapter)) {
+                $this->_adapter = DbAdapter::get($adapter);
+            } else {
+                throw new \Exception(sprintf('Unknown adapter type: %s.', gettype($adapter)));
+            }
+        } else {
+            // default adapter
+            $this->_adapter = DbAdapter::getDefault();
+        }
+        
+        // query
+        $this->_query = $this->_adapter->query();
+        $this->_statement = new SqlStatement($this->_query);
         
         // schema
-        $this->_schema = $schema = Schema::factory($class_name);
+        $this->_schema = Schema::factory(get_class($this));
         
         // table
-        $statement->setTable($schema->table);
+        $this->_statement->setTable($this->_schema->get('table'));
         
         // init model
-        if (method_exists($this, '__init')) {
-            $this->__init();
+        $this->__init();
+        
+        // where
+        if ($cond) {
+            $this->_statement->where($cond);
         }
     }
 
@@ -76,35 +96,35 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     }
 
 
-    static function find($cond = null)
+    static function find($cond = null, DbAdapter $adapter = null)
     {
+        // model
         $class_name = get_called_class();
-        $model = new $class_name;
-
-        if (func_num_args() > 1) {
-            // many rows
-            throw new \Exception('[todo] Many rows.');
-        }
-        elseif (is_int($cond) or is_string($cond)) {
+        $model = new $class_name($adapter);
+        // where
+        if (is_int($cond) or is_string($cond)) {
             // returns Row
             return $model->wherePrimary($cond);
-        }
-        elseif (is_array($cond)) {
+        } elseif (is_array($cond)) {
             // returns Row
             return $model->where($cond);
-        }
-        elseif (is_null($cond)) {
+        } elseif (is_null($cond)) {
             // returns Model
             return $model;
-        }
-        else {
+        } else {
             // error
-            throw new \Exception(sprintf('Unknown condition type (%s).', gettype($cond)));
+            throw new \Exception(sprintf('Unknown condition type: %s.', gettype($cond)));
         }
     }
 
 
-    final protected function getSchema()
+    final function getAdapter()
+    {
+        return $this->_adapter;
+    }
+
+
+    final function getSchema()
     {
         return $this->_schema;
     }
@@ -118,7 +138,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     final function create()
     {
-        return new $this->_schema->rowClass;
+        return new $this->_schema->rowClass([], $this->_adapter, $this);
     }
 
 
@@ -126,8 +146,6 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     {
         return new \ArrayIterator($this->all());
     }
-
-
 
 
     final function offsetExists($i)
@@ -144,26 +162,14 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     }
 
 
-    final function offsetSet($offset, $value)
-    {
-        return false;
-    }
-
-
-    final function offsetUnset($offset)
-    {
-        return false;
-    }
-
-
+    final function offsetSet($offset, $value) { return false; }
+    final function offsetUnset($offset) { return false; }
 
 
     final function getStatement()
     {
         return $this->_statement;
     }
-
-
 
 
     private function _getIterator()
@@ -192,7 +198,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $res = [];
         $rowClass = $this->_schema->rowClass;
         foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[] = new $rowClass($row, true);
+            $res[] = new $rowClass($row, $this->_adapter, $this, true);
         }
         return $res;
     }
@@ -203,7 +209,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
         $res = [];
         $rowClass = $this->_schema->rowClass;
         foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[$row['id']] = new $rowClass($row, true);
+            $res[$row['id']] = new $rowClass($row, $this->_adapter, $this, true);
         }
         return $res;
     }
@@ -213,7 +219,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     {
         $rowClass = $this->_schema->rowClass;
         if ($row = $this->_getIterator()->fetch()) {
-            return new $rowClass($row, true);
+            return new $rowClass($row, $this->_adapter, $this, true);
         }
     }
 }

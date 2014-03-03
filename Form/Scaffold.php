@@ -130,8 +130,7 @@ class Scaffold
                         return ($redir instanceof \Lemmon\Route\Link) ? $redir : $controller->getRoute()->to($redir, $item);
                     }
                 } catch (\Lemmon\Model\ValidationException $e) {
-                    $controller->getFlash()->setError(_t('Your input contains errors'))
-                                           ->setError(_t('Item has NOT been created'))
+                    $controller->getFlash()->setError(_t('Item has NOT been created'))
                                            ->setErrorFields($item->getErrors());
                 }
             } elseif ($config['default'] and is_array($config['default'])) {
@@ -154,7 +153,7 @@ class Scaffold
             return $config['model'];
         } else {
             $config['model'] = self::getModelName($controller, $config);
-            return new $config['model'];
+            return $controller->getDb()->find($config['model']);
         }
     }
 

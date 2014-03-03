@@ -90,8 +90,7 @@ class Autoloader
     private function _psr0Base($class)
     {
         $class = ltrim($class, '\\');
-        if ($i = strrpos($class, '\\'))
-        {
+        if ($i = strrpos($class, '\\')) {
             $namespace = substr($class, 0, $i);
             $class = substr($class, $i + 1);
             $filename  = str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR;
@@ -103,17 +102,18 @@ class Autoloader
 
     function findFile($class)
     {
+        #echo '<br><strong>', $class, '</strong><br>';
         // masks
-        foreach ($this->_masks as $_mask) if (preg_match($_mask['mask'], $class))
-        {
+        foreach ($this->_masks as $_mask) if (preg_match($_mask['mask'], $class)) {
             if (is_callable($_mask['path'])) $_mask['path'] = $_mask['path']($class);
             $path = $this->_parse($_mask['path'], $class);
+            #echo '... [mask] ', $path, '<br>';
             if (is_file($path)) return $path;
         }
         // files
-        foreach ($this->_files as $path)
-        {
+        foreach ($this->_files as $path) {
             $file = $this->_parse($path, $class);
+            #echo '... [file] ', $file, '<br>';
             if (is_file($file)) return $file;
         }
     }

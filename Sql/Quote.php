@@ -20,19 +20,15 @@ class Quote
 
     static function field($field)
     {
-        if (is_array($field))
-        {
-            foreach ($field as $i => $_field)
+        if (is_array($field)) {
+            foreach ($field as $i => $_field) {
                 $field[$i] = self::field($_field);
+            }
             return $field;
-        }
-        else
-        {
+        } else {
             $field = explode('.', trim($field, '.'));
-            foreach ($field as $i => $_field)
-            {
-                if ($_field != '*')
-                {
+            foreach ($field as $i => $_field) {
+                if ($_field != '*') {
                     $field[$i] = '`' . self::_field($_field) . '`';
                 }
             }
@@ -43,20 +39,15 @@ class Quote
 
     static function value($value)
     {
-        if (is_null($value))
-        {
+        if (is_null($value)) {
             return 'NULL';
-        }
-        elseif (is_array($value))
-        {
+        } elseif (is_array($value)) {
             return '\'' . join('\', \'', self::_value($value)) . '\'';
-        }
-        elseif (is_int($value) or is_double($value))
-        {
+        } elseif (is_int($value) or is_double($value)) {
             return $value;
-        }
-        else
-        {
+            // setlocale() issue
+            // return str_replace([localeconv()['decimal_point'], localeconv()['thousands_sep']], ['.', ''], $value);
+        } else {
             return sprintf('\'%s\'', self::_value($value));
         }
     }

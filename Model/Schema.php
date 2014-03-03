@@ -19,7 +19,6 @@ class Schema
     static private $_instances = [];
     static private $_defaultUploadDir = 'uploads';
 
-    private $_model;
     private $_schema;
 
 

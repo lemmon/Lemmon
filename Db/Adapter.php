@@ -17,29 +17,48 @@ namespace Lemmon\Db;
 class Adapter
 {
     static private $_default;
-    
+    static private $_adapters = [];
+
+    private $_name;
     private $_pdo;
 
 
-    function __construct($driver = [])
+    function __construct(array $config = [])
     {
-        $this->_pdo = new \PDO("mysql:dbname={$driver['database']};host={$driver['host']}", $driver['username'], $driver['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$driver['encoding']}'"]);
+        $this->_pdo = new \PDO("mysql:dbname={$config['database']};host={$config['host']}", $config['username'], $config['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$config['encoding']}'"]);
         $this->_pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
         $this->_pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_OBJ); 
         
+        // adapters
+        $this->_name = $name = $config['name'] ?: get_class($this);
+        if (array_key_exists($name, self::$_adapters)) {
+            throw new \Exception(sprintf('Adapter "%s" already exists.', $name));
+        }
+        self::$_adapters[$name] = $this;
+        
         // default adapter
         if (!isset(self::$_default)) {
-            self::$_default = $this;
+            self::$_default = $name;
         }
     }
 
 
     static function getDefault()
     {
-        if ($adapter = self::$_default) {
-            return $adapter;
+        if ($adapter_name = self::$_default) {
+            return self::$_adapters[$adapter_name];
         } else {
             throw new \Exception('No adapter has been defined yet.');
+        }
+    }
+
+
+    static function get($adapter_name)
+    {
+        if ($adapter = self::$_adapters[$adapter_name]) {
+            return $adapter;
+        } else {
+            throw new \Exception(sprintf('Adapter "%s" does NOT exists.', $adapter_name));
         }
     }
 
@@ -47,6 +66,18 @@ class Adapter
     function getPdo()
     {
         return $this->_pdo;
+    }
+
+
+    function find($model_name, array $cond = [])
+    {
+        return new $model_name($this, $cond);
+    }
+
+
+    function load($row_name, $cond = null)
+    {
+        return call_user_func([$row_name, 'find'], $cond, $this);
     }
 
 

@@ -92,6 +92,6 @@ class Query
 
     function exec($query)
     {
-         return $this->_adapter->getPdo()->query($query);
+        return $this->_adapter->getPdo()->query($query);
     }
 }

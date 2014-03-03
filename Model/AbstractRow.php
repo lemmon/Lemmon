@@ -13,6 +13,7 @@ namespace Lemmon\Model;
 
 use \Lemmon\Db\Adapter as DbAdapter,
     \Lemmon\Sql\Expression as SqlExpression,
+    \Lemmon\Model\AbstractModel,
     \Lemmon\String as String;
 
 /**
@@ -32,18 +33,30 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     protected $data = [];
     protected $dataDefault = [];
 
+    private $_adapter;
     private $_schema;
     private $_state;
 
     private $_errors = [];
 
 
-    final function __construct($data = null, $from_db = false)
+    final function __construct(array $data = null, $adapter = null, AbstractModel $model = null, $from_db = false)
     {
         if (!isset(static::$model)) throw new \Exception('No model has been defined.');
-    
+        
         // model
-        $this->_schema = Schema::factory(static::$model);
+        $this->_schema = $model ? $model->getSchema() : Schema::factory(static::$model);
+        
+        // adapter
+        if ($adapter instanceof DbAdapter) {
+            $this->_adapter = $adapter;
+        } elseif ($model) {
+            $this->_adapter = $model->getAdapter();
+        } elseif (is_string($adapter)) {
+            $this->_adapter = DbAdapter::get($adapter);
+        } else {
+            $this->_adapter = DbAdapter::getDefault();
+        }
         
         // data
         if ($data) {
@@ -74,10 +87,10 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     protected function upload(){}
 
 
-    static function find($cond)
+    static function find($cond, DbAdapter $adapter = null)
     {
         if (!isset(static::$model)) throw new \Exception('No model has been defined.');
-        return call_user_func([static::$model, 'find'], $cond)->first();
+        return call_user_func([static::$model, 'find'], $cond, $adapter)->first();
     }
 
 
@@ -99,6 +112,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         }
         //
         return;
+    }
+
+
+    final protected function createQuery($type)
+    {
+        return call_user_func([$this->_adapter->query(), $type], $this->_schema->get('table'));
     }
 
 
@@ -283,7 +302,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    function set($data)
+    function set(array $data)
     {
         $this->reload();
         foreach ($data as $field => $value) $this->_set($field, $value);

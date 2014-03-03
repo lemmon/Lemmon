@@ -234,6 +234,12 @@ class Framework
     }
 
 
+    function getDb()
+    {
+        return $this->db;
+    }
+
+
     /**
      * @return Route
      */
