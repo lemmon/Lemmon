@@ -40,8 +40,7 @@ abstract class AbstractStatement implements StatementInterface
             $this->_order  = $query->_order;
             $this->_limit  = $query->_limit;
             $this->_offset = $query->_offset;
-        }
-        else {
+        } else {
             throw new \Exception('Unknown query type :%s.', gettype($query));
         }
         // table
@@ -68,12 +67,10 @@ abstract class AbstractStatement implements StatementInterface
         if (is_array($table)) {
             if (is_int(key($table))) {
                 $this->_table = new Table(current($table));
-            }
-            else {
+            } else {
                 $this->_table = new Table(current($table), key($table));
             }
-        }
-        else {
+        } else {
             $this->_table = new Table($table, $alias);
         }
     }
@@ -95,14 +92,6 @@ abstract class AbstractStatement implements StatementInterface
         $this->getTable()->forceName(true);
         return $this;
     }
-
-
-    /* DEV helper function */
-    function _J()
-    {
-        return $this->_join;
-    }
-    /* /DEV */
 
 
     function where($expr, $value = false)
@@ -131,16 +120,6 @@ abstract class AbstractStatement implements StatementInterface
     }
 
 
-    /* DEV helper function */
-    function W()
-    {
-        $w = [];
-        foreach ($this->_where as $where) $w[] = $where->getExpression();
-        return $w;
-    }
-    /* /DEV */
-
-
     function group($group)
     {
         $this->_group = new Expression($group);
@@ -151,15 +130,6 @@ abstract class AbstractStatement implements StatementInterface
     function order($order)
     {
         $this->_order = new Expression($order);
-        /*
-        $order = join(', ', is_array($order) ? $order : func_get_args());
-        preg_match_all('/([\w\.]+)\s*(asc|desc)?/i', $order, $m);
-        foreach ($m[0] as $i => $_order)
-        {
-            $m[0][$i] = str_replace($m[1][$i], Quote::field($m[1][$i]), $m[0][$i]);
-        }
-        $this->_order = join(', ', $m[0]);
-        */
         return $this;
     }
 
@@ -193,15 +163,5 @@ abstract class AbstractStatement implements StatementInterface
     function __call($name, $args)
     {
         throw new \Exception(sprintf('TODO: Missing method: %s().', $name));
-        /*
-        if (method_exists($this->_query, $name))
-        {
-            return call_user_func_array([$this->_query, $name], $args);
-        }
-        else
-        {
-            throw new \Exception(sprintf('Unknown method %s() on %s class.', $name, get_class($this)));
-        }
-        */
     }
 }

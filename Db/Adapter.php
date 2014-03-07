@@ -23,6 +23,9 @@ class Adapter
     private $_pdo;
 
 
+    protected function __logQuery($query, $t){}
+
+
     function __construct(array $config = [])
     {
         $this->_pdo = new \PDO("mysql:dbname={$config['database']};host={$config['host']}", $config['username'], $config['password'], [\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$config['encoding']}'"]);
@@ -60,6 +63,15 @@ class Adapter
         } else {
             throw new \Exception(sprintf('Adapter "%s" does NOT exists.', $adapter_name));
         }
+    }
+
+
+    function __query($query)
+    {
+        $t = microtime(true);
+        $res = $this->_pdo->query($query);
+        $this->__logQuery($query, microtime(true) - $t);
+        return $res;
     }
 
 

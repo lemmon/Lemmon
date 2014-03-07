@@ -121,6 +121,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
+    final protected function getAdapter()
+    {
+        return $this->_adapter;
+    }
+
+
     final protected function getSchema()
     {
         return $this->_schema;
@@ -176,6 +182,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
+    protected function getUploadedFileName($file)
+    {
+        return String::asciize(substr($file, 0, strrpos($file, '.'))) . '.' . time() . '.' . strtolower(substr($file, strrpos($file, '.') + 1));
+    }
+
+
     private function _validate(&$f, &$to_upload = null)
     {
         $ok = true;
@@ -215,11 +227,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
                 }
                 // upload
                 if ($file['error'] == UPLOAD_ERR_OK) {
-                    $_file = [
-                        'base' => substr($file['name'], 0, strrpos($file['name'], '.')),
-                        'ext'  => substr($file['name'], strrpos($file['name'], '.') + 1),
-                    ];
-                    $file_name = String::asciize($_file['base']) . '.' . time() . '.' . strtolower($_file['ext']);
+                    $file_name = $this->getUploadedFileName($file['name']);
                     $file = $_dir . '/' . $file_name;
                     $f[$field] = ($upload_dir ? $upload_dir . '/' : '') . $file_name;
                     $to_upload[$field] = [
