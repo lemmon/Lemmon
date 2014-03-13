@@ -34,6 +34,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     protected $dataDefault = [];
 
     private $_adapter;
+    private $_model;
     private $_schema;
     private $_state;
 
@@ -46,6 +47,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
         
         // model
         $this->_schema = $model ? $model->getSchema() : Schema::factory(static::$model);
+        $this->_model = $model;
         
         // adapter
         if ($adapter instanceof DbAdapter) {
@@ -356,6 +358,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
+    function __id()
+    {
+        return $this->data['id'];
+    }
+
+
     function __get($key)
     {
         $this->reload();
@@ -394,5 +402,11 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     function getDefault($key)
     {
         return $this->dataDefault[$key];
+    }
+
+
+    function fetchMany($collection, $key, $model, $callback = null)
+    {
+        return $this->_model->getCollection()->fetchMany($this, $collection, $key, $this->__id(), $model);
     }
 }

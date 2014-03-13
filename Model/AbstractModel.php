@@ -17,10 +17,8 @@ use \Lemmon\Db\Adapter as DbAdapter,
 /**
  * Model.
  */
-abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
+abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess, \Countable
 {
-    const FETCH_AS_ARRAY = 1;
-
     static $adapter;
     static $rowClass;
     static $table;
@@ -31,10 +29,12 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     static $required;
     static $unique;
     static $timestamp;
+    /* ?? */
     static $hasOne;
     static $hasMany;
     static $belongsTo;
     static $hasAndBelongsToMany;
+    /* /?? */
     static $uploadDir;
 
     private $_adapter;
@@ -42,7 +42,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     private $_statement;
     private $_schema;
 
-    private $_all;
+    private $_collection;
 
 
     protected function __init() {}
@@ -87,7 +87,7 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
     function __call($method, $args)
     {
         if (method_exists($this->_statement, $method)) {
-            unset($this->_all);
+            unset($this->_collection);
             call_user_func_array([$this->_statement, $method], $args);
             return $this;
         } else {
@@ -150,15 +150,13 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     final function offsetExists($i)
     {
-        $all = ($this->_all) ?: ($this->_all = $this->all());
-        return array_key_exists($i, $all);
+        return array_key_exists($i, $this->all());
     }
 
 
     final function offsetGet($i)
     {
-        $all = ($this->_all) ?: ($this->_all = $this->all());
-        return $all[$i];
+        return $this->all()[$i];
     }
 
 
@@ -184,32 +182,32 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     final function count()
     {
-        if ($this->_all) {
-            return count($this->_all);
-        } else {
-            $query = new \Lemmon\Sql\Select($this->_statement);
-            return $query->count();
-        }
+        $c = ($this->_collection ?: new \Lemmon\Sql\Select($this->_statement));
+        return $c->count();
     }
 
 
     final function all()
     {
-        $res = [];
-        $rowClass = $this->_schema->rowClass;
-        foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[] = new $rowClass($row, $this->_adapter, $this, true);
+        if ($this->_collection) {
+            return $this->_collection->getArray();
+        } else {
+            $res = [];
+            $rowClass = $this->_schema->rowClass;
+            foreach ($this->_getIterator()->fetchAll() as $row) {
+                $res[] = new $rowClass($row, $this->_adapter, $this, true);
+            }
+            $this->_collection = new Collection($this->_adapter, $res);
+            return $this->_collection->getArray();
         }
-        return $res;
     }
 
 
     final function allByPrimary()
     {
         $res = [];
-        $rowClass = $this->_schema->rowClass;
-        foreach ($this->_getIterator()->fetchAll() as $row) {
-            $res[$row['id']] = new $rowClass($row, $this->_adapter, $this, true);
+        foreach ($this->all() as $row) {
+            $res[$row->__id()] = $row;
         }
         return $res;
     }
@@ -217,9 +215,18 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess
 
     final function first()
     {
+        if ($this->_collection) {
+            return $this->_collection->first();
+        }
         $rowClass = $this->_schema->rowClass;
         if ($row = $this->_getIterator()->fetch()) {
             return new $rowClass($row, $this->_adapter, $this, true);
         }
+    }
+
+
+    function getCollection()
+    {
+        return $this->_collection;
     }
 }
