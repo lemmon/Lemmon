@@ -20,11 +20,11 @@ use \Lemmon\Sql\Select;
 class Collection
 {
     private $_adapter;
-    private $_collection = [];
+    private $_collection;
     private $_many = [];
 
 
-    function __construct(\Lemmon\Db\Adapter $adapter, array $collection)
+    function __construct(\Lemmon\Db\Adapter $adapter, array $collection = null)
     {
         $this->_adapter = $adapter;
         $this->_collection = $collection;
@@ -42,7 +42,7 @@ class Collection
     function fetchMany($model, $collection, $key, $id, $callback)
     {
         if (!array_key_exists($collection, $this->_many)) {
-            foreach ($callback($this->_adapter)->where($key, $this->__ids()) as $item) {
+            foreach ($callback($this->_adapter)->where($this->_collection ? [$key => $this->__ids()] : [$key => $id]) as $item) {
                 $this->_many[$collection][$item->{$key}][] = $item;
             }
         }

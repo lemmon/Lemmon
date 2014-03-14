@@ -14,7 +14,7 @@ namespace Lemmon\Sql;
 /**
  * SQL Select.
  */
-class Select extends AbstractStatement
+class Select extends AbstractStatement implements \IteratorAggregate
 {
     protected $_select = '*';
 
@@ -91,6 +91,12 @@ class Select extends AbstractStatement
     function first()
     {
         return $this->exec()->fetch();
+    }
+
+
+    final function getIterator()
+    {
+        return new \ArrayIterator($this->all());
     }
 
 

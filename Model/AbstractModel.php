@@ -227,6 +227,6 @@ abstract class AbstractModel implements \IteratorAggregate, \ArrayAccess, \Count
 
     function getCollection()
     {
-        return $this->_collection;
+        return ($this->_collection) ?: ($this->_collection = new Collection($this->_adapter));
     }
 }
