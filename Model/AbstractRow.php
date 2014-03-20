@@ -105,6 +105,18 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
+    function __id()
+    {
+        return $this->data['id'];
+    }
+
+
+    final function getErrors()
+    {
+        return $this->_errors;
+    }
+
+
     private function _sanitize(&$f)
     {
         // timestamps
@@ -149,12 +161,6 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             $this->_errors[$field][] = $message;
         }
         return $this;
-    }
-
-
-    final function getErrors()
-    {
-        return $this->_errors;
     }
 
 
@@ -292,7 +298,7 @@ abstract class AbstractRow /*implements \ArrayAccess*/
             // before create/update event
             ($this->_state & 0b10) ? $this->onBeforeUpdate($data) : $this->onBeforeCreate($data);
             // query
-            $q = new \Lemmon\Sql\Replace(DbAdapter::getDefault()->query(), $this->_schema->get('table'));
+            $q = new \Lemmon\Sql\Replace($this->_adapter->query(), $this->_schema->get('table'));
             // set values
             $q->set($data);
             // execute
@@ -358,25 +364,12 @@ abstract class AbstractRow /*implements \ArrayAccess*/
     }
 
 
-    function __id()
-    {
-        return $this->data['id'];
-    }
-
-
     function __get($key)
     {
         $this->reload();
         if (method_exists($this, $method = 'get' . $key)) {
             return $this->{$method}();
-        }
-        /*
-        elseif (array_key_exists($key, $this->_schema->uploads))
-        {
-            return new \Lemmon\Files\File($this->_schema->uploadDir . '/' . $this->data[$key]);
-        }
-        */
-        else {
+        } else {
             return $this->data[$key];
         }
     }
@@ -384,9 +377,6 @@ abstract class AbstractRow /*implements \ArrayAccess*/
 
     function __set($key, $val)
     {
-        /*
-        self::offsetSet($key, $val);
-        */
         $this->reload();
         $this->_set($key, $val);
         $this->_state |= 0b1;

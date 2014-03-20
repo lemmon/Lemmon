@@ -38,7 +38,7 @@ class Expression
         // remove strings
         $strings = [];
         $i = 0;
-        $expr = preg_replace_callback('/"([^"]+)"/', function($m) use (&$i, &$strings){
+        $expr = preg_replace_callback('/("([^"]+)"|\'([^\']+)\'|{([^}]+)})/', function($m) use (&$i, &$strings){
             $i++;
             $strings[$i] = $m[0];
             return ':@' . $i;
@@ -55,26 +55,32 @@ class Expression
         }
 
         // match and replace arguments
-        if ($args)
-        {
-            $expr = preg_replace_callback('/%?(\?)%?/', function($m) use ($args){
+        if ($args) {
+            $expr = preg_replace_callback('/(%?((\?)|:(\d+))%?)({(\w+)})?/', function($m) use ($args){
                 static $i = 0;
-                if (is_object($args[$i]))
-                {
-                    if ($args[$i] instanceof self)
-                    {
-                        $res = (string)$args[$i];
+                $arg = $args[$m[4] ? $m[4] - 1 : $i];
+                if (is_object($arg)) {
+                    if ($arg instanceof self) {
+                        $res = $arg->toString();
+                    } else {
+                        throw new \Exception(sprintf('Unknown argument type (%s)', get_class($arg)));
                     }
-                    else
-                    {
-                        throw new \Exception(sprintf('Unknown argument type (%s)', get_class($args[$i])));
+                } else {
+                    $val = str_replace($m[2], $arg, $m[1]);
+                    switch ($m[6]) {
+                        case 'raw':
+                            $res = $val;
+                            break;
+                        case 'field':
+                            $res = Quote::field($val);
+                            break;
+                        default:
+                            $res = Quote::value($val);
                     }
                 }
-                else
-                {
-                    $res = Quote::value(($m[0]=='?') ? $args[$i] : str_replace('?', $args[$i], $m[0]));
+                if (!$m[4]) {
+                    $i++;
                 }
-                $i++;
                 return $res;
             }, $expr);
         }

@@ -18,7 +18,10 @@ namespace Lemmon;
  */
 class Environment
 {
-    static private $_development = null;
+    const TYPE_DEVELOPMENT = 'development';
+    const TYPE_PRODUCTION = 'production';
+
+    static private $_development = null; // depreciated
 
 
     protected function __init() {}
@@ -29,12 +32,15 @@ class Environment
      */
     function __construct()
     {
+        // depreciated
         // defaults
         if (is_null(self::$_development)) {
             if ($_SERVER['SERVER_ADDR'] == '127.0.0.1') {
                 self::setDev(true);
             }
         }
+        // /depreciated
+        
         // init class
         $this->__init();
     }
@@ -45,6 +51,7 @@ class Environment
      */
     static function setDev($is = true)
     {
+        // depreciated
         self::$_development = (bool)$is;
     }
 
@@ -55,6 +62,7 @@ class Environment
      */
     static function isDev()
     {
+        // depreciated
         return (bool)self::$_development;
     }
 
@@ -65,6 +73,7 @@ class Environment
      */
     static function isProduction()
     {
+        // depreciated
         return !(bool)self::$_development;
     }
 }

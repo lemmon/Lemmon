@@ -90,6 +90,7 @@ class Autoloader
     private function _psr0Base($class)
     {
         $class = ltrim($class, '\\');
+        $filename = '';
         if ($i = strrpos($class, '\\')) {
             $namespace = substr($class, 0, $i);
             $class = substr($class, $i + 1);
