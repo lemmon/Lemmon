@@ -65,6 +65,8 @@ class Expression
                     } else {
                         throw new \Exception(sprintf('Unknown argument type (%s)', get_class($arg)));
                     }
+                } elseif (is_array($arg)) {
+                    $res = join(', ', array_map(function($item){ return Quote::value($item); }, $arg));
                 } else {
                     $val = str_replace($m[2], $arg, $m[1]);
                     switch ($m[6]) {

@@ -51,7 +51,7 @@ class Adapter
         if ($adapter_name = self::$_default) {
             return self::$_adapters[$adapter_name];
         } else {
-            throw new \Exception('No adapter has been defined yet.');
+            throw new \Exception('No adapter has been defined yet');
         }
     }
 
@@ -61,7 +61,7 @@ class Adapter
         if ($adapter = self::$_adapters[$adapter_name]) {
             return $adapter;
         } else {
-            throw new \Exception(sprintf('Adapter "%s" does NOT exists.', $adapter_name));
+            throw new \Exception(sprintf('Unknown Adapter (%s)', $adapter_name));
         }
     }
 
@@ -81,14 +81,36 @@ class Adapter
     }
 
 
+    function __call($name, $arguments)
+    {
+        if (substr($name, 0, 4) == 'find') {
+            $_name = substr($name, 4);
+            return new $_name($this, $arguments[0]);
+        } elseif (substr($name, 0, 3) == 'get') {
+            // TODO: need to improve this to work withou calling static method
+            return call_user_func([substr($name, 3), 'find'], $arguments[0], $this);
+        } else {
+            throw new \Exception(sprintf('Unkown method (%s)', $name));
+        }
+    }
+
+
+    /**
+     * Find Model.
+     */
     function find($model_name, array $cond = [])
     {
+        // depreciated
         return new $model_name($this, $cond);
     }
 
 
+    /**
+     * Load Row.
+     */
     function load($row_name, $cond = null)
     {
+        // depreciated
         return call_user_func([$row_name, 'find'], $cond, $this);
     }
 

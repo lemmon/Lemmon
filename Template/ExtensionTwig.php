@@ -42,7 +42,9 @@ class ExtensionTwig extends \Twig_Extension
             'html_to_text'  => new \Twig_Filter_Function('Lemmon\String::html2text'),
             
             // Debug
-            'dump'          => new \Twig_Filter_Function('Lemmon\Template\ExtensionTwig::dump', ['is_safe' => ['html']]),
+            'dump'          => new \Twig_Filter_Function(function($stdin){
+                return \Lemmon\Template\ExtensionTwig::dump($stdin);
+            }, ['is_safe' => ['html']]),
             
         ];
     }

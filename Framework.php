@@ -210,8 +210,7 @@ class Framework
     final function __construct(array $params = [])
     {
         // assign necessary classes
-        foreach ($params as $key => $param)
-        {
+        foreach ($params as $key => $param) {
             $this->{$key} = $param;
         }
         

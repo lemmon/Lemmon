@@ -169,10 +169,11 @@ class Link
      * Include host.
      * @return self
      */
-    function includeHost()
+    function includeHost($host = null)
     {
-        if (empty($this->_host))
-        {
+        if (isset($host)) {
+            $this->_host = $host;
+        } elseif (empty($this->_host)) {
             $this->_host = $this->_route->getHost();
         }
         return $this;

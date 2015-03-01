@@ -36,13 +36,10 @@ class Debugger extends Debugger\AbstractDebugger
 
     static function dumpArray($array)
     {
-        if (is_array($array))
-        {
+        if (is_array($array)) {
             self::includeHeaders();
             include __DIR__ . '/Debugger/_dump_array.php';
-        }
-        else
-        {
+        } else {
             throw new \Exception('This is not an array.');
         }
     }
@@ -57,8 +54,7 @@ class Debugger extends Debugger\AbstractDebugger
             E_PARSE         => 1,
         ];
         $error = error_get_last();
-        if (isset($types[$error['type']]))
-        {
+        if (isset($types[$error['type']])) {
             self::exceptionHandler(new \ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line'], null));
         }
     }
@@ -67,13 +63,10 @@ class Debugger extends Debugger\AbstractDebugger
     static function exceptionHandler($exception)
     {
         @header('HTTP/1.1 500 Internal Server Error');
-        try
-        {
+        try {
             ob_start();
             include __DIR__ . '/Debugger/_exception.php';
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             echo $e->getMessage();
         }
         self::_ob();
@@ -95,8 +88,7 @@ class Debugger extends Debugger\AbstractDebugger
 
     static private function _ob()
     {
-        if (!Environment::isDev())
-        {
+        if (!Environment::isDev()) {
             // ob
             $html = ob_get_contents();
             $id = uniqid('', true);
@@ -107,9 +99,7 @@ class Debugger extends Debugger\AbstractDebugger
             if (is_callable(self::$onError)) {
                 call_user_func(self::$onError, $html, $id);
             }
-        }
-        else
-        {
+        } else {
             ob_flush();
         }
     }

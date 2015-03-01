@@ -146,8 +146,9 @@ class String
     static public function line($str, $len = 150)
     {
         $str = strip_tags($str);
+        $str = html_entity_decode($str);
         $str = trim(preg_replace('/\s+/', ' ', $str));
-        if ($len>0 and strlen($str)>$len) $str = preg_replace('/\W+$/', '', substr($str, 0, $len), 1) . '...';
+        if ($len > 0 and strlen($str)>$len) $str = preg_replace('/\W+$/', '', substr($str, 0, $len), 1) . '...';
         return $str;
     }
 

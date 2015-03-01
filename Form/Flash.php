@@ -104,7 +104,7 @@ class Flash
 
     function getErrors()
     {
-        if ($res = $this->_messages['error']){
+        if ($res = $this->_messages['error']) {
             $this->_assignLink();
             return $res;
         }
