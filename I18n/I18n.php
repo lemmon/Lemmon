@@ -1,70 +1,111 @@
 <?php
 
-/*
- * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
- *
- * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Lemmon\I18n;
 
-/**
- * Model.
- */
 class I18n
 {
-    static $_cache = [];
+    private $_dir = BASE_DIR . '/i18n';
+    private $_locale = 'en_US';
+    private $_cache = [];
+    private $_domains = [];
+    private $_currentDomain;
+    private $_plural;
 
-    private $_localeId;
-    private $_dictonary = [];
 
-
-    function __construct($locale_id = 'en')
+    function setLocale($locale)
     {
-        $this->setLocale($locale_id);
+        $this->_locale = $locale;
+        return $this;
     }
 
 
-    static function getLocales()
+    function _print($str, array $args)
     {
-        return include __DIR__ . '/data/locales.php';
-    }
-
-
-    static function getCountries()
-    {
-        return include __DIR__ . '/data/countries.php';
-    }
-
-
-    function setLocale($locale_id)
-    {
-        $this->_localeId = $locale_id;
-    }
-
-
-    function load($file)
-    {
-        if (file_exists($file)) {
-            $data = include $file;
-            if (is_array($data)) {
-                $this->_dictonary = array_merge($this->_dictonary, $data);
+        if ($args) {
+            if (array_key_exists(0, $args)) {
+                return vsprintf($str, $args);
+            } else {
+                foreach ($args as $key => $val) {
+                    $str = str_replace(':' . $key, $val, $str);
+                }
             }
         }
+        return $str;
     }
 
 
-    function t($phrase)
+    function t($str, $args = [])
     {
-        $args = func_get_args();
-        array_shift($args);
-        $phrase = array_key_exists($phrase, $this->_dictonary) ? $this->_dictonary[$phrase] : $phrase;
-        if ($args) {
-            $phrase = vsprintf($phrase, $args);
+        if ($args and !is_array($args)) {
+            $args = func_get_args();
+            array_shift($args);
         }
-        return $phrase;
+        if ($res = @$this->_domains[$this->_currentDomain][$str]) {
+            return $this->_print($res, $args);
+        }
+        return $this->_print($str, $args);
+    }
+
+
+    function tn($str, $n, $args = [])
+    {
+        if (isset($this->_currentDomain) and $res = @$this->_domains[$this->_currentDomain][$str]) {
+            $i = $this->getPlural($n);
+        } else {
+            $res = $str;
+            $i = $this->getDeaultPlural($n);
+        }
+        $res = explode('|', $res);
+        $res = str_replace(':n', $n, $res[$i]);
+        return $res;
+    }
+
+
+    function getPlural($n)
+    {
+        return (is_callable($this->_plural) and $func = $this->_plural) ? $func($n) : $this->getDeaultPlural($n);
+    }
+
+
+    function getDeaultPlural($n)
+    {
+        return ($n == 0 or $n > 1) ? 1 : 0;
+    }
+
+
+    function getCountries()
+    {
+        return @$this->_cache['countries'] ?: $this->_cache['countries'] = $this->_sort(array_diff_key($this->_include('countries')['countries'], $this->getTerritories()));
+    }
+
+
+    function getTerritories()
+    {
+        return @$this->_cache['territories'] ?: $this->_cache['territories'] = include BASE_DIR . "/i18n/territories.php";
+    }
+
+
+    function getTimezones()
+    {
+        return array_combine(timezone_identifiers_list(), timezone_identifiers_list());
+    }
+
+
+    private function _getCollator()
+    {
+        return @$this->_cache['collator'][$this->_locale] ?: ($this->_cache['collator'][$this->_locale] = new \Collator($this->_locale));
+    }
+
+
+    private function _sort($array)
+    {
+        $this->_getCollator()->asort($array);
+        return $array;
+    }
+
+
+    private function _include($name)
+    {
+        return include BASE_DIR . "/i18n/{$this->_locale}/{$name}.php";
     }
 }
