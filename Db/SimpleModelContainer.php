@@ -21,6 +21,12 @@ class SimpleModelContainer implements \Iterator
     }
 
 
+    function toArray()
+    {
+        return iterator_to_array($this);
+    }
+
+
     public function current()
     {
         return new $this->_model($this->_collection, $this->_cursor->current());
