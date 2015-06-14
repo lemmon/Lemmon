@@ -245,7 +245,7 @@ abstract class AbstractRouter implements RouterInterface
         $pattern = preg_replace('#\)(?!\!)#', ')?', $pattern);
         $pattern = str_replace(')!', ')', $pattern);
         $pattern = str_replace('.', '\.', $pattern);
-        $pattern = str_replace('*', '.*', $pattern);
+        $pattern = str_replace('*', '.+', $pattern);
         $pattern = preg_replace_callback('#{(?<name>(\w+))(:(?<pattern>.+)(:(?<length>.+))?)?(=(?<default>.+))?}#U', function($m) use ($mask, &$defaults){
             if (@$m['pattern']) {
                 switch ($m['pattern']) {
