@@ -75,6 +75,12 @@ abstract class AbstractCollection implements \IteratorAggregate
     }
 
 
+    function distinct($field, $query = [])
+    {
+        return $this->_collection->distinct($field, $this->_query($query));
+    }
+
+
     function first($query = [])
     {
         if ($object = $this->_collection->findOne($this->_query($query))) {
