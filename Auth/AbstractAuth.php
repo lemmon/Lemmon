@@ -1,154 +1,68 @@
 <?php
 
-/*
- * This file is part of the Lemmon Framework (http://framework.lemmonjuice.com).
- *
- * Copyright (c) 2007 Jakub Pelák (http://jakubpelak.com)
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Lemmon\Auth;
 
-/**
- * Handles authentication. Uses Eksblowfish method with per-round salted passwords.
- * Even two identical passwords stored in the same database return different hashes
- * which increases security rapidly.
- */
-abstract class AbstractAuth extends Service
+abstract class AbstractAuth
 {
-    /** @var self */
-    private static $_instance;
-    
-    /** @var mixed */
     private $_identity;
 
 
-    /**
-     * Constructor.
-     */
-    final function __construct() {
-        // check for blowfish
-        if (CRYPT_BLOWFISH != 1) {
-            throw new Exception('Bcrypt not supported in this installation. See http://php.net/crypt');
-        }
-        
-        // init
-        call_user_func_array([$this, '__init'], func_get_args());
-        
-        // instance
-        self::$_instance = $this;
-    }
-
-
-    /**
-     * Returns current instance.
-     * @return self
-     */
-    static function getInstance()
+    final function __construct()
     {
-        if ($instance = self::$_instance) {
-            return $instance;
-        } else {
-            return new self();
+        if (is_callable([$this, '__init'])) {
+            call_user_func_array([$this, '__init'], func_get_args());
         }
     }
 
 
-    protected function __init() {}
+    abstract protected function __authenticate($username, $password);
+    abstract protected function __storeIdentity($id, $permanent = false);
+    abstract protected function __identity($id);
+    abstract protected function __clearIdentity();
 
 
-    /**
-     * Authenticate event.
-     * @param  string $username
-     * @param  string $password
-     * @see    self::authenticate()
-     * @return mixed
-     */
-    protected function onAuthenticate($username, $password) {}
-    protected function onStoreIdentity($identity, $permanent = false) {}
-    protected function onClearIdentity(){}
-
-
-    protected function onGetIdentity($identity)
+    function passwordHash($password)
     {
-        return $identity;
+        return password_hash($password, PASSWORD_DEFAULT);
     }
 
 
-    /**
-     * Authenticate.
-     * @param  string $username
-     * @param  string $password
-     * @see    self::onAuthenticate()
-     * @return bool
-     */
     final function authenticate($username, $password)
     {
-        if ($identity = $this->onAuthenticate($username, $password)) {
-            // successful attempt
-            $this->_identity = $identity;
-            return true;
-        } else {
-            // authetication unsuccessful
-            return false;
-        }
+        return ($this->_identity = $this->__authenticate($username, $password)) ? TRUE : FALSE;
     }
 
 
-    /**
-     * Store identity.
-     * @param  bool $permanent
-     * @see    self::onStoreIdentity()
-     * @return mixed
-     */
-    final function storeIdentity($permanent = false)
-    {
-        return $this->onStoreIdentity($this->_identity, $permanent);
-    }
-
-
-    /**
-     * Is there authenticated identity.
-     * @return bool
-     */
     final function hasIdentity()
     {
-        return $this->_identity ? true : false;
+        return $this->_identity ? TRUE : FALSE;
     }
 
 
-    /**
-     * Returns current identity.
-     * @see    self::getIdentity()
-     * @return mixed
-     */
-    final function getIdentity()
-    {
-        if ($identity = $this->_identity) {
-            return $this->onGetIdentity($identity);
-        }
-    }
-
-
-    /**
-     * Sets identity.
-     * @param  mixed $identity
-     */
     final function setIdentity($identity)
     {
         $this->_identity = $identity;
+        return $this;
     }
 
 
-    /**
-     * Clear current identity.
-     * @see    self::onClearIdentity()
-     */
+    final function storeIdentity($permanent = FALSE)
+    {
+        $this->__storeIdentity($this->_identity, $permanent);
+        return $this;
+    }
+
+
+    final function getIdentity()
+    {
+        return ($_ = $this->_identity) ? $this->__identity($_) : NULL;
+    }
+
+
     final function clearIdentity()
     {
-        $this->_identity = null;
-        return $this->onClearIdentity();
+        $this->_identity = NULL;
+        $this->__clearIdentity();
+        return $this;
     }
 }
