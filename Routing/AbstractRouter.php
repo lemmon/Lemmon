@@ -214,7 +214,6 @@ abstract class AbstractRouter implements RouterInterface
         }, $link);
         
         // paste current route params
-        
         if (FALSE !== strpos($link, '@')) {
             $link = explode('/', $link);
             foreach ($link as $i => $_param) {
@@ -228,10 +227,18 @@ abstract class AbstractRouter implements RouterInterface
         //
         
         if ('' == $link or ('/' !== $link{0} and FALSE === strpos($link, '://'))) {
-            $link = $this->_root . $this->_routePrefix . rtrim($link, '/');
+            $link = $this->normalize($this->_root . $this->_routePrefix . rtrim($link, '/'));
         }
         
         return $link;
+    }
+
+
+    function normalize($uri)
+    {
+        $uri = preg_replace('#/[^/]+/([^/]+\.[^\.]+/)?\.\.#', '', $uri);
+        $uri = preg_replace('#/([^/]+\.[^\.]+/)?\.#', '', $uri);
+        return $uri;
     }
 
 
