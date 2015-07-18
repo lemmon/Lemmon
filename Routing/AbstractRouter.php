@@ -4,15 +4,6 @@ namespace Lemmon\Routing;
 
 abstract class AbstractRouter implements RouterInterface
 {
-    /*
-    private $_methods = [
-        'GET'    =>    0b1,
-        'POST'   =>   0b10,
-        'PUT'    =>  0b100,
-        'DELETE' => 0b1000,
-    ];
-    */
-
     private $_options = [
         'mod_rewrite' => FALSE,
     ];
@@ -245,7 +236,7 @@ abstract class AbstractRouter implements RouterInterface
     protected function matchPattern($pattern, $mask = [], $method = NULL, &$matches = [], &$defaults = [])
     {
         // match method
-        if ($method and !($method & $this->_methods[$_SERVER['REQUEST_METHOD']])) {
+        if ($method and !($method & constant('self::METHOD_' . $_SERVER['REQUEST_METHOD']))) {
             return FALSE;
         }
         // match route

@@ -22,4 +22,11 @@ class SimpleRouter extends AbstractRouter
             return TRUE;
         }
     }
+
+
+    public function redir($link)
+    {
+        header('Location: ' . $this->to($link));
+        exit;
+    }
 }
