@@ -218,7 +218,7 @@ abstract class AbstractRouter implements RouterInterface
         //
         
         if ('' == $link or ('/' !== $link{0} and FALSE === strpos($link, '://'))) {
-            $link = $this->normalize($this->_root . $this->_routePrefix . rtrim($link, '/'));
+            $link = $this->_root . $this->normalize($this->_routePrefix . rtrim($link, '/'));
         }
         
         return $link;
@@ -227,9 +227,10 @@ abstract class AbstractRouter implements RouterInterface
 
     function normalize($uri)
     {
+        $uri = '/' . $uri;
         $uri = preg_replace('#/[^/]+/([^/]+\.[^\.]+/)?\.\.#', '', $uri);
         $uri = preg_replace('#/([^/]+\.[^\.]+/)?\.#', '', $uri);
-        return $uri;
+        return substr($uri, 1);
     }
 
 
