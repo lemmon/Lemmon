@@ -165,7 +165,7 @@ abstract class AbstractRouter implements RouterInterface
         }, $link);
         
         // match link variables with params
-        $link = preg_replace_callback('#(?<keep>@)?({((?<match>\w+)|%(?<arg>\d+))(=(?<default>\w+))?}|%(?<arg0>\d+))#', function($m) use ($args){
+        $link = preg_replace_callback('#(?<keep>@)?({((?<match>[\w\.]+)|%(?<arg>\d+))(=(?<default>\w+))?}|%(?<arg0>\d+))#', function($m) use ($args){
             // argument
             $res = !empty($args) ? $args[(($i = (int)@$m['arg0'] or $i = (int)@$m['arg']) and isset($args[$i - 1])) ? $i - 1 : 0] : '';
             // match
