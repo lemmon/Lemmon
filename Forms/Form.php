@@ -36,7 +36,9 @@ class Form implements \JsonSerializable
     function __construct($item = NULL)
     {
         if ($item) {
-            if ($item instanceof \Lemmon\Db\AbstractModel) {
+            if (is_array($item)) {
+                $this->_values = $item;
+            } elseif ($item instanceof \Lemmon\Db\AbstractModel) {
                 $this->_model = $item;
                 $this->_values = $item->getData();
                 if (is_callable([$item, '__validate'])) {
