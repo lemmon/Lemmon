@@ -65,9 +65,9 @@ abstract class AbstractRouter implements RouterInterface
     }
 
 
-    public function getRoot()
+    public function getRoot($keepPrefix = FALSE, $keepIndex = FALSE)
     {
-        return $this->_root;
+        return $this->_root . ($keepPrefix ? rtrim(($keepIndex or 'index.php/' != $this->_routePrefix) ? $this->_routePrefix : '', '/') : '');
     }
 
 
@@ -85,7 +85,7 @@ abstract class AbstractRouter implements RouterInterface
 
     public function getSelf()
     {
-        return $this->_root . ($this->_route ? $this->_routePrefix . $this->_route : '');
+        return $this->_root . ('index.php/' != $this->_routePrefix ? rtrim($this->_routePrefix . $this->_route, '/') : '');
     }
 
 
