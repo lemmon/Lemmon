@@ -9,7 +9,7 @@ class SimpleRouter extends AbstractRouter
     public function match(...$args)
     {
         // method
-        $method = is_int($args[0]) ? array_shift($args) : null;
+        $method = is_int($args[0]) ? array_shift($args) : NULL;
         // pattern
         $pattern = array_shift($args);
         // masks
